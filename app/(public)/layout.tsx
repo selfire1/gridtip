@@ -1,5 +1,5 @@
-import { LucideTrophy } from 'lucide-react'
 import Link from 'next/link'
+import { AppHeader } from '../../components/AppHeader'
 
 export default function DefaultLayout({
   children,
@@ -8,7 +8,7 @@ export default function DefaultLayout({
 }) {
   return (
     <div>
-      <header className='is-container'>
+      <header className='sticky top-0 z-50 bg-background/80 backdrop-blur-lg'>
         <AppHeader />
       </header>
       <main className='min-h-screen'>{children}</main>
@@ -31,15 +31,6 @@ function AppFooter() {
           Joschua
         </Link>
       </p>
-    </div>
-  )
-}
-
-function AppHeader() {
-  return (
-    <div className='flex items-center gap-1 py-2'>
-      <LucideTrophy size={20} />
-      <p className='font-semibold'>GridTip</p>
     </div>
   )
 }

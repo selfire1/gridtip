@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# database
+dump.sql
+local.db
+server/db/seed.ts
+
+# other
+public/img/user
