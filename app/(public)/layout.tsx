@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { AppHeader } from '../../components/AppHeader'
+import { AppHeader } from '../../components/app-header'
 
 export default function DefaultLayout({
   children,
