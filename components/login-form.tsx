@@ -1,6 +1,10 @@
 'use client'
 
-import { usePathname, useSearchParams } from 'next/navigation'
+import {
+  ReadonlyURLSearchParams,
+  usePathname,
+  useSearchParams,
+} from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -21,10 +25,6 @@ export function LoginForm({
   const searchParams = useSearchParams()
   const router = useRouter()
 
-  const description = getDescription(searchParams)
-
-  const [isLoading, setIsLoading] = useState(false)
-
   useEffect(() => {
     if (searchParams.get('origin') === QueryOrigin.NotAllowed) {
       showSignInRequiredToast()
@@ -35,12 +35,8 @@ export function LoginForm({
     }
   }, [searchParams, pathname, router])
 
-  function showSignInRequiredToast() {
-    toast.warning('Please sign in', {
-      description: 'You must be signed in to access this page',
-      duration: 6_000,
-    })
-  }
+  const description = getDescription(searchParams)
+  const [isLoading, setIsLoading] = useState(false)
 
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
@@ -86,6 +82,13 @@ export function LoginForm({
       </Card>
     </div>
   )
+
+  function showSignInRequiredToast() {
+    toast.warning('Please sign in', {
+      description: 'You must be signed in to access this page',
+      duration: 6_000,
+    })
+  }
 
   async function signInWithGoogle(redirect: string | null) {
     setIsLoading(true)
