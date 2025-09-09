@@ -33,7 +33,8 @@ export function LoginForm({
         router.replace(pathname)
       }
     }
-  }, [searchParams, pathname, router])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const description = getDescription(searchParams)
   const [isLoading, setIsLoading] = useState(false)
