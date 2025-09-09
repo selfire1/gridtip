@@ -17,10 +17,11 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
+  const pathname = usePathname()
   const searchParams = useSearchParams()
   const router = useRouter()
-  const description = getDescription()
-  const pathname = usePathname()
+
+  const description = getDescription(searchParams)
 
   const [isLoading, setIsLoading] = useState(false)
 
