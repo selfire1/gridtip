@@ -26,17 +26,20 @@ export function LoginForm({
 
   useEffect(() => {
     if (searchParams.get('origin') === QueryOrigin.NotAllowed) {
-      toast.warning('Please sign in', {
-        description: 'You must be signed in to access this page',
-        duration: 6_000,
-      })
+      showSignInRequiredToast()
       clearParams()
-
       function clearParams() {
         router.replace(pathname)
       }
     }
   }, [searchParams, pathname, router])
+
+  function showSignInRequiredToast() {
+    toast.warning('Please sign in', {
+      description: 'You must be signed in to access this page',
+      duration: 6_000,
+    })
+  }
 
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
