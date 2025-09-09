@@ -110,8 +110,8 @@ export function LoginForm({
     router.push('/tipping')
   }
 
-  function getDescription() {
-    switch (searchParams.get('origin')) {
+  function getDescription(params: ReadonlyURLSearchParams) {
+    switch (params.get('origin')) {
       case QueryOrigin.Join:
         return 'Please sign in or create an account first before joining this group.'
       default:
