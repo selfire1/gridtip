@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSessionCookie } from 'better-auth/cookies'
 import { QueryOrigin } from '@/constants'
+import { getCookieCache } from 'better-auth/cookies'
 
 export async function middleware(request: NextRequest) {
-  const sessionCookie = getSessionCookie(request)
+  const session = await getCookieCache(request)
 
-  if (!sessionCookie) {
+  if (!session) {
     const url = new URL('/auth', request.url)
     url.searchParams.append('origin', QueryOrigin.NotAllowed)
     return NextResponse.redirect(url)
