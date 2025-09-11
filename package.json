@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
+    "db:dump": "turso db shell f1-tipping .dump > dump.sql && rm local.db && cat dump.sql | sqlite3 local.db",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:prod:generate": "bun --env-file=.env.production run db:generate",
