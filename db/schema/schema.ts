@@ -9,6 +9,7 @@ import { createId } from '@paralleldrive/cuid2'
 import { user } from './auth-schema'
 import { PREDICTION_FIELDS, DEFAULT_CUTOFF_MINS } from '@/constants'
 import { relations, sql } from 'drizzle-orm'
+import { SUPPORTED_ICON_NAMES } from '@/app/tipping/components/icon-from-name'
 
 export const groupsTable = sqliteTable('groups', {
   id: text().primaryKey().$defaultFn(createId),
@@ -22,6 +23,9 @@ export const groupsTable = sqliteTable('groups', {
   cutoffInMinutes: integer('cutoff_in_minutes', { mode: 'number' })
     .default(DEFAULT_CUTOFF_MINS)
     .notNull(),
+  iconName: text({ enum: SUPPORTED_ICON_NAMES })
+    .notNull()
+    .default('lucide:users'),
 })
 
 export const groupRelations = relations(groupsTable, ({ many, one }) => ({
