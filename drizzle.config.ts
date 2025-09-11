@@ -1,7 +1,7 @@
 import { config } from 'dotenv'
 import { defineConfig } from 'drizzle-kit'
 
-config({ path: '.env' })
+config({ path: '.env', quiet: true })
 
 export default defineConfig({
   schema: ['./db/schema/schema.ts', './db/schema/auth-schema.ts'],
