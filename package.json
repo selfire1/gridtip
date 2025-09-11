@@ -5,6 +5,10 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:prod:generate": "bun --env-file=.env.production run db:generate",
+    "db:prod:migrate": "bun --env-file=.env.production run db:migrate",
     "start": "next start",
     "lint": "eslint"
   },
