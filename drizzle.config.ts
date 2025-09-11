@@ -9,7 +9,7 @@ export default defineConfig({
   dialect: 'turso',
   casing: 'snake_case',
   dbCredentials: {
-    url: process.env.NUXT_TURSO_DATABASE_URL!,
-    authToken: process.env.NUXT_TURSO_AUTH_TOKEN!,
+    url: process.env.TURSO_DATABASE_URL!,
+    authToken: process.env.TURSO_AUTH_TOKEN!,
   },
 })
