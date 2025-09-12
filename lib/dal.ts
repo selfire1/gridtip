@@ -15,5 +15,5 @@ export const verifySession = cache(async () => {
     redirect(`/auth?origin=${QueryOrigin.NotAllowed}`)
   }
 
-  return { isAuth: true, userId: session.user.id }
+  return { isAuth: true, userId: session.user.id, user: session.user }
 })

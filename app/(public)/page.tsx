@@ -1,6 +1,6 @@
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { user } from '@/lib/utils/user'
+import { getImageHref } from '@/lib/utils/user'
 import { auth } from '@/lib/auth'
 import { headers } from 'next/headers'
 import Link from 'next/link'
@@ -53,7 +53,7 @@ async function GetStartedButton() {
       to: '/tipping',
       label: 'View dashboard',
       title: 'Dashboard',
-      src: user.getImageHref(session.user),
+      src: getImageHref(session.user),
     }
   }
 
