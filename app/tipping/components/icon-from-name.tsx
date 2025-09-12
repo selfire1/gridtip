@@ -2,7 +2,7 @@ import { LucideIcon, LucideUsers } from 'lucide-react'
 import * as React from 'react'
 
 export const SUPPORTED_ICON_NAMES = ['lucide:users'] as const
-type IconName = (typeof SUPPORTED_ICON_NAMES)[number]
+export type IconName = (typeof SUPPORTED_ICON_NAMES)[number]
 
 export function IconFromName(props: {
   iconName: string

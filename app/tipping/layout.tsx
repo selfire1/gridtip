@@ -14,7 +14,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 
-export default function TippingLayout({
+export default async function TippingLayout({
   children,
 }: {
   children: React.ReactNode
