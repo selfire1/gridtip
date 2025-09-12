@@ -14,15 +14,6 @@ import { verifySession } from '@/lib/dal'
 import { getCurrentGroup, getGroupsForUser } from '@/lib/repository'
 import { getImageHref } from '@/lib/utils/user'
 
-// This is sample data.
-const data = {
-  user: {
-    name: 'shadcn',
-    email: 'm@example.com',
-    avatar: '/avatars/shadcn.jpg',
-  },
-}
-
 export async function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
