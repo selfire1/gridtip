@@ -1,6 +1,6 @@
 'use client'
 
-import { BookOpen, Bot, Settings2, SquareTerminal } from 'lucide-react'
+import { CheckSquare, LucideList, Settings2 } from 'lucide-react'
 
 import { ChevronRight } from 'lucide-react'
 
@@ -22,87 +22,57 @@ import {
 
 const items = [
   {
-    title: 'Playground',
+    title: 'Tipping',
     url: '#',
-    icon: SquareTerminal,
+    icon: CheckSquare,
     isActive: true,
     items: [
       {
-        title: 'History',
-        url: '#',
+        title: 'Dashboard',
+        url: '/tipping',
       },
       {
-        title: 'Starred',
-        url: '#',
+        title: 'Enter tips',
+        url: '/tipping/add-tips',
       },
       {
-        title: 'Settings',
-        url: '#',
+        title: 'Championships',
+        url: '/tipping/championships',
       },
     ],
   },
   {
-    title: 'Models',
+    title: 'Results',
     url: '#',
-    icon: Bot,
+    icon: LucideList,
+    isActive: true,
     items: [
       {
-        title: 'Genesis',
-        url: '#',
+        title: 'Leaderboard',
+        url: '/tipping/leaderboard',
       },
       {
-        title: 'Explorer',
-        url: '#',
-      },
-      {
-        title: 'Quantum',
-        url: '#',
+        title: 'Rules & Scoring',
+        url: '/tipping/rules',
       },
     ],
   },
   {
-    title: 'Documentation',
-    url: '#',
-    icon: BookOpen,
-    items: [
-      {
-        title: 'Introduction',
-        url: '#',
-      },
-      {
-        title: 'Get Started',
-        url: '#',
-      },
-      {
-        title: 'Tutorials',
-        url: '#',
-      },
-      {
-        title: 'Changelog',
-        url: '#',
-      },
-    ],
-  },
-  {
-    title: 'Settings',
+    title: 'Manage',
     url: '#',
     icon: Settings2,
     items: [
       {
-        title: 'General',
-        url: '#',
+        title: 'Groups',
+        url: '/tipping/groups',
       },
       {
-        title: 'Team',
-        url: '#',
+        title: 'Feedback',
+        url: '/tipping/contact',
       },
       {
-        title: 'Billing',
-        url: '#',
-      },
-      {
-        title: 'Limits',
-        url: '#',
+        title: 'Settings',
+        url: '/tipping/settings',
       },
     ],
   },
@@ -111,7 +81,6 @@ const items = [
 export function NavMain() {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible
@@ -122,7 +91,10 @@ export function NavMain() {
           >
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton tooltip={item.title}>
+                <SidebarMenuButton
+                  className='text-xs font-medium text-muted-foreground transition-colors'
+                  tooltip={item.title}
+                >
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>
                   <ChevronRight className='ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
