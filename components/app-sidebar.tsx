@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/sidebar'
 import { verifySession } from '@/lib/dal'
 import { getCurrentGroup, getGroupsForUser } from '@/lib/repository'
+import { getImageHref } from '@/lib/utils/user'
 
 // This is sample data.
 const data = {
@@ -20,29 +21,12 @@ const data = {
     email: 'm@example.com',
     avatar: '/avatars/shadcn.jpg',
   },
-  teams: [
-    {
-      id: 'Acme Inc',
-      name: 'Acme Inc',
-      logo: '🏁',
-    },
-    {
-      id: 'Acme Corp.',
-      name: 'Acme Corp.',
-      logo: '🏎️',
-    },
-    {
-      id: 'Evil Corp.',
-      name: 'Evil Corp.',
-      logo: '😄',
-    },
-  ],
 }
 
 export async function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
-  const { userId } = await verifySession()
+  const { userId, user } = await verifySession()
   const groupsOfUser = await getGroupsForUser(userId)
   const cookieGroup = await getCurrentGroup(userId)
 
@@ -61,7 +45,13 @@ export async function AppSidebar({
         <NavMain />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser
+          user={{
+            name: user.name,
+            avatar: getImageHref(user),
+            email: user.email,
+          }}
+        />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
