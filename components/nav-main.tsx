@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/sidebar'
 import { Icon } from './icon'
 
-const items = [
+export const nav = [
   {
     title: 'Tipping',
     url: '#',
@@ -83,7 +83,7 @@ export function NavMain() {
   return (
     <SidebarGroup>
       <SidebarMenu>
-        {items.map((item) => (
+        {nav.map((item) => (
           <Collapsible
             key={item.title}
             asChild
