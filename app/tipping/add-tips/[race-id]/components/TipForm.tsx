@@ -21,31 +21,14 @@ import {
   ConstructorOption,
   SelectConstructor,
 } from '@/app/tipping/components/select-constructor'
-import { useActionState, useTransition } from 'react'
+import { useTransition } from 'react'
 import { submitChanges } from '../actions/submit-tip'
 import { Loader2Icon } from 'lucide-react'
 import { toast } from 'sonner'
 import { Database } from '@/db/types'
+import { submitTipSchema } from '../actions/schema'
 
-const idObject = z
-  .object({
-    id: z.string().min(1, 'Required'),
-  })
-  .loose()
-
-export const formSchema = z
-  .object({
-    pole: idObject,
-    p1: idObject,
-    p10: idObject,
-    last: idObject,
-    constructorWithMostPoints: idObject,
-    sprintP1: idObject,
-    groupId: z.string().optional(),
-    raceId: z.string().optional(),
-  })
-  .partial()
-
+const formSchema = submitTipSchema.partial()
 export type Schema = z.infer<typeof formSchema>
 
 export default function TipForm({

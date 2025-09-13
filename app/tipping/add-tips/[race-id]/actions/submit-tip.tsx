@@ -2,7 +2,6 @@
 
 import { verifySession } from '@/lib/dal'
 import z from 'zod'
-import { formSchema as clientSchema } from '../components/TipForm'
 import { db } from '@/db'
 import { and, eq } from 'drizzle-orm'
 import { predictionEntriesTable, predictionsTable } from '@/db/schema/schema'
@@ -16,15 +15,10 @@ import {
 import { Database as Db } from '@/db/types'
 import { isPositionAfterCutoff as getIsAfterCutoff } from '@/lib/utils/prediction-fields'
 import { conflictUpdateAllExcept } from '@/lib/utils/drizzle'
+import { serverSubmitTipSchema as schema } from './schema'
 
 export async function submitChanges(input: Record<string, any>) {
-  const serverSchema = z.object({
-    ...clientSchema.shape,
-    groupId: z.string('No group id'),
-    raceId: z.string('Invalid race id'),
-  })
-
-  type Schema = z.infer<typeof serverSchema>
+  type Schema = z.infer<typeof schema>
 
   const { userId } = await verifySession()
 
@@ -283,11 +277,11 @@ export async function submitChanges(input: Record<string, any>) {
   }
 
   function validateInput() {
-    const result = serverSchema.safeParse(input)
+    const result = schema.safeParse(input)
     if (!result.success) {
       throw new Error(z.prettifyError(result.error))
     }
-    return input as Schema // HACK: we should use `result.data`, but that strips some keys
+    return result.data
   }
 
   async function throwIfSuppliedIdsAreInvalid(body: Schema) {
