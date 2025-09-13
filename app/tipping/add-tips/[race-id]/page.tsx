@@ -3,22 +3,19 @@ import AlertNoGroup from '../components/alert-no-group'
 import { db } from '@/db'
 import { verifySession } from '@/lib/dal'
 import Alert from '@/components/alert'
-import { isFuture, isPast, subMinutes } from 'date-fns'
+import { isFuture, isPast } from 'date-fns'
 import {
   LucideArrowLeft,
   LucideArrowRight,
-  LucideCheckSquare,
   LucideClock,
   LucideIcon,
-  LucideListOrdered,
-  LucideTrophy,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import Image from 'next/image'
-import TipForm, { Schema as FormTipSchema } from './components/TipForm'
+import TipForm from './components/TipForm'
 import { Database } from '@/db/types'
-import { RACE_PREDICTION_FIELDS, RacePredictionField } from '@/constants'
+import { RacePredictionField } from '@/constants'
 import { predictionsTable } from '@/db/schema/schema'
 import { eq } from 'drizzle-orm'
 import {
@@ -30,6 +27,7 @@ import {
   isRaceAbleToBeTipped,
 } from '@/lib/utils/prediction-fields'
 import { Separator } from '@/components/ui/separator'
+import { Icon } from '@/components/icon'
 
 export default async function RaceFormPage({
   params,
@@ -227,14 +225,14 @@ export default async function RaceFormPage({
           <TimeTile
             title='Sprint tips due'
             date={tipsDue.sprint}
-            icon={LucideCheckSquare}
+            icon={Icon.Tipping}
             isActive={isFuture(tipsDue.sprint)}
           />
         )}
         <TimeTile
           title={isSprint ? 'GP tips due' : 'Tips due'}
           date={tipsDue.grandPrix}
-          icon={LucideCheckSquare}
+          icon={Icon.Tipping}
           isActive={
             isFuture(tipsDue.grandPrix) &&
             (tipsDue.sprint ? isPast(tipsDue.sprint) : true)
@@ -243,13 +241,13 @@ export default async function RaceFormPage({
         <TimeTile
           title='Qualifying'
           date={race.qualifyingDate}
-          icon={LucideListOrdered}
+          icon={Icon.Qualifying}
           isActive={isFuture(race.qualifyingDate) && isPast(tipsDue.grandPrix)}
         />
         <TimeTile
           title='Grand Prix'
           date={race.grandPrixDate}
-          icon={LucideTrophy}
+          icon={Icon.GrandPrix}
           isActive={isFuture(race.grandPrixDate) && isPast(tipsDue.grandPrix)}
         />
       </section>

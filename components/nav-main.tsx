@@ -19,12 +19,13 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar'
+import { Icon } from './icon'
 
 const items = [
   {
     title: 'Tipping',
     url: '#',
-    icon: CheckSquare,
+    icon: Icon.Tipping,
     isActive: true,
     items: [
       {
