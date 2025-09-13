@@ -32,13 +32,17 @@ async function getGroupsForUser(userId: string) {
   })
 }
 
-async function getCurrentGroup(userId: string) {
+export async function getCurrentGroupId() {
   const cookieStore = await cookies()
   const cookieGroupId = cookieStore.get(GROUP_ID_COOKIE_NAME)?.value
+  return cookieGroupId
+}
+
+async function getCurrentGroup(userId: string) {
+  const cookieGroupId = await getCurrentGroupId()
   if (!cookieGroupId) {
     return
   }
-
   const userWithGroups = await getGroupsForUser(userId)
   return userWithGroups.find(({ group }) => group.id === cookieGroupId)?.group
 }

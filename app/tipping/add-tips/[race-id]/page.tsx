@@ -1,0 +1,286 @@
+import { getCurrentGroupId } from '@/lib/repository'
+import AlertNoGroup from '../components/alert-no-group'
+import { db } from '@/db'
+import { verifySession } from '@/lib/dal'
+import Alert from '@/components/alert'
+import { isFuture, isPast, subMinutes } from 'date-fns'
+import {
+  LucideArrowLeft,
+  LucideArrowRight,
+  LucideCheckSquare,
+  LucideIcon,
+  LucideListOrdered,
+  LucideTrophy,
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+import Image from 'next/image'
+import TipForm from './components/TipForm'
+import { Database } from '@/db/types'
+
+export default async function RaceFormPage({
+  params,
+}: {
+  params: Promise<{ 'race-id': string }>
+}) {
+  await verifySession()
+
+  const currentGroupId = await getCurrentGroupId()
+  if (!currentGroupId) {
+    return <AlertNoGroup />
+  }
+
+  const currentGroup = await db.query.groupsTable.findFirst({
+    where(fields, { eq }) {
+      return eq(fields.id, currentGroupId)
+    },
+    columns: {
+      cutoffInMinutes: true,
+    },
+  })
+
+  if (!currentGroup) {
+    return <AlertNoGroup />
+  }
+
+  const { 'race-id': raceId } = await params
+  const race = await db.query.racesTable.findFirst({
+    where: (race, { eq }) => eq(race.id, raceId),
+  })
+
+  if (!race) {
+    return <Alert title='No race found' />
+  }
+
+  const [next, prev] = await db.query.racesTable.findMany({
+    where: (selectRace, { or, eq, and, gt }) =>
+      and(
+        gt(selectRace.grandPrixDate, new Date()),
+        or(
+          eq(selectRace.round, race.round + 1),
+          eq(selectRace.round, race.round - 1),
+        ),
+      ),
+    columns: {
+      id: true,
+      country: true,
+    },
+    orderBy: (race, { desc }) => desc(race.round),
+  })
+
+  const isSprint = race.sprintQualifyingDate
+
+  const tipsDue = {
+    sprint: !race.sprintQualifyingDate
+      ? race.sprintQualifyingDate
+      : subMinutes(race.sprintQualifyingDate, currentGroup.cutoffInMinutes),
+    grandPrix: subMinutes(race.qualifyingDate, currentGroup.cutoffInMinutes),
+  }
+
+  return (
+    <div className='space-y-6'>
+      <div className='flex flex-wrap gap-y-6 gap-x-4 justify-between items-center'>
+        <Hero race={race} />
+        <Times race={race} />
+      </div>
+      <NavigationButtons />
+      <section>
+        <TipForm />
+      </section>
+    </div>
+  )
+
+  function Hero({ race }: { race: Database.Race }) {
+    return (
+      <div className='flex items-center gap-8 flex-row-reverse sm:flex-row justify-end sm:justify-start sm:gap-4'>
+        <Image
+          width={200}
+          height={200}
+          fetchPriority='high'
+          loading='eager'
+          className='size-16 sm:size-20 object-cover rounded-full border-2'
+          alt={`Flag of ${race.country}`}
+          src={getCountryFlag(race.country)}
+        />
+        <div>
+          <p className='text-sm text-muted-foreground'>Round {race.round}</p>
+          <h1 className='scroll-m-20 text-2xl font-semibold text-balance tracking-tight sm:text-3xl xl:text-4xl'>
+            {race.raceName}
+          </h1>
+          <p>
+            <span className='text-sm mt-2 text-muted-foreground font-medium'>
+              {race.circuitName}
+            </span>
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  function Times({ race }: { race: Database.Race }) {
+    return (
+      <section className='flex gap-4'>
+        {isSprint && tipsDue.sprint && (
+          <TimeTile
+            title='Sprint tips due'
+            date={tipsDue.sprint}
+            icon={LucideCheckSquare}
+            isActive={isFuture(tipsDue.sprint)}
+          />
+        )}
+        <TimeTile
+          title={isSprint ? 'GP tips due' : 'Tips due'}
+          date={tipsDue.grandPrix}
+          icon={LucideCheckSquare}
+          isActive={
+            isFuture(tipsDue.grandPrix) &&
+            (tipsDue.sprint ? isPast(tipsDue.sprint) : true)
+          }
+        />
+        <TimeTile
+          title='Qualifying'
+          date={race.qualifyingDate}
+          icon={LucideListOrdered}
+          isActive={isFuture(race.qualifyingDate) && isPast(tipsDue.grandPrix)}
+        />
+        <TimeTile
+          title='Grand Prix'
+          date={race.grandPrixDate}
+          icon={LucideTrophy}
+          isActive={isFuture(race.grandPrixDate) && isPast(tipsDue.grandPrix)}
+        />
+      </section>
+    )
+  }
+
+  function NavigationButtons() {
+    return (
+      <section>
+        <div className='flex justify-between items-center'>
+          <NavigationButton
+            title={prev?.country}
+            id={prev?.id}
+            direction='previous'
+          />
+          <NavigationButton
+            title={next?.country}
+            id={next?.id}
+            direction='next'
+          />
+        </div>
+      </section>
+    )
+  }
+
+  function TimeTile(props: {
+    title: string
+    date: Date
+    isActive: boolean
+    icon: LucideIcon
+    className?: string
+  }) {
+    return (
+      <div
+        className={[
+          'text-sm py-2 px-4 border rounded-lg',
+          props.isActive
+            ? ''
+            : 'text-muted-foreground hidden sm:block border-transparent',
+          props.className ?? '',
+        ].join(' ')}
+      >
+        <p className='text-xs flex items-center gap-1 font-medium text-muted-foreground'>
+          <props.icon size={12} />
+          {props.title}
+        </p>
+        <p className='flex flex-col font-medium leading-tight'>
+          <span>{getLocalDateString(props.date)}</span>
+          <span className='uppercase'>{getLocalTimeString(props.date)}</span>
+        </p>
+      </div>
+    )
+  }
+
+  function NavigationButton(props: {
+    title: string | undefined
+    id: string | undefined
+    direction: 'previous' | 'next'
+  }) {
+    const { id, direction } = props
+    return (
+      <Button asChild variant='secondary'>
+        <Link
+          href={!id ? '#' : `/tipping/add-tips/${id}`}
+          aria-disabled={!id}
+          className={!id ? 'pointer-events-none opacity-50' : ''}
+          title={props.title}
+        >
+          {direction === 'previous' && <LucideArrowLeft size={16} />}
+          {direction === 'next' ? 'Next' : 'Previous'}
+          {direction === 'next' && <LucideArrowRight size={16} />}
+        </Link>
+      </Button>
+    )
+  }
+
+  function getLocalDateString(date: Date) {
+    const formatter = Intl.DateTimeFormat('en-AU', {
+      day: 'numeric',
+      weekday: 'short',
+      month: 'short',
+      year:
+        new Date().getFullYear() === date.getFullYear() ? undefined : 'numeric',
+    })
+    return formatter.format(date)
+  }
+  function getLocalTimeString(date: Date) {
+    const formatter = Intl.DateTimeFormat('en-AU', {
+      timeStyle: 'short',
+    })
+    return formatter.format(date)
+  }
+
+  function getCountryFlag(countryCode: string) {
+    const COUNTRY_FLAGS: Record<string, string> = {
+      Australia:
+        'https://upload.wikimedia.org/wikipedia/en/b/b9/Flag_of_Australia.svg',
+      China:
+        'https://upload.wikimedia.org/wikipedia/commons/f/fa/Flag_of_the_People%27s_Republic_of_China.svg',
+      Japan: 'https://upload.wikimedia.org/wikipedia/en/9/9e/Flag_of_Japan.svg',
+      Bahrain:
+        'https://upload.wikimedia.org/wikipedia/commons/2/2c/Flag_of_Bahrain.svg',
+      'Saudi Arabia':
+        'https://upload.wikimedia.org/wikipedia/commons/0/0d/Flag_of_Saudi_Arabia.svg',
+      USA: 'https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg',
+      Italy: 'https://upload.wikimedia.org/wikipedia/en/0/03/Flag_of_Italy.svg',
+      Monaco:
+        'https://upload.wikimedia.org/wikipedia/commons/e/ea/Flag_of_Monaco.svg',
+      Spain: 'https://upload.wikimedia.org/wikipedia/en/9/9a/Flag_of_Spain.svg',
+      Canada:
+        'https://upload.wikimedia.org/wikipedia/en/c/cf/Flag_of_Canada.svg',
+      Austria:
+        'https://upload.wikimedia.org/wikipedia/commons/4/41/Flag_of_Austria.svg',
+      UK: 'https://upload.wikimedia.org/wikipedia/en/a/ae/Flag_of_the_United_Kingdom.svg',
+      Belgium:
+        'https://upload.wikimedia.org/wikipedia/commons/6/65/Flag_of_Belgium.svg',
+      Hungary:
+        'https://upload.wikimedia.org/wikipedia/commons/c/c1/Flag_of_Hungary.svg',
+      Netherlands:
+        'https://upload.wikimedia.org/wikipedia/commons/2/20/Flag_of_the_Netherlands.svg',
+      Azerbaijan:
+        'https://upload.wikimedia.org/wikipedia/commons/d/dd/Flag_of_Azerbaijan.svg',
+      Singapore:
+        'https://upload.wikimedia.org/wikipedia/commons/4/48/Flag_of_Singapore.svg',
+      Mexico:
+        'https://upload.wikimedia.org/wikipedia/commons/f/fc/Flag_of_Mexico.svg',
+      Brazil:
+        'https://upload.wikimedia.org/wikipedia/en/0/05/Flag_of_Brazil.svg',
+      'United States':
+        'https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg',
+      Qatar:
+        'https://upload.wikimedia.org/wikipedia/commons/6/65/Flag_of_Qatar.svg',
+      UAE: 'https://upload.wikimedia.org/wikipedia/commons/c/cb/Flag_of_the_United_Arab_Emirates.svg',
+    }
+    return COUNTRY_FLAGS[countryCode]
+  }
+}
