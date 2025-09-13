@@ -254,15 +254,14 @@ export const resultsRelations = relations(resultsTable, ({ many, one }) => ({
 }))
 
 export type Group = typeof groupsTable.$inferSelect
+
 export type Race = typeof racesTable.$inferSelect
 export type InsertRace = typeof racesTable.$inferInsert
 
-type DriverFull = typeof driversTable.$inferSelect
-export type Driver = Omit<DriverFull, 'created' | 'lastUpdated'>
+export type Driver = typeof driversTable.$inferSelect
 export type InsertDriver = typeof driversTable.$inferInsert
 
-export type ConstructorFull = typeof constructorsTable.$inferSelect
-export type Constructor = Omit<ConstructorFull, 'created' | 'lastUpdated'>
+export type Constructor = typeof constructorsTable.$inferSelect
 
 export type Prediction = typeof predictionsTable.$inferSelect
 export type InsertPrediction = typeof predictionsTable.$inferInsert

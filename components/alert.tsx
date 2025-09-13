@@ -3,12 +3,13 @@ import {
   AlertDescription,
   AlertTitle,
 } from '@/components/ui/alert'
+import { LucideIcon } from 'lucide-react'
 
 type Props = {
   variant?: 'default' | 'destructive'
   title: string
   description?: string
-  icon?: () => React.ReactNode
+  icon?: LucideIcon | (() => React.ReactNode)
 }
 export default function Alert(props: Props) {
   return (
