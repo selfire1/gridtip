@@ -171,10 +171,4 @@ export default function TipForm({
       field.name !== 'sprintP1' ? true : isSprint,
     )
   }
-
-  function onSubmit(values: Schema) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values)
-  }
 }
