@@ -22,40 +22,30 @@ import { Database } from '@/db/types'
 import { ChevronsUpDown, LucideCheck } from 'lucide-react'
 import Image from 'next/image'
 import { UseFormReturn } from 'react-hook-form'
+import { FormControl } from '@/components/ui/form'
 
 export type ConstructorOption = Pick<Database.Constructor, 'id' | 'name'>
 
 export function SelectConstructor({
   constructors,
   value,
-  form,
-  name,
+  onSelect,
   disabled,
 }: {
   constructors: ConstructorOption[]
   value: { id: string } | undefined
-  form: UseFormReturn<any>
-  name: string
+  onSelect: (driver: ConstructorOption | undefined) => void
   disabled?: boolean
 }) {
   const [open, setOpen] = React.useState(false)
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const [selected, setSelected] = React.useState<ConstructorOption | undefined>(
-    undefined,
+    constructors.find((d) => d.id === value?.id),
   )
-
   React.useEffect(() => {
-    const constructor = constructors.find(
-      (constructor) => constructor.id === value?.id,
-    )
-    setSelected(constructor || undefined)
-    //eslint-disable-next-line react-hooks/exhaustive-deps
+    setSelected(constructors.find((d) => d.id === value?.id))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
-
-  React.useEffect(() => {
-    form.setValue(name, selected)
-    //eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selected])
 
   if (isDesktop) {
     return (
@@ -102,14 +92,20 @@ function TriggerButton({
   const Trigger = type === 'drawer' ? DrawerTrigger : PopoverTrigger
   return (
     <Trigger asChild>
-      <Button variant='outline' className='justify-between' disabled={disabled}>
-        {selected ? (
-          <Option constructor={selected} isSelected={false} />
-        ) : (
-          <EmptyState />
-        )}
-        <ChevronsUpDown className='opacity-50' />
-      </Button>
+      <FormControl>
+        <Button
+          variant='outline'
+          className='justify-between'
+          disabled={disabled}
+        >
+          {selected ? (
+            <Option constructor={selected} isSelected={false} />
+          ) : (
+            <EmptyState />
+          )}
+          <ChevronsUpDown className='opacity-50' />
+        </Button>
+      </FormControl>
     </Trigger>
   )
   function EmptyState() {

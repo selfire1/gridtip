@@ -73,25 +73,29 @@ export default function TipForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{formField.label}</FormLabel>
-                  <FormControl>
-                    {formField.type === 'driver' ? (
-                      <SelectDriver
-                        drivers={drivers}
-                        value={field.value}
-                        form={form}
-                        name={formField.name}
-                        disabled={disabledFields.has(formField.name)}
-                      />
-                    ) : (
-                      <SelectConstructor
-                        constructors={constructors}
-                        value={field.value}
-                        form={form}
-                        name={formField.name}
-                        disabled={disabledFields.has(formField.name)}
-                      />
-                    )}
-                  </FormControl>
+                  {formField.type === 'driver' ? (
+                    <SelectDriver
+                      drivers={drivers}
+                      value={field.value}
+                      onSelect={(driver) =>
+                        form.setValue(formField.name, driver, {
+                          shouldDirty: true,
+                        })
+                      }
+                      disabled={disabledFields.has(formField.name)}
+                    />
+                  ) : (
+                    <SelectConstructor
+                      constructors={constructors}
+                      value={field.value}
+                      disabled={disabledFields.has(formField.name)}
+                      onSelect={(constructor) =>
+                        form.setValue(formField.name, constructor, {
+                          shouldDirty: true,
+                        })
+                      }
+                    />
+                  )}
                   <FormDescription>{formField.description}</FormDescription>
                   <FormMessage />
                 </FormItem>

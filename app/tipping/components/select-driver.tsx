@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/popover'
 import { Database } from '@/db/types'
 import { ChevronsUpDown, LucideCheck } from 'lucide-react'
-import { UseFormReturn } from 'react-hook-form'
+import { FormControl } from '@/components/ui/form'
 
 export type DriverOption = Pick<
   Database.Driver,
@@ -30,48 +30,31 @@ export type DriverOption = Pick<
 export function SelectDriver({
   drivers,
   value,
-  form,
-  name,
+  onSelect,
   disabled,
 }: {
   drivers: DriverOption[]
   value: { id: string } | undefined
-  form: UseFormReturn<any>
-  name: string
+  onSelect: (driver: DriverOption | undefined) => void
   disabled?: boolean
 }) {
   const [open, setOpen] = React.useState(false)
   const isDesktop = useMediaQuery('(min-width: 768px)')
-  const [selectedDriver, setSelectedDriver] = React.useState<
-    DriverOption | undefined
-  >(undefined)
 
+  const [selected, setSelected] = React.useState<DriverOption | undefined>(
+    drivers.find((d) => d.id === value?.id),
+  )
   React.useEffect(() => {
-    const driver = drivers.find((driver) => driver.id === value?.id)
-    setSelectedDriver(driver || undefined)
-    //eslint-disable-next-line react-hooks/exhaustive-deps
+    setSelected(drivers.find((d) => d.id === value?.id))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
-
-  React.useEffect(() => {
-    form.setValue(name, selectedDriver)
-    //eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDriver])
 
   if (isDesktop) {
     return (
       <Popover open={open} onOpenChange={setOpen}>
-        <TriggerButton
-          selected={selectedDriver}
-          type='popover'
-          disabled={disabled}
-        />
+        <TriggerButton type='popover' disabled={disabled} />
         <PopoverContent className='w-[300px] p-0' align='start'>
-          <DriverList
-            setOpen={setOpen}
-            selectedDriver={selectedDriver}
-            setSelectedDriver={setSelectedDriver}
-            drivers={drivers}
-          />
+          <DriverList setOpen={setOpen} />
         </PopoverContent>
       </Popover>
     )
@@ -79,98 +62,79 @@ export function SelectDriver({
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
-      <TriggerButton
-        selected={selectedDriver}
-        type='drawer'
-        disabled={disabled}
-      />
+      <TriggerButton type='drawer' disabled={disabled} />
       <DrawerContent>
         <div className='mt-4 border-t'>
-          <DriverList
-            selectedDriver={selectedDriver}
-            setSelectedDriver={setSelectedDriver}
-            setOpen={setOpen}
-            drivers={drivers}
-          />
+          <DriverList setOpen={setOpen} />
         </div>
       </DrawerContent>
     </Drawer>
   )
-}
 
-function TriggerButton({
-  selected,
-  type,
-  disabled,
-}: {
-  selected: DriverOption | undefined
-  type: 'drawer' | 'popover'
-  disabled?: boolean
-}) {
-  const Trigger = type === 'drawer' ? DrawerTrigger : PopoverTrigger
-  return (
-    <Trigger asChild>
-      <Button
-        disabled={disabled}
-        variant='outline'
-        className='justify-between flex'
-      >
-        {selected ? (
-          <DriverOption driver={selected} isSelected={false} />
-        ) : (
-          <EmptyState />
-        )}
-        <ChevronsUpDown className='opacity-50' />
-      </Button>
-    </Trigger>
-  )
-  function EmptyState() {
-    return <span>Select driver</span>
+  function DriverList({ setOpen }: { setOpen: (open: boolean) => void }) {
+    return (
+      <Command>
+        <CommandInput placeholder='Search drivers…' />
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandGroup>
+            {drivers.map((driver) => (
+              <CommandItem
+                key={driver.id}
+                value={getName(driver)}
+                onSelect={(name) => {
+                  onSelect(
+                    drivers.find((driver) => getName(driver) === name) ||
+                      undefined,
+                  )
+                  setOpen(false)
+                }}
+              >
+                <DriverOption
+                  driver={driver}
+                  isSelected={selected?.id === driver.id}
+                />
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </Command>
+    )
+
+    function getName(driver: DriverOption) {
+      return [driver.givenName, driver.familyName].join(' ')
+    }
   }
-}
 
-function DriverList({
-  setOpen,
-  setSelectedDriver,
-  drivers,
-  selectedDriver,
-}: {
-  setOpen: (open: boolean) => void
-  setSelectedDriver: (driver: DriverOption | undefined) => void
-  drivers: DriverOption[]
-  selectedDriver: DriverOption | undefined
-}) {
-  return (
-    <Command>
-      <CommandInput placeholder='Search drivers…' />
-      <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
-        <CommandGroup>
-          {drivers.map((driver) => (
-            <CommandItem
-              key={driver.id}
-              value={getName(driver)}
-              onSelect={(name) => {
-                setSelectedDriver(
-                  drivers.find((driver) => getName(driver) === name) ||
-                    undefined,
-                )
-                setOpen(false)
-              }}
-            >
-              <DriverOption
-                driver={driver}
-                isSelected={selectedDriver?.id === driver.id}
-              />
-            </CommandItem>
-          ))}
-        </CommandGroup>
-      </CommandList>
-    </Command>
-  )
-
-  function getName(driver: DriverOption) {
-    return [driver.givenName, driver.familyName].join(' ')
+  function TriggerButton({
+    type,
+    disabled,
+  }: {
+    type: 'drawer' | 'popover'
+    disabled?: boolean
+  }) {
+    const Trigger = type === 'drawer' ? DrawerTrigger : PopoverTrigger
+    return (
+      <Trigger asChild>
+        <FormControl>
+          <Button
+            disabled={disabled}
+            variant='outline'
+            className='justify-between flex'
+          >
+            {selected ? (
+              <DriverOption driver={selected} isSelected={false} />
+            ) : (
+              <EmptyState />
+            )}
+            <ChevronsUpDown className='opacity-50' />
+          </Button>
+        </FormControl>
+      </Trigger>
+    )
+    function EmptyState() {
+      return <span>Select driver</span>
+    }
   }
 }
 
