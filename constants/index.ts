@@ -34,8 +34,8 @@ export const CUTOFF_REFERENCE_KEY = {
   p1: 'qualifyingDate',
   p10: 'qualifyingDate',
   last: 'qualifyingDate',
-  sprintP1: 'sprintQualifyingDate',
   constructorWithMostPoints: 'qualifyingDate',
+  sprintP1: 'sprintQualifyingDate',
 } as const satisfies Record<RacePredictionField, keyof Database.Race>
 
 export type PredictionField = (typeof PREDICTION_FIELDS)[number]
@@ -54,3 +54,5 @@ export enum QueryOrigin {
   NotAllowed = 'not-logged-in',
   Join = 'join',
 }
+
+export const GROUP_ID_COOKIE_NAME = 'grid-tip-group-id' as const

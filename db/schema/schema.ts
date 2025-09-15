@@ -9,6 +9,7 @@ import { createId } from '@paralleldrive/cuid2'
 import { user } from './auth-schema'
 import { PREDICTION_FIELDS, DEFAULT_CUTOFF_MINS } from '@/constants'
 import { relations, sql } from 'drizzle-orm'
+import { SUPPORTED_ICON_NAMES } from '@/app/tipping/components/icon-from-name'
 
 export const groupsTable = sqliteTable('groups', {
   id: text().primaryKey().$defaultFn(createId),
@@ -22,6 +23,9 @@ export const groupsTable = sqliteTable('groups', {
   cutoffInMinutes: integer('cutoff_in_minutes', { mode: 'number' })
     .default(DEFAULT_CUTOFF_MINS)
     .notNull(),
+  iconName: text({ enum: SUPPORTED_ICON_NAMES })
+    .notNull()
+    .default('lucide:users'),
 })
 
 export const groupRelations = relations(groupsTable, ({ many, one }) => ({
@@ -250,15 +254,14 @@ export const resultsRelations = relations(resultsTable, ({ many, one }) => ({
 }))
 
 export type Group = typeof groupsTable.$inferSelect
+
 export type Race = typeof racesTable.$inferSelect
 export type InsertRace = typeof racesTable.$inferInsert
 
-type DriverFull = typeof driversTable.$inferSelect
-export type Driver = Omit<DriverFull, 'created' | 'lastUpdated'>
+export type Driver = typeof driversTable.$inferSelect
 export type InsertDriver = typeof driversTable.$inferInsert
 
-export type ConstructorFull = typeof constructorsTable.$inferSelect
-export type Constructor = Omit<ConstructorFull, 'created' | 'lastUpdated'>
+export type Constructor = typeof constructorsTable.$inferSelect
 
 export type Prediction = typeof predictionsTable.$inferSelect
 export type InsertPrediction = typeof predictionsTable.$inferInsert

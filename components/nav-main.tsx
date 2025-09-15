@@ -1,6 +1,8 @@
 'use client'
 
-import { ChevronRight, type LucideIcon } from 'lucide-react'
+import { CheckSquare, LucideList, Settings2 } from 'lucide-react'
+
+import { ChevronRight } from 'lucide-react'
 
 import {
   Collapsible,
@@ -17,26 +19,71 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar'
+import { Icon } from './icon'
 
-export function NavMain({
-  items,
-}: {
-  items: {
-    title: string
-    url: string
-    icon?: LucideIcon
-    isActive?: boolean
-    items?: {
-      title: string
-      url: string
-    }[]
-  }[]
-}) {
+export const nav = [
+  {
+    title: 'Tipping',
+    url: '#',
+    icon: Icon.Tipping,
+    isActive: true,
+    items: [
+      {
+        title: 'Dashboard',
+        url: '/tipping',
+      },
+      {
+        title: 'Enter tips',
+        url: '/tipping/add-tips',
+      },
+      {
+        title: 'Championships',
+        url: '/tipping/championships',
+      },
+    ],
+  },
+  {
+    title: 'Results',
+    url: '#',
+    icon: LucideList,
+    isActive: true,
+    items: [
+      {
+        title: 'Leaderboard',
+        url: '/tipping/leaderboard',
+      },
+      {
+        title: 'Rules & Scoring',
+        url: '/tipping/rules',
+      },
+    ],
+  },
+  {
+    title: 'Manage',
+    url: '#',
+    icon: Settings2,
+    items: [
+      {
+        title: 'Groups',
+        url: '/tipping/groups',
+      },
+      {
+        title: 'Feedback',
+        url: '/tipping/contact',
+      },
+      {
+        title: 'Settings',
+        url: '/tipping/settings',
+      },
+    ],
+  },
+]
+
+export function NavMain() {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
+        {nav.map((item) => (
           <Collapsible
             key={item.title}
             asChild
@@ -45,7 +92,10 @@ export function NavMain({
           >
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton tooltip={item.title}>
+                <SidebarMenuButton
+                  className='text-xs font-medium text-muted-foreground transition-colors'
+                  tooltip={item.title}
+                >
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>
                   <ChevronRight className='ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
