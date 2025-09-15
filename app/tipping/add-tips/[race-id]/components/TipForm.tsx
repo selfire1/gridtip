@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import {
   Form,
-  FormControl,
   FormDescription,
   FormField,
   FormItem,
@@ -21,9 +20,9 @@ import {
   ConstructorOption,
   SelectConstructor,
 } from '@/app/tipping/components/select-constructor'
-import { useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { submitChanges } from '../actions/submit-tip'
-import { Loader2Icon } from 'lucide-react'
+import { Loader2Icon, LucideCheck } from 'lucide-react'
 import { toast } from 'sonner'
 import { Database } from '@/db/types'
 import { submitTipSchema } from '../actions/schema'
@@ -38,7 +37,6 @@ export default function TipForm({
   disabledFields,
   defaultValues,
   isFormDisabled,
-  groupId,
   race,
 }: {
   drivers: DriverOption[]
@@ -47,7 +45,6 @@ export default function TipForm({
   disabledFields: Set<keyof Schema>
   defaultValues: Schema
   isFormDisabled: boolean
-  groupId: string
   race: Pick<Database.Race, 'id' | 'raceName'>
 }) {
   const form = useForm<Schema>({
@@ -56,10 +53,26 @@ export default function TipForm({
   })
 
   const fields = getFormFields()
-  form.setValue('groupId', groupId)
-  form.setValue('raceId', race.id)
-
   const [isPending, startTransition] = useTransition()
+
+  const [isShouldShowSaved, setShouldShowSaved] = useState(false)
+
+  const {
+    formState: { isDirty, isSubmitSuccessful },
+    reset,
+  } = form
+
+  useEffect(() => {
+    resetFormStateToSetDirtyToFalse()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSubmitSuccessful])
+
+  useEffect(() => {
+    // on change, remove "Saved" text
+    if (isDirty) {
+      setShouldShowSaved(false)
+    }
+  }, [isDirty])
 
   return (
     <Form {...form}>
@@ -109,11 +122,21 @@ export default function TipForm({
           disabled={isFormDisabled || isPending}
         >
           {isPending && <Loader2Icon className='animate-spin' />}
-          {isPending ? 'Saving…' : 'Submit'}
+          {isShouldShowSaved && !isPending && <LucideCheck />}
+          {isPending ? 'Saving…' : isShouldShowSaved ? 'Saved' : 'Submit'}
         </Button>
       </form>
     </Form>
   )
+
+  function resetFormStateToSetDirtyToFalse() {
+    // HACK: reset the form state after submit to set dirty to false
+    reset(undefined, {
+      keepValues: true,
+      keepDirty: false,
+      keepDefaultValues: false,
+    })
+  }
 
   function runSubmit(data: Schema) {
     startTransition(async () => {
@@ -121,7 +144,9 @@ export default function TipForm({
         await submitChanges(data)
         toast.success('Tips saved', {
           description: `Your tips for the ${race.raceName} have been saved. Good luck!`,
+          duration: 2_000,
         })
+        setShouldShowSaved(true)
       } catch (err) {
         const error = err as Error
         toast.error('Could not save', {
