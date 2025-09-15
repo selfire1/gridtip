@@ -126,9 +126,12 @@ export default async function RaceFormPage({
           constructors={constructors}
           isSprint={isSprint}
           disabledFields={closedFields}
-          defaultValues={tips}
+          defaultValues={{
+            ...tips,
+            groupId: currentGroupId,
+            raceId: race.id,
+          }}
           isFormDisabled={isRaceClosed}
-          groupId={currentGroupId}
           race={race}
         />
       </section>
