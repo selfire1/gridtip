@@ -9,6 +9,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:prod:generate": "bun --env-file=.env.production run db:generate",
     "db:prod:migrate": "bun --env-file=.env.production run db:migrate",
+    "db:dump": "turso db shell f1-tipping .dump > dump.sql && rm local.db && cat dump.sql | sqlite3 local.db",
     "start": "next start",
     "lint": "eslint"
   },
