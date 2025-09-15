@@ -10,6 +10,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import { usePathname } from 'next/navigation'
+import React from 'react'
 
 export default function Breadcrumbs() {
   const pathname = usePathname()
@@ -38,12 +39,12 @@ export default function Breadcrumbs() {
               )
             }
             return (
-              <>
-                <BreadcrumbItem className='hidden md:block' key={href}>
+              <React.Fragment key={href}>
+                <BreadcrumbItem className='hidden md:block'>
                   <BreadcrumbLink href={href}>{label}</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className='hidden md:block' />
-              </>
+              </React.Fragment>
             )
           })}
         </BreadcrumbList>
