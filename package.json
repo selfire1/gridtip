@@ -10,6 +10,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:prod:generate": "bun --env-file=.env.production run db:generate",
     "db:prod:migrate": "bun --env-file=.env.production run db:migrate",
+    "save-images": "bun run scripts/save-avatars.ts",
     "start": "next start",
     "lint": "eslint"
   },
@@ -47,6 +48,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/bun": "^1.2.22",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
