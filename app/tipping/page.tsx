@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button'
-import Image from 'next/image'
 import { getImageHref } from '@/lib/utils/user'
 import {
   Accordion,
@@ -23,27 +22,78 @@ import { getCurrentGroupId } from '@/lib/repository'
 import { subDays, subMinutes } from 'date-fns'
 import { and, eq, inArray } from 'drizzle-orm'
 import { LucideArrowRight } from 'lucide-react'
-import React from 'react'
-import { getConstructorCssVariable, getCountryFlag } from '@/lib/utils/index'
+import React, { cache } from 'react'
+import { getConstructorCssVariable } from '@/lib/utils/index'
 import UserAvatar from '@/components/user-avatar'
 import clsx from 'clsx'
 import Constructor from '@/components/constructor'
+import CountryFlag from '@/components/country-flag'
+import { Database } from '@/db/types'
+import Link from 'next/link'
 
 export default async function DashboardPage() {
   const { userId } = await verifySession()
   const currentUserGroup = await getCurrentGroupId()
 
+  const getCutoff = cache(getCutoffUncached)
   const hasGroups = await getIsUserInGroups(userId)
   const ongoingRace = await getOngoingRace(userId)
+  const nextRace = await getNextRace(userId)
+  const previousRace = await getPreviousRace(nextRace?.round)
 
   return (
     <div className='is-grid-card-fit grid gap-8'>
       {(!hasGroups || !currentUserGroup) && <CardJoinGroup />}
-      {ongoingRace && (
-        <CardOngoing raceId={ongoingRace.id} groupId={currentUserGroup!} />
-      )}
+      {currentUserGroup && <RequiresGroup groupId={currentUserGroup} />}
     </div>
   )
+
+  function RequiresGroup({ groupId }: { groupId: string }) {
+    return (
+      <>
+        {ongoingRace && (
+          <CardOngoing raceId={ongoingRace.id} groupId={groupId} />
+        )}
+        {previousRace && <CardPrevious race={previousRace} />}
+      </>
+    )
+  }
+
+  async function getPreviousRace(round: number | undefined) {
+    if (!round) {
+      return
+    }
+    return await db.query.racesTable.findFirst({
+      where: (race, { eq, and, gt }) => {
+        const isPreviousRound = eq(race.round, round - 1)
+        const fiveDaysAgo = subDays(new Date(), 5)
+        const gpIsNoMoreThanFiveAgo = gt(race.grandPrixDate, fiveDaysAgo)
+        return and(isPreviousRound, gpIsNoMoreThanFiveAgo)
+      },
+    })
+  }
+
+  async function getNextRace(userId: string) {
+    if (!currentUserGroup) {
+      return
+    }
+    const cutoff = await getCutoff({ groupId: currentUserGroup, userId })
+    if (cutoff === undefined) {
+      return
+    }
+    return await db.query.racesTable.findFirst({
+      where(race, { gt, or }) {
+        const referenceDate = new Date()
+        const cutoffDate = subMinutes(referenceDate, cutoff)
+
+        // where tipping has started
+        return or(
+          gt(race.sprintQualifyingDate, cutoffDate),
+          gt(race.qualifyingDate, cutoffDate),
+        )
+      },
+    })
+  }
 
   async function getOngoingRace(userId: string) {
     if (!currentUserGroup) {
@@ -72,24 +122,23 @@ export default async function DashboardPage() {
       },
     })
     return racesInFuture
+  }
 
-    async function getCutoff(info: { groupId: string; userId: string }) {
-      const { groupId, userId } = info
-      const allGroupsOfUser = await db.query.groupMembersTable.findMany({
-        where: (table, { eq }) => eq(table.userId, userId),
-        with: {
-          group: {
-            columns: {
-              cutoffInMinutes: true,
-              id: true,
-            },
+  async function getCutoffUncached(info: { groupId: string; userId: string }) {
+    const { groupId, userId } = info
+    const allGroupsOfUser = await db.query.groupMembersTable.findMany({
+      where: (table, { eq }) => eq(table.userId, userId),
+      with: {
+        group: {
+          columns: {
+            cutoffInMinutes: true,
+            id: true,
           },
         },
-      })
-      return allGroupsOfUser.find(
-        (membership) => membership.group.id === groupId,
-      )?.group.cutoffInMinutes
-    }
+      },
+    })
+    return allGroupsOfUser.find((membership) => membership.group.id === groupId)
+      ?.group.cutoffInMinutes
   }
 
   async function getIsUserInGroups(userId: string) {
@@ -124,6 +173,60 @@ export default async function DashboardPage() {
     )
   }
 
+  async function CardPrevious(props: { race: Database.Race }) {
+    const hasResults = await getHasResults(props.race.id)
+    return (
+      <Card>
+        <RaceHeader
+          race={props.race}
+          title={props.race.raceName}
+          description={'Round ' + props.race.round}
+        />
+        <CardContent>
+          {!hasResults ? (
+            <div className='space-y-2 max-w-prose'>
+              <p>
+                Usually results are available the{' '}
+                <span className='font-medium'>
+                  Monday after the race weekend
+                </span>
+                .
+              </p>
+              <p className='text-muted-foreground text-sm'>
+                If it has been some time and you believe there could be an
+                issue, feel free to get in touch.
+              </p>
+            </div>
+          ) : (
+            <p>Results are available. See how you did!</p>
+          )}
+        </CardContent>
+        <CardFooter>
+          {!hasResults ? (
+            <Button asChild variant='link'>
+              <Link href='/tipping/contact'>
+                Contact us
+                <LucideArrowRight />
+              </Link>
+            </Button>
+          ) : (
+            <Button asChild>
+              <Link href='/tipping/leaderboard'>
+                View results
+                <LucideArrowRight />
+              </Link>
+            </Button>
+          )}
+        </CardFooter>
+      </Card>
+    )
+    function getHasResults(id: string) {
+      return db.query.resultsTable.findFirst({
+        where: (result, { eq }) => eq(result.raceId, id),
+      })
+    }
+  }
+
   type CardOngoingProps = { raceId: string; groupId: string }
   async function CardOngoing(props: CardOngoingProps) {
     const predictionEntries = await getPredictionEntries()
@@ -136,29 +239,18 @@ export default async function DashboardPage() {
 
     return (
       <Card>
-        <CardHeader>
-          <div className='flex gap-2 justify-between'>
-            <div className='flex flex-col gap-2'>
-              <CardTitle>Race Tips</CardTitle>
-              <CardDescription>
+        {race && (
+          <RaceHeader
+            title='Race tips'
+            race={race}
+            description={
+              <>
                 Find out how everyone tipped for the{' '}
                 <span className='font-medium'>{race?.raceName}</span>
-              </CardDescription>
-            </div>
-            {race && (
-              <Image
-                width={200}
-                height={200}
-                fetchPriority='high'
-                loading='eager'
-                className='size-12 object-cover rounded-full border-2'
-                alt={`Flag of ${race.country}`}
-                src={getCountryFlag(race.country)}
-              />
-            )}
-          </div>
-        </CardHeader>
-
+              </>
+            }
+          />
+        )}
         <CardContent>
           <Accordion type='single' collapsible>
             {RACE_PREDICTION_FIELDS.map((position) => {
@@ -396,6 +488,25 @@ export default async function DashboardPage() {
 
       return sorted
     }
+  }
+  function RaceHeader({
+    title,
+    race,
+    description,
+  }: {
+    title: string
+    race: Pick<Database.Race, 'country'>
+    description?: React.ReactNode
+  }) {
+    return (
+      <CardHeader className='flex gap-2 justify-between items-center'>
+        <div className='flex flex-col gap-2'>
+          <CardTitle>{title}</CardTitle>
+          <CardDescription>{description}</CardDescription>
+        </div>
+        {race && <CountryFlag country={race.country} />}
+      </CardHeader>
+    )
   }
 }
 

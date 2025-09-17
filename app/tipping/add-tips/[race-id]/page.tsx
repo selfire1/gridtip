@@ -28,7 +28,7 @@ import {
 } from '@/lib/utils/prediction-fields'
 import { Separator } from '@/components/ui/separator'
 import { Icon } from '@/components/icon'
-import { getCountryFlag } from '@/lib/utils/index'
+import CountryFlag from '@/components/country-flag'
 
 export default async function RaceFormPage({
   params,
@@ -198,14 +198,9 @@ export default async function RaceFormPage({
   function Hero({ race }: { race: Database.Race }) {
     return (
       <div className='flex items-center gap-8 flex-row-reverse sm:flex-row justify-end sm:justify-start sm:gap-4'>
-        <Image
-          width={200}
-          height={200}
-          fetchPriority='high'
-          loading='eager'
+        <CountryFlag
+          country={race.country}
           className='size-16 sm:size-20 object-cover rounded-full border-2'
-          alt={`Flag of ${race.country}`}
-          src={getCountryFlag(race.country)}
         />
         <div>
           <p className='text-sm text-muted-foreground'>Round {race.round}</p>
