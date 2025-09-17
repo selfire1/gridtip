@@ -26,7 +26,7 @@ import {
   differenceInHours,
 } from 'date-fns'
 import { and, eq, inArray } from 'drizzle-orm'
-import { LucideArrowRight, LucideIcon } from 'lucide-react'
+import { LucideArrowRight, LucideClock, LucideIcon } from 'lucide-react'
 import React, { cache } from 'react'
 import { getConstructorCssVariable } from '@/lib/utils/index'
 import UserAvatar from '@/components/user-avatar'
@@ -38,6 +38,7 @@ import Link from 'next/link'
 import RaceTimes from '@/components/race-times'
 import { getIsSprint, getTipsDue } from '@/lib/utils/prediction-fields'
 import { Badge } from '@/components/ui/badge'
+import { Icon } from '@/components/icon'
 
 export default async function DashboardPage() {
   const { userId } = await verifySession()
@@ -66,10 +67,124 @@ export default async function DashboardPage() {
         {nextRace && (
           <>
             <CardTipNext race={nextRace} groupId={groupId} />
+            <CardTipStatus groupId={groupId} raceId={nextRace.id} />
           </>
         )}
       </>
     )
+  }
+
+  async function CardTipStatus({
+    groupId,
+    raceId,
+  }: {
+    groupId: Database.Group['id']
+    raceId: Database.Race['id']
+  }) {
+    const { tipped, notTipped } = await getTippingStatus()
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Tipping status</CardTitle>
+          <CardDescription>Who has tipped already?</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className='grid grid-cols-2 gap-4'>
+            {tipped.length > 0 && (
+              <UserList title='Tipped' Icon={Icon.Tipping} users={tipped} />
+            )}
+            {notTipped.length > 0 && (
+              <UserList
+                title='Yet To Tip'
+                Icon={LucideClock}
+                users={notTipped}
+              />
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    )
+
+    function UserList({
+      title,
+      Icon,
+      users,
+    }: {
+      users: Array<Pick<Database.User, 'id' | 'name'>>
+      title: string
+      Icon: LucideIcon
+    }) {
+      return (
+        <div className='space-y-2'>
+          <p className='text-sm font-medium flex items-center gap-1 text-muted-foreground'>
+            <Icon size={16} />
+            {title}
+          </p>
+          <div className='space-y-4 p-4 border rounded-lg h-32 overflow-y-auto'>
+            {users.map((user) => (
+              <div key={user.id} className='flex items-center gap-2'>
+                <UserAvatar
+                  className='size-6 rounded-lg'
+                  name={user.name}
+                  id={user.id}
+                />
+                <p className='text-sm'>{user.name}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    async function getTippingStatus() {
+      const groupMembers = (
+        await db.query.groupMembersTable.findMany({
+          where: (group, { eq }) => eq(group.groupId, groupId),
+          columns: {
+            id: true,
+          },
+          with: {
+            user: {
+              columns: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        })
+      ).map((groupMember) => groupMember.user)
+
+      const peopleWhoTippedThisRace = await db.query.predictionsTable.findMany({
+        where: (prediction, { eq, and }) =>
+          and(eq(prediction.groupId, groupId), eq(prediction.raceId, raceId)),
+        columns: {
+          id: true,
+        },
+        with: {
+          user: {
+            columns: {
+              id: true,
+            },
+          },
+        },
+      })
+
+      const tippersSet = new Set(peopleWhoTippedThisRace.map((p) => p.user.id))
+
+      type Member = (typeof groupMembers)[number]
+
+      return groupMembers.reduce(
+        (acc, user) => {
+          if (!tippersSet.has(user.id)) {
+            acc.notTipped.push(user)
+            return acc
+          }
+          acc.tipped.push(user)
+          return acc
+        },
+        { tipped: [] as Member[], notTipped: [] as Member[] },
+      )
+    }
   }
 
   async function CardTipNext({
@@ -118,7 +233,7 @@ export default async function DashboardPage() {
         <CardContent className='space-y-4'>
           <RaceTimes race={race} cutoff={cutoff} />
         </CardContent>
-        <CardFooter>
+        <CardFooter className='mt-auto'>
           <Button asChild>
             <Link href={`/tipping/add-tips/${race.id}`}>
               {hasTipped ? 'Review tips' : 'Tip now'}
@@ -256,7 +371,7 @@ export default async function DashboardPage() {
             or creating a group.
           </CardDescription>
         </CardHeader>
-        <CardFooter>
+        <CardFooter className='mt-auto'>
           <Button asChild>
             <a href='/tipping/groups'>
               Manage groups
@@ -296,7 +411,7 @@ export default async function DashboardPage() {
             <p>Results are available. See how you did!</p>
           )}
         </CardContent>
-        <CardFooter>
+        <CardFooter className='mt-auto'>
           {!hasResults ? (
             <Button asChild variant='link'>
               <Link href='/tipping/contact'>

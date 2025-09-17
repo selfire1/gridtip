@@ -145,6 +145,6 @@
 @utility is-grid-card-fit {
   grid-template-columns: repeat(
     auto-fill,
-    minmax(min(var(--card-width, 320px), 100%), 1fr)
+    minmax(min(var(--card-width, 480px), 100%), 1fr)
   );
 }
