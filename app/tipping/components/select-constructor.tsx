@@ -20,11 +20,11 @@ import {
 } from '@/components/ui/popover'
 import { Database } from '@/db/types'
 import { ChevronsUpDown, LucideCheck } from 'lucide-react'
-import Image from 'next/image'
 import { UseFormReturn } from 'react-hook-form'
 import { FormControl } from '@/components/ui/form'
-
-export type ConstructorOption = Pick<Database.Constructor, 'id' | 'name'>
+import ConstructorOption, {
+  type ConstructorProps,
+} from '@/components/constructor'
 
 export function SelectConstructor({
   constructors,
@@ -32,14 +32,14 @@ export function SelectConstructor({
   onSelect,
   disabled,
 }: {
-  constructors: ConstructorOption[]
+  constructors: ConstructorProps[]
   value: { id: string } | undefined
-  onSelect: (driver: ConstructorOption | undefined) => void
+  onSelect: (driver: ConstructorProps | undefined) => void
   disabled?: boolean
 }) {
   const [open, setOpen] = React.useState(false)
   const isDesktop = useMediaQuery('(min-width: 768px)')
-  const [selected, setSelected] = React.useState<ConstructorOption | undefined>(
+  const [selected, setSelected] = React.useState<ConstructorProps | undefined>(
     constructors.find((d) => d.id === value?.id),
   )
   React.useEffect(() => {
@@ -85,7 +85,7 @@ function TriggerButton({
   type,
   disabled,
 }: {
-  selected: ConstructorOption | undefined
+  selected: ConstructorProps | undefined
   type: 'drawer' | 'popover'
   disabled?: boolean
 }) {
@@ -99,7 +99,7 @@ function TriggerButton({
           disabled={disabled}
         >
           {selected ? (
-            <Option constructor={selected} isSelected={false} />
+            <ConstructorOption constructor={selected} isSelected={false} />
           ) : (
             <EmptyState />
           )}
@@ -120,9 +120,9 @@ function ConstructorsList({
   constructors: constructors,
 }: {
   setOpen: (open: boolean) => void
-  setSelected: (constructor: ConstructorOption | undefined) => void
-  selected: ConstructorOption | undefined
-  constructors: ConstructorOption[]
+  setSelected: (constructor: ConstructorProps | undefined) => void
+  selected: ConstructorProps | undefined
+  constructors: ConstructorProps[]
 }) {
   return (
     <Command>
@@ -143,7 +143,7 @@ function ConstructorsList({
                 setOpen(false)
               }}
             >
-              <Option
+              <ConstructorOption
                 constructor={constructor}
                 isSelected={selected?.id === constructor.id}
               />
@@ -152,31 +152,5 @@ function ConstructorsList({
         </CommandGroup>
       </CommandList>
     </Command>
-  )
-}
-
-function Option({
-  constructor: constructor,
-  isSelected,
-}: {
-  constructor: ConstructorOption
-  isSelected: boolean
-}) {
-  return (
-    <div
-      className={[
-        'flex items-center gap-2 w-full',
-        isSelected ? 'font-semibold' : '',
-      ].join(' ')}
-    >
-      <Image
-        width={24}
-        height={24}
-        alt=''
-        src={`/img/constructors/${constructor.id}.avif`}
-      />
-      <span>{constructor.name}</span>
-      {isSelected && <LucideCheck className='ml-auto' />}
-    </div>
   )
 }

@@ -39,8 +39,8 @@ export async function AppSidebar({
         <NavUser
           user={{
             name: user.name,
-            avatar: getImageHref(user),
             email: user.email,
+            id: user.id,
           }}
         />
       </SidebarFooter>

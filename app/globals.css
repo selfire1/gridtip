@@ -1,6 +1,6 @@
-@import "tailwindcss";
-@import "tw-animate-css";
-@import "./css/team-colours.css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import './css/team-colours.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -142,3 +142,9 @@
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
 
+@utility is-grid-card-fit {
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(var(--card-width, 320px), 100%), 1fr)
+  );
+}
