@@ -19,9 +19,14 @@ import { db } from '@/db'
 import { predictionEntriesTable, predictionsTable } from '@/db/schema/schema'
 import { verifySession } from '@/lib/dal'
 import { getCurrentGroupId } from '@/lib/repository'
-import { subDays, subMinutes } from 'date-fns'
+import {
+  subDays,
+  subMinutes,
+  formatDistanceToNowStrict,
+  differenceInHours,
+} from 'date-fns'
 import { and, eq, inArray } from 'drizzle-orm'
-import { LucideArrowRight } from 'lucide-react'
+import { LucideArrowRight, LucideIcon } from 'lucide-react'
 import React, { cache } from 'react'
 import { getConstructorCssVariable } from '@/lib/utils/index'
 import UserAvatar from '@/components/user-avatar'
@@ -30,6 +35,9 @@ import Constructor from '@/components/constructor'
 import CountryFlag from '@/components/country-flag'
 import { Database } from '@/db/types'
 import Link from 'next/link'
+import RaceTimes from '@/components/race-times'
+import { getIsSprint, getTipsDue } from '@/lib/utils/prediction-fields'
+import { Badge } from '@/components/ui/badge'
 
 export default async function DashboardPage() {
   const { userId } = await verifySession()
@@ -55,8 +63,95 @@ export default async function DashboardPage() {
           <CardOngoing raceId={ongoingRace.id} groupId={groupId} />
         )}
         {previousRace && <CardPrevious race={previousRace} />}
+        {nextRace && (
+          <>
+            <CardTipNext race={nextRace} groupId={groupId} />
+          </>
+        )}
       </>
     )
+  }
+
+  async function CardTipNext({
+    race,
+    groupId,
+  }: {
+    race: Database.Race
+    groupId: Database.Group['id']
+  }) {
+    const cutoff = await getCutoff({ groupId: groupId, userId })
+    if (cutoff === undefined) {
+      return
+    }
+    const isSprint = getIsSprint(race)
+    const tipsDue = getTipsDue(race, cutoff)
+    const hasTipped = await getHasTipped()
+
+    return (
+      <Card>
+        <RaceHeader
+          race={race}
+          title={
+            <span className='flex flex-col gap-2'>
+              <div className='flex items-center gap-2'>
+                {isSprint && tipsDue.sprint && (
+                  <Badge variant={getBadgeVariant(tipsDue.sprint)}>
+                    Sprint tips due in{' '}
+                    {formatDistanceToNowStrict(tipsDue.sprint)}
+                  </Badge>
+                )}
+                <Badge variant={getBadgeVariant(tipsDue.grandPrix)}>
+                  {isSprint ? 'GP tips due in ' : 'Due in '}
+                  {formatDistanceToNowStrict(tipsDue.grandPrix)}
+                </Badge>
+              </div>
+              <span>Predict the next race</span>
+            </span>
+          }
+          description={
+            <div className='flex items-center gap-2'>
+              <p className='font-medium'>{race.raceName}</p>
+              <p>{race.circuitName}</p>
+            </div>
+          }
+        />
+        <CardContent className='space-y-4'>
+          <RaceTimes race={race} cutoff={cutoff} />
+        </CardContent>
+        <CardFooter>
+          <Button asChild>
+            <Link href={`/tipping/add-tips/${race.id}`}>
+              {hasTipped ? 'Review tips' : 'Tip now'}
+              <LucideArrowRight />
+            </Link>
+          </Button>
+        </CardFooter>
+      </Card>
+    )
+
+    function getBadgeVariant(
+      due: Date,
+    ): 'destructive' | 'default' | 'outline' | 'secondary' {
+      const hoursToNow = differenceInHours(due, new Date())
+      if (hoursToNow < 3) {
+        return 'destructive'
+      }
+      if (hoursToNow < 24 * 2) {
+        return 'default'
+      }
+      return 'secondary'
+    }
+
+    async function getHasTipped() {
+      return !!(await db.query.predictionsTable.findFirst({
+        where: (prediction, { eq, and }) =>
+          and(
+            eq(prediction.userId, userId),
+            eq(prediction.groupId, groupId),
+            eq(prediction.raceId, race.id),
+          ),
+      }))
+    }
   }
 
   async function getPreviousRace(round: number | undefined) {
@@ -494,7 +589,7 @@ export default async function DashboardPage() {
     race,
     description,
   }: {
-    title: string
+    title: React.ReactNode
     race: Pick<Database.Race, 'country'>
     description?: React.ReactNode
   }) {

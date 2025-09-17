@@ -3,16 +3,9 @@ import AlertNoGroup from '../components/alert-no-group'
 import { db } from '@/db'
 import { verifySession } from '@/lib/dal'
 import Alert from '@/components/alert'
-import { isFuture, isPast } from 'date-fns'
-import {
-  LucideArrowLeft,
-  LucideArrowRight,
-  LucideClock,
-  LucideIcon,
-} from 'lucide-react'
+import { LucideArrowLeft, LucideArrowRight, LucideClock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import Image from 'next/image'
 import TipForm from './components/TipForm'
 import { Database } from '@/db/types'
 import { RacePredictionField } from '@/constants'
@@ -22,13 +15,12 @@ import {
   getClosedFields,
   getIsSprint,
   getPositionType,
-  getTipsDue,
   isPredictionForRace,
   isRaceAbleToBeTipped,
 } from '@/lib/utils/prediction-fields'
 import { Separator } from '@/components/ui/separator'
-import { Icon } from '@/components/icon'
 import CountryFlag from '@/components/country-flag'
+import RaceTimes from '@/components/race-times'
 
 export default async function RaceFormPage({
   params,
@@ -78,7 +70,6 @@ export default async function RaceFormPage({
   })
 
   const isSprint = getIsSprint(race)
-  const tipsDue = getTipsDue(race, currentGroup.cutoffInMinutes)
   const closedFields = getClosedFields(race, currentGroup.cutoffInMinutes)
 
   const drivers = await db.query.driversTable.findMany({
@@ -111,7 +102,7 @@ export default async function RaceFormPage({
     <div className='space-y-8 mb-12'>
       <div className='flex flex-wrap gap-y-6 gap-x-4 justify-between items-center'>
         <Hero race={race} />
-        <Times race={race} />
+        <RaceTimes race={race} cutoff={currentGroup.cutoffInMinutes} />
       </div>
       <Separator />
       {isRaceClosed && (
@@ -217,42 +208,6 @@ export default async function RaceFormPage({
     )
   }
 
-  function Times({ race }: { race: Database.Race }) {
-    return (
-      <section className='flex gap-4'>
-        {isSprint && tipsDue.sprint && (
-          <TimeTile
-            title='Sprint tips due'
-            date={tipsDue.sprint}
-            icon={Icon.Tipping}
-            isActive={isFuture(tipsDue.sprint)}
-          />
-        )}
-        <TimeTile
-          title={isSprint ? 'GP tips due' : 'Tips due'}
-          date={tipsDue.grandPrix}
-          icon={Icon.Tipping}
-          isActive={
-            isFuture(tipsDue.grandPrix) &&
-            (tipsDue.sprint ? isPast(tipsDue.sprint) : true)
-          }
-        />
-        <TimeTile
-          title='Qualifying'
-          date={race.qualifyingDate}
-          icon={Icon.Qualifying}
-          isActive={isFuture(race.qualifyingDate) && isPast(tipsDue.grandPrix)}
-        />
-        <TimeTile
-          title='Grand Prix'
-          date={race.grandPrixDate}
-          icon={Icon.GrandPrix}
-          isActive={isFuture(race.grandPrixDate) && isPast(tipsDue.grandPrix)}
-        />
-      </section>
-    )
-  }
-
   function NavigationButtons({ children }: { children?: React.ReactNode }) {
     return (
       <section>
@@ -270,35 +225,6 @@ export default async function RaceFormPage({
           />
         </div>
       </section>
-    )
-  }
-
-  function TimeTile(props: {
-    title: string
-    date: Date
-    isActive: boolean
-    icon: LucideIcon
-    className?: string
-  }) {
-    return (
-      <div
-        className={[
-          'text-sm py-2 px-4 border rounded-lg',
-          props.isActive
-            ? ''
-            : 'text-muted-foreground hidden sm:block border-transparent',
-          props.className ?? '',
-        ].join(' ')}
-      >
-        <p className='text-xs flex items-center gap-1 font-medium text-muted-foreground'>
-          <props.icon size={12} />
-          {props.title}
-        </p>
-        <p className='flex flex-col font-medium leading-tight'>
-          <span>{getLocalDateString(props.date)}</span>
-          <span className='uppercase'>{getLocalTimeString(props.date)}</span>
-        </p>
-      </div>
     )
   }
 
@@ -322,22 +248,5 @@ export default async function RaceFormPage({
         </Link>
       </Button>
     )
-  }
-
-  function getLocalDateString(date: Date) {
-    const formatter = Intl.DateTimeFormat('en-AU', {
-      day: 'numeric',
-      weekday: 'short',
-      month: 'short',
-      year:
-        new Date().getFullYear() === date.getFullYear() ? undefined : 'numeric',
-    })
-    return formatter.format(date)
-  }
-  function getLocalTimeString(date: Date) {
-    const formatter = Intl.DateTimeFormat('en-AU', {
-      timeStyle: 'short',
-    })
-    return formatter.format(date)
   }
 }
