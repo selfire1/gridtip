@@ -61,7 +61,6 @@ export default function ChampionshipForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit((data) => runSubmit(data))}>
-        <Pre value={defaultValues} />
         <div className='space-y-8'>
           <Pre value={form.formState.isValid} />
           {fields.map((formField) => (
