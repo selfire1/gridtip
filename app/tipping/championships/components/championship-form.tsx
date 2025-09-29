@@ -40,7 +40,7 @@ export default function ChampionshipForm({
   })
   const fields = [
     {
-      name: 'constructor',
+      name: 'constructorChampion',
       label: 'Constructors’ Championship',
       hint: '10 points',
       description:
@@ -48,7 +48,7 @@ export default function ChampionshipForm({
       type: 'constructor',
     },
     {
-      name: 'driver',
+      name: 'driverChampion',
       label: 'Drivers’ Championship',
       hint: '15 points',
       description: 'Which driver will claim champion of the world this year?',
@@ -62,7 +62,6 @@ export default function ChampionshipForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit((data) => runSubmit(data))}>
         <div className='space-y-8'>
-          <Pre value={form.formState.isValid} />
           {fields.map((formField) => (
             <FormField
               key={formField.name}

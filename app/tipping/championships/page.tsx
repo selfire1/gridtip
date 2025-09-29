@@ -47,10 +47,10 @@ export default async function ChampionshipPage() {
       (tip) => tip.position === 'championshipConstructor',
     )
     return {
-      driver: {
+      driverChampion: {
         id: driverTip?.driver?.id,
       },
-      constructor: {
+      constructorChampion: {
         id: constructorTip?.constructor?.id,
       },
     }
