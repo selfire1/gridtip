@@ -120,17 +120,19 @@ export default async function DashboardPage() {
             <Icon size={16} />
             {title}
           </p>
-          <div className='space-y-4 p-4 border rounded-lg h-32 overflow-y-auto'>
-            {users.map((user) => (
-              <div key={user.id} className='flex items-center gap-2'>
-                <UserAvatar
-                  className='size-6 rounded-lg'
-                  name={user.name}
-                  id={user.id}
-                />
-                <p className='text-sm'>{user.name}</p>
-              </div>
-            ))}
+          <div className='rounded-lg overflow-hidden border'>
+            <div className='space-y-4 p-4  h-32 overflow-y-auto'>
+              {users.map((user) => (
+                <div key={user.id} className='flex items-center gap-2'>
+                  <UserAvatar
+                    className='size-6 rounded-lg'
+                    name={user.name}
+                    id={user.id}
+                  />
+                  <p className='text-sm'>{user.name}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )
