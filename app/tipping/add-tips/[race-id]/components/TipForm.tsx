@@ -16,16 +16,14 @@ import {
   DriverOption,
   SelectDriver,
 } from '@/app/tipping/components/select-driver'
-import {
-  ConstructorOption,
-  SelectConstructor,
-} from '@/app/tipping/components/select-constructor'
+import { SelectConstructor } from '@/app/tipping/components/select-constructor'
 import { useEffect, useState, useTransition } from 'react'
 import { submitChanges } from '../actions/submit-tip'
 import { Loader2Icon, LucideCheck } from 'lucide-react'
 import { toast } from 'sonner'
 import { Database } from '@/db/types'
 import { submitTipSchema } from '../actions/schema'
+import { ConstructorProps } from '@/components/constructor'
 
 const formSchema = submitTipSchema.partial()
 export type Schema = z.infer<typeof formSchema>
@@ -40,7 +38,7 @@ export default function TipForm({
   race,
 }: {
   drivers: DriverOption[]
-  constructors: ConstructorOption[]
+  constructors: ConstructorProps[]
   isSprint: boolean
   disabledFields: Set<keyof Schema>
   defaultValues: Schema

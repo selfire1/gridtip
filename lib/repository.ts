@@ -46,3 +46,25 @@ async function getCurrentGroup(userId: string) {
   const userWithGroups = await getGroupsForUser(userId)
   return userWithGroups.find(({ group }) => group.id === cookieGroupId)?.group
 }
+
+export function getDriverOptions() {
+  return db.query.driversTable.findMany({
+    columns: {
+      id: true,
+      constructorId: true,
+      givenName: true,
+      familyName: true,
+    },
+    orderBy: (driver, { asc }) => asc(driver.familyName),
+  })
+}
+
+export function getConstructorOptions() {
+  return db.query.constructorsTable.findMany({
+    columns: {
+      id: true,
+      name: true,
+    },
+    orderBy: (constructor, { asc }) => asc(constructor.name),
+  })
+}

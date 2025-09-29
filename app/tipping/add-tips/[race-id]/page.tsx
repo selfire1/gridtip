@@ -1,4 +1,8 @@
-import { getCurrentGroupId } from '@/lib/repository'
+import {
+  getConstructorOptions,
+  getCurrentGroupId,
+  getDriverOptions,
+} from '@/lib/repository'
 import AlertNoGroup from '../components/alert-no-group'
 import { db } from '@/db'
 import { verifySession } from '@/lib/dal'
@@ -72,23 +76,8 @@ export default async function RaceFormPage({
   const isSprint = getIsSprint(race)
   const closedFields = getClosedFields(race, currentGroup.cutoffInMinutes)
 
-  const drivers = await db.query.driversTable.findMany({
-    columns: {
-      id: true,
-      constructorId: true,
-      givenName: true,
-      familyName: true,
-    },
-    orderBy: (driver, { asc }) => asc(driver.familyName),
-  })
-
-  const constructors = await db.query.constructorsTable.findMany({
-    columns: {
-      id: true,
-      name: true,
-    },
-    orderBy: (constructor, { asc }) => asc(constructor.name),
-  })
+  const drivers = await getDriverOptions()
+  const constructors = await getConstructorOptions()
 
   const tips = await getTips({
     userId,
@@ -195,9 +184,7 @@ export default async function RaceFormPage({
         />
         <div>
           <p className='text-sm text-muted-foreground'>Round {race.round}</p>
-          <h1 className='scroll-m-20 text-2xl font-semibold text-balance tracking-tight sm:text-3xl xl:text-4xl'>
-            {race.raceName}
-          </h1>
+          <h1 className='page-title'>{race.raceName}</h1>
           <p>
             <span className='text-sm mt-2 text-muted-foreground font-medium'>
               {race.circuitName}

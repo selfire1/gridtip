@@ -1,6 +1,6 @@
 import z from 'zod'
 
-const idObject = z
+export const idObject = z
   .object({
     id: z.string().min(1, 'Required'),
   })
