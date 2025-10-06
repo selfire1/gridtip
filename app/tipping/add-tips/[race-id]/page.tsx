@@ -2,7 +2,7 @@ import {
   getConstructorOptions,
   getCurrentGroupId,
   getDriverOptions,
-} from '@/lib/repository'
+} from '@/lib/utils/groups'
 import AlertNoGroup from '../components/alert-no-group'
 import { db } from '@/db'
 import { verifySession } from '@/lib/dal'

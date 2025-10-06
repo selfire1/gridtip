@@ -2,7 +2,7 @@ import {
   getConstructorOptions,
   getCurrentGroupId,
   getDriverOptions,
-} from '@/lib/repository'
+} from '@/lib/utils/groups'
 import ChampionshipForm, { Schema } from './components/championship-form'
 import { verifySession } from '@/lib/dal'
 import { db } from '@/db'

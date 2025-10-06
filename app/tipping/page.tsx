@@ -18,7 +18,7 @@ import { RACE_PREDICTION_FIELDS, RacePredictionField } from '@/constants'
 import { db } from '@/db'
 import { predictionEntriesTable, predictionsTable } from '@/db/schema/schema'
 import { verifySession } from '@/lib/dal'
-import { getCurrentGroupId } from '@/lib/repository'
+import { getCurrentGroupId } from '@/lib/utils/groups'
 import {
   subDays,
   subMinutes,
