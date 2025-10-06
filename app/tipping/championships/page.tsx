@@ -6,7 +6,7 @@ import {
 import ChampionshipForm, { Schema } from './components/championship-form'
 import { verifySession } from '@/lib/dal'
 import { db } from '@/db'
-import { DeepPartial } from '@/app/types'
+import { DeepPartial } from '@/types'
 
 export default async function ChampionshipPage() {
   const { userId } = await verifySession()

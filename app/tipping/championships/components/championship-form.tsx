@@ -17,9 +17,9 @@ import { SelectConstructor } from '../../components/select-constructor'
 import { Button } from '@/components/ui/button'
 import { useEffect, useTransition } from 'react'
 import { Loader2Icon } from 'lucide-react'
-import { DeepPartial } from '@/app/types'
 import Pre from '@/components/debug'
 import { schema as formSchema } from '../actions/schema'
+import { DeepPartial } from '@/types'
 
 export type Schema = z.infer<typeof formSchema>
 
