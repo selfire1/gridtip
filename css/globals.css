@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
-@import './css/team-colours.css';
+@import './team-colours.css';
 
 @custom-variant dark (&:is(.dark *));
 
