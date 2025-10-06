@@ -61,7 +61,7 @@ export default async function DashboardPage() {
     return (
       <>
         {ongoingRace && (
-          <CardOngoing raceId={ongoingRace.id} groupId={groupId} />
+          <CardEveryonesTips raceId={ongoingRace.id} groupId={groupId} />
         )}
         {previousRace && <CardPrevious race={previousRace} />}
         {nextRace && (
@@ -440,7 +440,7 @@ export default async function DashboardPage() {
   }
 
   type CardOngoingProps = { raceId: string; groupId: string }
-  async function CardOngoing(props: CardOngoingProps) {
+  async function CardEveryonesTips(props: CardOngoingProps) {
     const predictionEntries = await getPredictionEntries()
     const positionToTips = reduceIntoObject(predictionEntries)
 
@@ -448,6 +448,7 @@ export default async function DashboardPage() {
     const seenConstructors = new Set<string>()
 
     const race = await getRaceInfo(props.raceId)
+    const positionTips = getTipsOnPosition()
 
     return (
       <Card>
@@ -457,19 +458,34 @@ export default async function DashboardPage() {
             race={race}
             description={
               <>
-                Find out how everyone tipped for the{' '}
+                See everyone’s tips for the{' '}
                 <span className='font-medium'>{race?.raceName}</span>
               </>
             }
           />
         )}
+
+        {!!positionTips.length ? (
+          <TipsAccordion />
+        ) : (
+          <CardContent>
+            <p className='text-muted-foreground text-sm'>
+              No one has tipped yet
+            </p>
+          </CardContent>
+        )}
+      </Card>
+    )
+
+    function TipsAccordion() {
+      return (
         <CardContent>
-          <Accordion type='single' collapsible>
-            {RACE_PREDICTION_FIELDS.map((position) => {
-              const tips = positionToTips[position]
-              if (!tips?.length) {
-                return
-              }
+          <Accordion
+            type='single'
+            collapsible={true}
+            defaultValue={positionTips[0].position}
+          >
+            {positionTips.map(({ position, tips }) => {
               return (
                 <React.Fragment key={position}>
                   <AccordionItem value={position}>
@@ -491,8 +507,25 @@ export default async function DashboardPage() {
             })}
           </Accordion>
         </CardContent>
-      </Card>
-    )
+      )
+    }
+
+    function getTipsOnPosition() {
+      return RACE_PREDICTION_FIELDS.reduce(
+        (acc, position) => {
+          const tips = positionToTips[position]
+          if (!tips?.length) {
+            return acc
+          }
+          acc.push({ tips, position })
+          return acc
+        },
+        [] as {
+          tips: (typeof positionToTips)[RacePredictionField]
+          position: RacePredictionField
+        }[],
+      )
+    }
 
     function getRaceInfo(raceId: string) {
       return db.query.racesTable.findFirst({
@@ -543,6 +576,14 @@ export default async function DashboardPage() {
           )}
           style={style}
         >
+          <div className='flex items-center gap-2 text-xs'>
+            <UserAvatar
+              name={user.name}
+              id={user.id}
+              className='size-6 rounded-lg'
+            />
+            <p className='text-muted-foreground'>{user.name}</p>
+          </div>
           <div>
             {isDriver ? (
               <div className='flex items-baseline gap-1'>
@@ -555,14 +596,6 @@ export default async function DashboardPage() {
             ) : (
               <Constructor constructor={tip} />
             )}
-          </div>
-          <div className='flex items-center gap-2 text-xs'>
-            <p className='text-muted-foreground'>{user.name}</p>
-            <UserAvatar
-              name={user.name}
-              id={user.id}
-              className='size-6 rounded-lg'
-            />
           </div>
         </div>
       )
