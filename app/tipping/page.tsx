@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import Image from 'next/image'
 import { getImageHref } from '@/lib/utils/user'
 import {
   Accordion,
@@ -39,6 +40,7 @@ import RaceTimes from '@/components/race-times'
 import { getIsSprint, getTipsDue } from '@/lib/utils/prediction-fields'
 import { Badge } from '@/components/ui/badge'
 import { Icon } from '@/components/icon'
+import { getCountryFlag } from '@/lib/utils/country-flag'
 
 export default async function DashboardPage() {
   const { userId } = await verifySession()
@@ -205,7 +207,11 @@ export default async function DashboardPage() {
     const hasTipped = await getHasTipped()
 
     return (
-      <Card>
+      <Card className='relative isolate overflow-hidden'>
+        <div className='absolute inset-0 overflow-hidden z-[-1] blur-3xl'>
+          <div className='absolute inset-0 bg-gradient-to-br from-card/85 to-card' />
+          <img alt='' src={getCountryFlag(race.country)} />
+        </div>
         <RaceHeader
           race={race}
           title={
@@ -388,7 +394,11 @@ export default async function DashboardPage() {
   async function CardPrevious(props: { race: Database.Race }) {
     const hasResults = await getHasResults(props.race.id)
     return (
-      <Card>
+      <Card className='relative isolate overflow-hidden'>
+        <div className='absolute inset-0 overflow-hidden z-[-1] blur-3xl'>
+          <div className='absolute inset-0 bg-gradient-to-br from-card/85 to-card' />
+          <img alt='' src={getCountryFlag(props.race.country)} />
+        </div>
         <RaceHeader
           race={props.race}
           title={props.race.raceName}
