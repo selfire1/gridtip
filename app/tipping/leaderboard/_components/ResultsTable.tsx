@@ -14,14 +14,6 @@ import { ClassValue } from 'clsx'
 import { Group } from '@/db/schema/schema'
 
 import { db } from '@/db'
-import {
-  groupsTable,
-  predictionEntriesTable,
-  predictionsTable,
-  racesTable,
-} from '@/db/schema/schema'
-import { subMinutes } from 'date-fns'
-import { eq, lt, and, inArray } from 'drizzle-orm'
 import { getImageHref } from '@/lib/utils/user'
 import { LucideListX } from 'lucide-react'
 import Alert from '@/components/alert'
@@ -30,6 +22,7 @@ import {
   getRaceIdToResultMap,
   getOnlyRacesWithResults,
   ResultsMap,
+  getPredictionsOfRacesAfterCutoff,
 } from '@/lib/utils/race-results'
 
 type Leaderboard = {
@@ -42,11 +35,7 @@ type Leaderboard = {
 
 type Row = Leaderboard[number]
 export async function ResultsTable({ groupId }: { groupId: Group['id'] }) {
-  const idsOfRacesAfterCutoff = await getRacesThatAreAfterCutoff(groupId)
-  const allPredictions = await getPredictionsOfRaces(
-    groupId,
-    idsOfRacesAfterCutoff,
-  )
+  const allPredictions = await getPredictionsOfRacesAfterCutoff(groupId)
   const groupMembers = await getGroupMembers(groupId)
   const resultsByRaceAndPosition = await getRaceIdToResultMap()
   const racesWithResults = await getOnlyRacesWithResults()
@@ -324,58 +313,6 @@ export async function ResultsTable({ groupId }: { groupId: Group['id'] }) {
         },
       })
     ).map((member) => member.user)
-  }
-
-  async function getPredictionsOfRaces(groupId: string, ids: string[]) {
-    const predictionEntries = await db
-      .select({
-        id: predictionEntriesTable.id,
-        userId: predictionsTable.userId,
-        raceId: predictionsTable.raceId,
-        position: predictionEntriesTable.position,
-        driverId: predictionEntriesTable.driverId,
-        constructorId: predictionEntriesTable.constructorId,
-      })
-      .from(predictionsTable)
-      .leftJoin(
-        predictionEntriesTable,
-        eq(predictionsTable.id, predictionEntriesTable.predictionId),
-      )
-      .where(
-        and(
-          eq(predictionsTable.groupId, groupId),
-          inArray(predictionsTable.raceId, ids),
-        ),
-      )
-    return predictionEntries
-  }
-
-  async function getRacesThatAreAfterCutoff(groupId: string) {
-    const group = await db.query.groupsTable.findFirst({
-      where: eq(groupsTable.id, groupId),
-      columns: {
-        cutoffInMinutes: true,
-      },
-    })
-
-    const cutoffInMinutes = group?.cutoffInMinutes
-    if (cutoffInMinutes === undefined) {
-      throw new Error('Group not found')
-    }
-    const currentDate = new Date()
-    const currentDateWithCutoffAdjusted = subMinutes(
-      currentDate,
-      cutoffInMinutes,
-    )
-    const raceIds = (
-      await db.query.racesTable.findMany({
-        where: lt(racesTable.qualifyingDate, currentDateWithCutoffAdjusted),
-        columns: {
-          id: true,
-        },
-      })
-    ).map((race) => race.id)
-    return raceIds
   }
 
   function PositionDelta({ delta }: { delta: Row['pointsDelta'] }) {

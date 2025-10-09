@@ -1,6 +1,14 @@
 import { DriverOption } from '@/app/tipping/components/select-driver'
 import { db } from '@/db'
+import {
+  groupsTable,
+  predictionEntriesTable,
+  predictionsTable,
+  racesTable,
+} from '@/db/schema/schema'
 import { Database } from '@/db/types'
+import { subMinutes } from 'date-fns'
+import { and, eq, inArray, lt } from 'drizzle-orm'
 import { cache } from 'react'
 
 async function uncachedGetOnlyRacesWithResults() {
@@ -123,7 +131,72 @@ async function uncachedGetRaceIdToResultMap(): Promise<ResultsMap | undefined> {
   }
 }
 
+async function uncachedGetPredictionsOfRacesAfterCutoff(groupId: string) {
+  const idsOfRacesAfterCutoff = await getRacesThatAreAfterCutoff(groupId)
+  const allPredictions = await getPredictionsOfRaces(
+    groupId,
+    idsOfRacesAfterCutoff,
+  )
+  return allPredictions
+}
+
+async function getPredictionsOfRaces(groupId: string, ids: string[]) {
+  const predictionEntries = await db
+    .select({
+      id: predictionEntriesTable.id,
+      userId: predictionsTable.userId,
+      raceId: predictionsTable.raceId,
+      position: predictionEntriesTable.position,
+      driverId: predictionEntriesTable.driverId,
+      constructorId: predictionEntriesTable.constructorId,
+    })
+    .from(predictionsTable)
+    .leftJoin(
+      predictionEntriesTable,
+      eq(predictionsTable.id, predictionEntriesTable.predictionId),
+    )
+    .where(
+      and(
+        eq(predictionsTable.groupId, groupId),
+        inArray(predictionsTable.raceId, ids),
+      ),
+    )
+  return predictionEntries
+}
+
+async function getRacesThatAreAfterCutoff(groupId: string) {
+  const group = await db.query.groupsTable.findFirst({
+    where: eq(groupsTable.id, groupId),
+    columns: {
+      cutoffInMinutes: true,
+    },
+  })
+
+  const cutoffInMinutes = group?.cutoffInMinutes
+  if (cutoffInMinutes === undefined) {
+    throw new Error('Group not found')
+  }
+  const currentDate = new Date()
+  const currentDateWithCutoffAdjusted = subMinutes(currentDate, cutoffInMinutes)
+  const raceIds = (
+    await db.query.racesTable.findMany({
+      where: lt(racesTable.qualifyingDate, currentDateWithCutoffAdjusted),
+      columns: {
+        id: true,
+      },
+    })
+  ).map((race) => race.id)
+  return raceIds
+}
+
 const getRaceIdToResultMap = cache(uncachedGetRaceIdToResultMap)
 const getOnlyRacesWithResults = cache(uncachedGetOnlyRacesWithResults)
+const getPredictionsOfRacesAfterCutoff = cache(
+  uncachedGetPredictionsOfRacesAfterCutoff,
+)
 
-export { getRaceIdToResultMap, getOnlyRacesWithResults }
+export {
+  getRaceIdToResultMap,
+  getOnlyRacesWithResults,
+  getPredictionsOfRacesAfterCutoff,
+}
