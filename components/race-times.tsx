@@ -20,7 +20,7 @@ export default function RaceTimes({
         <TimeTile
           title='Sprint tips due'
           date={tipsDue.sprint}
-          icon={Icon.Tipping}
+          icon={Icon.Sprint}
           isActive={isFuture(tipsDue.sprint)}
           className='snap-start'
         />
