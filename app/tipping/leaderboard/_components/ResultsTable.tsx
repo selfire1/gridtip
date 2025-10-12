@@ -24,6 +24,7 @@ import {
   ResultsMap,
   getPredictionsOfRacesAfterCutoff,
 } from '@/lib/utils/race-results'
+import { Card, CardContent } from '@/components/ui/card'
 
 type Leaderboard = {
   place: number

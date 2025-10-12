@@ -153,4 +153,8 @@
   .page-title {
     @apply scroll-m-20 text-2xl font-semibold text-balance tracking-tight sm:text-3xl xl:text-4xl;
   }
+
+  .title-2 {
+    @apply scroll-m-20 text-xl font-semibold text-balance tracking-tight sm:text-2xl xl:text-3xl;
+  }
 }

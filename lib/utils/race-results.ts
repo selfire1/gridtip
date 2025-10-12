@@ -1,4 +1,5 @@
-import { DriverOption } from '@/app/tipping/components/select-driver'
+import { DriverOptionProps } from '@/components/driver-option'
+import { CacheTag } from '@/constants/cache'
 import { db } from '@/db'
 import {
   groupsTable,
@@ -9,6 +10,7 @@ import {
 import { Database } from '@/db/types'
 import { subMinutes } from 'date-fns'
 import { and, eq, inArray, lt } from 'drizzle-orm'
+import { unstable_cache } from 'next/cache'
 import { cache } from 'react'
 
 async function uncachedGetOnlyRacesWithResults() {
@@ -17,6 +19,7 @@ async function uncachedGetOnlyRacesWithResults() {
     columns: {
       id: true,
       round: true,
+      raceName: true,
     },
   })
   return allRaces
@@ -31,9 +34,9 @@ export type ResultsMap = Map<
    */
   Database.Race['id'],
   {
-    qualifying: Map<Position, DriverOption>
-    sprint: Map<Position, DriverOption> | null
-    gp: Map<Position, DriverOption>
+    qualifying: Map<Position, DriverOptionProps>
+    sprint: Map<Position, DriverOptionProps> | null
+    gp: Map<Position, DriverOptionProps>
     allConstructorsPoints: Map<Database.Result['constructorId'], number>
     topConstructorsPoints: Map<Database.Result['constructorId'], number>
   }
@@ -54,9 +57,9 @@ async function uncachedGetRaceIdToResultMap(): Promise<ResultsMap | undefined> {
       resultsMap.set(result.raceId, {
         allConstructorsPoints: new Map<Database.Constructor['id'], number>(),
         topConstructorsPoints: new Map<Database.Constructor['id'], number>(),
-        qualifying: new Map<number, DriverOption>(),
-        gp: new Map<number, DriverOption>(),
-        sprint: hasSprintResult ? new Map<number, DriverOption>() : null,
+        qualifying: new Map<number, DriverOptionProps>(),
+        gp: new Map<number, DriverOptionProps>(),
+        sprint: hasSprintResult ? new Map<number, DriverOptionProps>() : null,
       })
     }
 
@@ -77,7 +80,7 @@ async function uncachedGetRaceIdToResultMap(): Promise<ResultsMap | undefined> {
 
     if (result.sprint && result.sprint > 0) {
       if (!raceMap?.sprint) {
-        raceMap.sprint = new Map<number, DriverOption>()
+        raceMap.sprint = new Map<number, DriverOptionProps>()
       }
 
       if (result.driver) {
@@ -110,24 +113,29 @@ async function uncachedGetRaceIdToResultMap(): Promise<ResultsMap | undefined> {
   return resultsMap
 
   async function getResults() {
-    return await db.query.resultsTable.findMany({
-      with: {
-        driver: {
-          columns: {
-            id: true,
-            constructorId: true,
-            givenName: true,
-            familyName: true,
+    const runQuery = async () =>
+      await db.query.resultsTable.findMany({
+        with: {
+          driver: {
+            columns: {
+              id: true,
+              constructorId: true,
+              givenName: true,
+              familyName: true,
+            },
+          },
+          constructor: {
+            columns: {
+              id: true,
+              name: true,
+            },
           },
         },
-        constructor: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-    })
+      })
+
+    return await unstable_cache(runQuery, [], {
+      tags: [CacheTag.Results],
+    })()
   }
 }
 

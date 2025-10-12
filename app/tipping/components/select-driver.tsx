@@ -18,15 +18,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { Database } from '@/db/types'
-import { ChevronsUpDown, LucideCheck } from 'lucide-react'
+import { ChevronsUpDown } from 'lucide-react'
 import { FormControl } from '@/components/ui/form'
-import DriverLine from '@/components/driver-option'
-
-export type DriverOption = Pick<
-  Database.Driver,
-  'constructorId' | 'givenName' | 'familyName' | 'id'
->
+import DriverOption, { DriverOptionProps } from '@/components/driver-option'
+// import DriverOption from '@/components/driver-option'
 
 export function SelectDriver({
   drivers,
@@ -34,15 +29,15 @@ export function SelectDriver({
   onSelect,
   disabled,
 }: {
-  drivers: DriverOption[]
+  drivers: DriverOptionProps[]
   value: { id: string } | undefined
-  onSelect: (driver: DriverOption | undefined) => void
+  onSelect: (driver: DriverOptionProps | undefined) => void
   disabled?: boolean
 }) {
   const [open, setOpen] = React.useState(false)
   const isDesktop = useMediaQuery('(min-width: 768px)')
 
-  const [selected, setSelected] = React.useState<DriverOption | undefined>(
+  const [selected, setSelected] = React.useState<DriverOptionProps | undefined>(
     drivers.find((d) => d.id === value?.id),
   )
   React.useEffect(() => {
@@ -102,7 +97,7 @@ export function SelectDriver({
       </Command>
     )
 
-    function getName(driver: DriverOption) {
+    function getName(driver: DriverOptionProps) {
       return [driver.givenName, driver.familyName].join(' ')
     }
   }
@@ -135,44 +130,6 @@ export function SelectDriver({
     )
     function EmptyState() {
       return <span>Select driver</span>
-    }
-  }
-}
-
-function DriverOption({
-  driver,
-  isSelected,
-}: {
-  driver: DriverOption
-  isSelected: boolean
-}) {
-  return (
-    <div
-      className='flex items-stretch w-full gap-2 before:w-1 before:rounded-full before:bg-(--team-color)'
-      style={getStyle()}
-    >
-      <p className={isSelected ? 'font-semibold' : ''}>
-        <span className='text-muted-foreground'>{driver.givenName}</span>
-        <span> </span>
-        <span>{driver.familyName}</span>
-      </p>
-      {isSelected && <LucideCheck className='ml-auto' />}
-    </div>
-  )
-
-  function getStyle() {
-    if (!driver.constructorId) {
-      return {}
-    }
-    return {
-      ['--team-color' as string]: getConstructorCssVariable(
-        driver.constructorId,
-      ),
-    }
-
-    function getConstructorCssVariable(teamId: string, opacity = 1) {
-      const variableName = `--clr-team-${teamId}`
-      return `rgba(var(${variableName}), ${opacity})`
     }
   }
 }
