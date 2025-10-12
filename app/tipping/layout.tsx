@@ -5,7 +5,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar'
-import Breadcrumbs from './components/breadcrumbs'
+import Breadcrumbs from '../../components/breadcrumbs'
 
 export default async function TippingLayout({
   children,

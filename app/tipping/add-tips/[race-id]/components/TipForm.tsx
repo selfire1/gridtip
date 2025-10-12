@@ -12,11 +12,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
-import {
-  DriverOption,
-  SelectDriver,
-} from '@/app/tipping/components/select-driver'
-import { SelectConstructor } from '@/app/tipping/components/select-constructor'
+import { SelectDriver } from '@/components/select-driver'
 import { useEffect, useState, useTransition } from 'react'
 import { submitChanges } from '../actions/submit-tip'
 import { Loader2Icon, LucideCheck } from 'lucide-react'
@@ -24,6 +20,8 @@ import { toast } from 'sonner'
 import { Database } from '@/db/types'
 import { submitTipSchema } from '../actions/schema'
 import { ConstructorProps } from '@/components/constructor'
+import { DriverOptionProps as DriverOption } from '@/components/driver-option'
+import { SelectConstructor } from '@/components/select-constructor'
 
 const formSchema = submitTipSchema.partial()
 export type Schema = z.infer<typeof formSchema>

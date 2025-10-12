@@ -16,9 +16,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { IconFromName } from '@/app/tipping/components/icon-from-name'
 import { useRouter } from 'next/navigation'
 import { GROUP_ID_COOKIE_NAME } from '@/constants'
+import { IconFromName } from '@/components/icon-from-name'
 
 type GroupData = Pick<Database.Group, 'id' | 'name' | 'iconName'>
 
