@@ -10,22 +10,22 @@ import {
 import { eq, inArray } from 'drizzle-orm'
 import { CacheTag } from '@/constants/cache'
 import PastRacesClient from './PastRacesClient'
-import { revalidateTag } from 'next/cache'
 
 export type RacesWithResults = Awaited<
   ReturnType<typeof getOnlyRacesWithResults>
 >
 
 export type RacePredictionMaps = ReturnType<typeof getResultsMaps>
+export type Constructors = Awaited<ReturnType<typeof getConstructors>>
 
 type RaceId = Database.Race['id']
+
 export default async function PastRacesServer({
   groupId,
 }: {
   groupId: string
 }) {
   const CACHE_TTL = 60 * 20 // 20 minutes
-
   const getCachedInfo = unstable_cache(
     async () =>
       await Promise.all([
@@ -36,6 +36,12 @@ export default async function PastRacesServer({
     { tags: [CacheTag.Results], revalidate: CACHE_TTL },
   )
 
+  const constructors = await unstable_cache(() => getConstructors(), [], {
+    tags: [CacheTag.Constructors],
+  })()
+
+  console.log('constructors', constructors) // FIXME: remove
+
   const [racesWithResults, allPredictionsWithUser] = await getCachedInfo()
   const results = await getRaceIdToResultMap()
 
@@ -44,7 +50,13 @@ export default async function PastRacesServer({
     results,
   })
 
-  return <PastRacesClient races={racesWithResults} maps={resultsPerRaceMap} />
+  return (
+    <PastRacesClient
+      races={racesWithResults}
+      maps={resultsPerRaceMap}
+      constructors={constructors}
+    />
+  )
 }
 
 type Race = Awaited<ReturnType<typeof getOnlyRacesWithResults>>[number]
@@ -55,6 +67,15 @@ type GetTipsInfo = {
   forRace: Race
   allPredictionsWithUser: AllPredictions
   results: Results
+}
+
+function getConstructors() {
+  return db.query.constructorsTable.findMany({
+    columns: {
+      id: true,
+      name: true,
+    },
+  })
 }
 
 function getResultsMaps(
