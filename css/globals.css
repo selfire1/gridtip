@@ -124,11 +124,12 @@
   .typography {
     max-width: 65ch;
     color: var(--color-foreground);
+    --spacing: 0.2rem;
   }
   .typography h1:not(.not-typography h1) {
     scroll-margin: calc(var(--spacing) * 20);
-    font-size: var(--text-4xl);
-    line-height: var(--text-4xl--line-height);
+    font-size: var(--text-3xl);
+    line-height: var(--text-3xl--line-height);
     font-weight: 800;
     letter-spacing: var(--tracking-tight);
   }
@@ -136,8 +137,8 @@
     scroll-margin: calc(var(--spacing) * 20);
     border-bottom: 1px solid var(--color-border);
     padding-bottom: calc(var(--spacing) * 2);
-    font-size: var(--text-3xl);
-    line-height: var(--text-3xl--line-height);
+    font-size: var(--text-2xl);
+    line-height: var(--text-2xl--line-height);
     font-weight: 600;
     letter-spacing: var(--tracking-tight);
     margin-top: calc(var(--spacing) * 12);
@@ -147,8 +148,8 @@
   }
   .typography h3:not(.not-typography h3) {
     scroll-margin: calc(var(--spacing) * 20);
-    font-size: var(--text-2xl);
-    line-height: var(--text-2xl--line-height);
+    font-size: var(--text-xl);
+    line-height: var(--text-xl--line-height);
     font-weight: 600;
     letter-spacing: var(--tracking-tight);
     margin-top: calc(var(--spacing) * 12);
@@ -158,8 +159,8 @@
   }
   .typography h4:not(.not-typography h4) {
     scroll-margin: calc(var(--spacing) * 20);
-    font-size: var(--text-xl);
-    line-height: var(--text-xl--line-height);
+    font-size: var(--text-lg);
+    line-height: var(--text-lg--line-height);
     font-weight: 600;
     letter-spacing: var(--tracking-tight);
     margin-top: calc(var(--spacing) * 12);
@@ -169,8 +170,8 @@
   }
   .typography h5:not(.not-typography h5) {
     scroll-margin: calc(var(--spacing) * 20);
-    font-size: var(--text-lg);
-    line-height: var(--text-lg--line-height);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
     font-weight: 600;
     letter-spacing: var(--tracking-tight);
     margin-top: calc(var(--spacing) * 12);
@@ -178,18 +179,15 @@
   .typography h5:not(.not-typography h5):first-child {
     margin-top: 0;
   }
-  .typography h6:not(.not-typography h6) {
-    scroll-margin: calc(var(--spacing) * 20);
-    font-size: var(--text-base);
-    line-height: var(--text-base--line-height);
-    font-weight: 600;
-    letter-spacing: var(--tracking-tight);
-    margin-top: calc(var(--spacing) * 12);
-  }
   .typography h6:not(.not-typography h6):first-child {
     margin-top: 0;
   }
-  .typography h1:not(.not-typography h1) + p, .typography h2:not(.not-typography h2) + p, .typography h3:not(.not-typography h3) + p, .typography h4:not(.not-typography h4) + p, .typography h5:not(.not-typography h5) + p, .typography h6:not(.not-typography h6) + p {
+  .typography h1:not(.not-typography h1) + p,
+  .typography h2:not(.not-typography h2) + p,
+  .typography h3:not(.not-typography h3) + p,
+  .typography h4:not(.not-typography h4) + p,
+  .typography h5:not(.not-typography h5) + p,
+  .typography h6:not(.not-typography h6) + p {
     margin-top: 0;
   }
   .typography p:not(.not-typography p) {
@@ -233,10 +231,10 @@
     text-align: left;
     font-weight: 700;
   }
-  .typography table:not(.not-typography table) th[align="center"] {
+  .typography table:not(.not-typography table) th[align='center'] {
     text-align: center;
   }
-  .typography table:not(.not-typography table) th[align="right"] {
+  .typography table:not(.not-typography table) th[align='right'] {
     text-align: right;
   }
   .typography table:not(.not-typography table) tbody tr {
@@ -252,10 +250,10 @@
     padding: calc(var(--spacing) * 2) calc(var(--spacing) * 4);
     text-align: left;
   }
-  .typography table:not(.not-typography table) td[align="center"] {
+  .typography table:not(.not-typography table) td[align='center'] {
     text-align: center;
   }
-  .typography table:not(.not-typography table) td[align="right"] {
+  .typography table:not(.not-typography table) td[align='right'] {
     text-align: right;
   }
   .typography ul:not(.not-typography ul) {
@@ -324,7 +322,9 @@
     line-height: var(--text-sm--line-height);
     color: var(--color-muted-foreground);
   }
-  .typography img:not(.not-typography img), .typography picture:not(.not-typography picture), .typography video:not(.not-typography video) {
+  .typography img:not(.not-typography img),
+  .typography picture:not(.not-typography picture),
+  .typography video:not(.not-typography video) {
     margin-top: calc(var(--spacing) * 6);
     margin-bottom: calc(var(--spacing) * 6);
   }
@@ -376,10 +376,10 @@
     line-height: 1;
   }
 
-@media (min-width: 1024px) {
-  .typography h1:not(.not-typography h1) {
-    font-size: var(--text-5xl);
-    line-height: var(--text-5xl--line-height);
+  @media (min-width: 1024px) {
+    .typography h1:not(.not-typography h1) {
+      font-size: var(--text-5xl);
+      line-height: var(--text-5xl--line-height);
     }
   }
 }
@@ -419,3 +419,4 @@
     @apply scroll-m-20 text-xl font-semibold text-balance tracking-tight sm:text-2xl xl:text-3xl;
   }
 }
+
