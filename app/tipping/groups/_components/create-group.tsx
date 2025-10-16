@@ -16,25 +16,20 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import {
-  Field,
-  FieldDescription,
-  FieldLabel,
-  FieldSet,
-} from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
+import { FieldErrors } from '@/components/ui/field'
 import { LucideArrowUpRight } from 'lucide-react'
-import {
-  IconFromName,
-  IconName,
-  SUPPORTED_ICON_NAMES,
-} from '@/components/icon-from-name'
-import { useState } from 'react'
-import { cn } from '@/lib/utils'
+import { IconName, SUPPORTED_ICON_NAMES } from '@/components/icon-from-name'
+import { useEffect, useRef, useState, useTransition } from 'react'
+import z from 'zod'
+import { Spinner } from '@/components/ui/spinner'
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
+import { schema } from '@/lib/schemas/create-group'
+import { createGroup } from '@/actions/create-group'
+import GroupFields from '@/components/group-fields'
 
 export default function CreateGroup({ className }: { className?: string }) {
   return (
@@ -54,80 +49,107 @@ export default function CreateGroup({ className }: { className?: string }) {
 }
 
 function CreateGroupDialog() {
-  return (
-    <Dialog>
-      <form>
-        <DialogTrigger asChild>
-          <Button variant='outline'>
-            Create new group
-            <LucideArrowUpRight />
-          </Button>
-        </DialogTrigger>
-        <DialogContent className='overflow-y-auto max-h-full'>
-          <DialogHeader>
-            <DialogTitle>Create group</DialogTitle>
-            <DialogDescription>
-              Start a new group to invite people to predict with you.
-            </DialogDescription>
-          </DialogHeader>
-          <GroupFields />
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant='outline'>Cancel</Button>
-            </DialogClose>
-            <Button type='submit'>Create</Button>
-          </DialogFooter>
-        </DialogContent>
-      </form>
-    </Dialog>
-  )
-}
+  const [open, setOpen] = useState(false)
 
-function GroupFields() {
+  const [name, setName] = useState<string>('')
+
   const [selectedIcon, setSelectedIcon] = useState<IconName>(
     SUPPORTED_ICON_NAMES[0],
   )
 
+  const [formErrors, setFormErrors] = useState<{
+    name: FieldErrors
+    icon: FieldErrors
+  }>()
+
+  const formRef = useRef<HTMLFormElement>(null)
+
+  const [isPending, startTransition] = useTransition()
+
+  useEffect(() => {
+    if (!open) {
+      setTimeout(() => {
+        setName('')
+        setSelectedIcon(SUPPORTED_ICON_NAMES[0])
+        setFormErrors(undefined)
+      }, 400)
+    }
+  }, [open])
+
+  const router = useRouter()
+
   return (
-    <FieldSet>
-      <Field>
-        <FieldLabel htmlFor='name'>Name</FieldLabel>
-        <Input id='name' autoComplete='off' />
-        <FieldDescription>
-          The name is visible to people you invite.
-        </FieldDescription>
-      </Field>
-      <Field>
-        <FieldLabel>Icon</FieldLabel>
-        <div
-          className='flex flex-wrap gap-2 max-h-48 overflow-y-auto'
-          style={{ ['--card-width' as string]: '3rem' }}
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant='outline'>
+          Create new group
+          <LucideArrowUpRight />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className='overflow-y-auto max-h-full'>
+        <DialogHeader>
+          <DialogTitle>Create group</DialogTitle>
+          <DialogDescription>
+            Start a new group to invite people to predict with you.
+          </DialogDescription>
+        </DialogHeader>
+        <form
+          ref={formRef}
+          onSubmit={(e) => {
+            console.log('submitted')
+            e.preventDefault()
+            handleSubmit()
+          }}
         >
-          {SUPPORTED_ICON_NAMES.map((icon) => (
-            <button
-              type='button'
-              onClick={(e) => {
-                e.preventDefault()
-                setSelectedIcon(icon)
-              }}
-              key={icon}
-              className={cn(
-                'p-2 border border-transparent hover:bg-secondary rounded-lg transition-all',
-                icon === selectedIcon && 'border-default bg-background',
-              )}
-            >
-              <IconFromName
-                iconName={icon}
-                className={cn(
-                  'p-0.5 transition-transform size-6',
-                  icon === selectedIcon && 'scale-120',
-                )}
-              />
-            </button>
-          ))}
-        </div>
-        <FieldDescription>You can change the icon later.</FieldDescription>
-      </Field>
-    </FieldSet>
+          <GroupFields
+            name={name}
+            setName={setName}
+            selectedIcon={selectedIcon}
+            setIcon={setSelectedIcon}
+            errors={formErrors}
+          />
+        </form>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant='outline'>Cancel</Button>
+          </DialogClose>
+          <Button
+            // isPending
+            disabled={isPending}
+            type='submit'
+            onClick={() => formRef.current?.requestSubmit()}
+          >
+            {isPending ? <Spinner /> : null}
+            Create
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
+
+  function handleSubmit() {
+    setFormErrors(undefined)
+    const result = schema.safeParse({ name, icon: selectedIcon })
+    if (!result.success) {
+      const errors = z.treeifyError(result.error)
+      setFormErrors({
+        name: errors.properties?.name?.errors?.map((e) => ({ message: e })),
+        icon: errors.properties?.icon?.errors?.map((e) => ({ message: e })),
+      })
+      return
+    }
+
+    startTransition(async () => {
+      const response = await createGroup({ name, icon: selectedIcon })
+      if (!response.ok) {
+        toast.error(response.message, {
+          description: response.error,
+        })
+        return
+      }
+      setOpen(false)
+      toast.success('Group created')
+      router.refresh()
+    })
+  }
 }

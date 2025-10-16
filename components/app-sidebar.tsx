@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/sidebar'
 import { verifySession } from '@/lib/dal'
 import { getCurrentGroup, getGroupsForUser } from '@/lib/utils/groups'
-import { getImageHref } from '@/lib/utils/user'
 
 export async function AppSidebar({
   ...props

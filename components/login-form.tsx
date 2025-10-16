@@ -16,6 +16,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Loader2Icon } from 'lucide-react'
 import { QueryOrigin } from '@/constants'
+import { Spinner } from './ui/spinner'
 
 export function LoginForm({
   className,
@@ -58,11 +59,7 @@ export function LoginForm({
                 </p>
               </div>
               <Button type='submit' className='w-full' disabled={isLoading}>
-                {isLoading ? (
-                  <Loader2Icon className='animate-spin' />
-                ) : (
-                  <GIcon />
-                )}
+                {isLoading ? <Spinner /> : <GIcon />}
                 <span>Continue with Google</span>
               </Button>
             </div>
