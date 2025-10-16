@@ -6,6 +6,8 @@ import { db } from '@/db'
 import { groupMembersTable, groupsTable } from '@/db/schema/schema'
 import { Database } from '@/db/types'
 import { schema } from '@/lib/schemas/create-group'
+import { cookies } from 'next/headers'
+import { GROUP_ID_COOKIE_MAX_AGE, GROUP_ID_COOKIE_NAME } from '@/constants'
 
 export async function createGroup(data: z.infer<typeof schema>) {
   const { user } = await verifySession()
@@ -37,6 +39,13 @@ export async function createGroup(data: z.infer<typeof schema>) {
       message: 'Could not create group',
     }
   }
+
+  const cookieStore = await cookies()
+  cookieStore.set(GROUP_ID_COOKIE_NAME, groupId, {
+    maxAge: GROUP_ID_COOKIE_MAX_AGE,
+    sameSite: 'lax',
+    path: '/',
+  })
 
   try {
     await db.insert(groupMembersTable).values({
