@@ -56,3 +56,4 @@ export enum QueryOrigin {
 }
 
 export const GROUP_ID_COOKIE_NAME = 'grid-tip-group-id' as const
+export const GROUP_ID_COOKIE_MAX_AGE = 60 * 60 * 24 * 365

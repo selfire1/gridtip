@@ -17,7 +17,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import { useRouter } from 'next/navigation'
-import { GROUP_ID_COOKIE_NAME } from '@/constants'
+import { GROUP_ID_COOKIE_MAX_AGE, GROUP_ID_COOKIE_NAME } from '@/constants'
 import { IconFromName } from '@/components/icon-from-name'
 
 type GroupData = Pick<Database.Group, 'id' | 'name' | 'iconName'>
@@ -132,14 +132,12 @@ export function GroupSwitcher({
       return
     }
     setGroupToState(group)
-    const COOKIE_MAX_AGE = 60 * 60 * 24 * 365
 
-    console.log('set group id', group?.id)
     if (!group) {
-      document.cookie = `${GROUP_ID_COOKIE_NAME}=''; max-age=${COOKIE_MAX_AGE}; samesite=lax; path=/;`
+      document.cookie = `${GROUP_ID_COOKIE_NAME}=''; max-age=${GROUP_ID_COOKIE_MAX_AGE}; samesite=lax; path=/;`
       return
     }
-    document.cookie = `${GROUP_ID_COOKIE_NAME}=${group.id}; max-age=${COOKIE_MAX_AGE}; samesite=lax; path=/;`
+    document.cookie = `${GROUP_ID_COOKIE_NAME}=${group.id}; max-age=${GROUP_ID_COOKIE_MAX_AGE}; samesite=lax; path=/;`
 
     startTransition(() => {
       router.refresh()
