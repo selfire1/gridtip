@@ -147,8 +147,27 @@ function CreateGroupDialog() {
         })
         return
       }
+      if (!response.group) {
+        // this should be caught by earlier conditions
+        return
+      }
       setOpen(false)
-      toast.success('Group created')
+      toast.success(
+        <p>
+          Created <span className='font-semibold'>{response.group.name}</span>
+        </p>,
+
+        {
+          action: {
+            label: 'Copy invite link',
+            onClick: () => {
+              navigator.clipboard.writeText(
+                `${window.location.origin}/join/${response.group.id}`,
+              )
+            },
+          },
+        },
+      )
       router.refresh()
     })
   }

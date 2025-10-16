@@ -35,7 +35,7 @@ export default async function GroupsPage() {
   )
 
   function JoinGroup({ className }: { className?: string }) {
-    return <pre>todo</pre>
+    return <pre>TODO: join group</pre>
   }
 
   function YourGroups({ className }: { className?: string }) {

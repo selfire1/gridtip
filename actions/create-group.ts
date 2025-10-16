@@ -21,9 +21,9 @@ export async function createGroup(data: z.infer<typeof schema>) {
     }
   }
 
-  let groupId = undefined as Database.Group['id'] | undefined
+  let group = undefined as Database.Group | undefined
   try {
-    const [group] = await db
+    const [createdGroup] = await db
       .insert(groupsTable)
       .values({
         name: data.name,
@@ -31,7 +31,7 @@ export async function createGroup(data: z.infer<typeof schema>) {
         createdByUser: user.id,
       })
       .returning()
-    groupId = group.id
+    group = createdGroup
   } catch (error) {
     return {
       ok: false,
@@ -41,7 +41,7 @@ export async function createGroup(data: z.infer<typeof schema>) {
   }
 
   const cookieStore = await cookies()
-  cookieStore.set(GROUP_ID_COOKIE_NAME, groupId, {
+  cookieStore.set(GROUP_ID_COOKIE_NAME, group.id, {
     maxAge: GROUP_ID_COOKIE_MAX_AGE,
     sameSite: 'lax',
     path: '/',
@@ -49,7 +49,7 @@ export async function createGroup(data: z.infer<typeof schema>) {
 
   try {
     await db.insert(groupMembersTable).values({
-      groupId: groupId,
+      groupId: group.id,
       userId: user.id,
     })
   } catch (error) {
@@ -60,8 +60,11 @@ export async function createGroup(data: z.infer<typeof schema>) {
     }
   }
 
-  console.log(data)
   return {
     ok: true,
+    group: {
+      name: group.name,
+      id: group.id,
+    },
   }
 }
