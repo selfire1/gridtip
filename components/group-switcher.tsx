@@ -32,6 +32,9 @@ export function GroupSwitcher({
   const { isMobile } = useSidebar()
   const router = useRouter()
 
+  const [isPending, startTransition] = React.useTransition()
+  const [selectedGroup, setGroupToState] = React.useState(currentlySelected)
+
   // set initial cookie
   React.useEffect(() => {
     if (selectedGroup) {
@@ -40,9 +43,6 @@ export function GroupSwitcher({
     setGroupAndCookie(groups[0])
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  const [isPending, startTransition] = React.useTransition()
-  const [selectedGroup, setGroupToState] = React.useState(currentlySelected)
 
   // check if there are other groups
   const [hasOtherGroups, setHasOtherGroups] = React.useState(false)
