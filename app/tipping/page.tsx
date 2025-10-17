@@ -69,7 +69,7 @@ export default async function DashboardPage() {
         {nextRace && (
           <>
             <CardTipNext race={nextRace} groupId={groupId} />
-            <CardTipStatus groupId={groupId} raceId={nextRace.id} />
+            <CardTipStatus groupId={groupId} race={nextRace} />
           </>
         )}
       </>
@@ -78,17 +78,19 @@ export default async function DashboardPage() {
 
   async function CardTipStatus({
     groupId,
-    raceId,
+    race,
   }: {
     groupId: Database.Group['id']
-    raceId: Database.Race['id']
+    race: Pick<Database.Race, 'id' | 'raceName'>
   }) {
     const { tipped, notTipped } = await getTippingStatus()
     return (
       <Card>
         <CardHeader>
           <CardTitle>Tipping status</CardTitle>
-          <CardDescription>Who has tipped already?</CardDescription>
+          <CardDescription>
+            Who has tipped the {race.raceName} already?
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className='grid grid-cols-2 gap-4'>
