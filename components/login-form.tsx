@@ -37,6 +37,7 @@ export function LoginForm({
         toast.success('Account deleted', {
           description: 'We’re sorry to see you go 😥',
           icon: <LucideTrash size={16} />,
+          duration: 4_000,
         })
         break
       }
