@@ -57,24 +57,44 @@ export function getClosedFields(
   const tipsDue = getTipsDue(race, cutoff)
 
   const disabledFields = new Set<RacePredictionField>()
-  if (isSprint && tipsDue.sprint && isPast(tipsDue.sprint)) {
+  if (isSprint && tipsDue.sprint && isPastForBaseDate(tipsDue.sprint)) {
     disabledFields.add('sprintP1')
   }
-  if (tipsDue.grandPrix && isPast(tipsDue.grandPrix)) {
+  if (tipsDue.grandPrix && isPastForBaseDate(tipsDue.grandPrix)) {
     RACE_PREDICTION_FIELDS.forEach((field) => {
       disabledFields.add(field)
     })
   }
   return disabledFields
+
+  function isPastForBaseDate(date: Date) {
+    return isBefore(date, baseDate)
+  }
 }
 
-export function isRaceAbleToBeTipped(race: Database.Race, cutoff: number) {
-  const closedFields = getClosedFields(race, cutoff)
-  const positionsToTip = getIsSprint(race)
-    ? RACE_PREDICTION_FIELDS
-    : RACE_PREDICTION_FIELDS.filter((pos) => pos === 'sprintP1') // TODO: move this into a central place
+export function isRaceAbleToBeTipped(
+  race: Database.Race,
+  cutoff: number,
+  baseDate = new Date(),
+) {
+  const closedFields = getClosedFields(race, cutoff, baseDate)
+  const positionsToTip = getPositionsStillToTip()
+  const areAllPositionsClosed = positionsToTip.every(
+    (position) => !isPositionClosed(position),
+  )
+  return areAllPositionsClosed
 
-  return positionsToTip.every((position) => !closedFields.has(position))
+  function getPositionsStillToTip() {
+    if (getIsSprint(race)) {
+      return RACE_PREDICTION_FIELDS.filter((pos) => !isPositionClosed(pos))
+    }
+    return RACE_PREDICTION_FIELDS.filter((pos) => pos === 'sprintP1') // on a non-sprint race, don't count sprint position
+      .filter((pos) => !isPositionClosed(pos))
+  }
+
+  function isPositionClosed(position: RacePredictionField) {
+    return closedFields.has(position)
+  }
 }
 
 type Reference = typeof CUTOFF_REFERENCE_KEY
