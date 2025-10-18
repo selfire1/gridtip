@@ -50,7 +50,7 @@ Examples of what that could look like:
 
 ### Championships
 
-You can score your points by correctly predicting the Constructors’ and Drivers’ Championships.
+You can score extra points by correctly predicting the Constructors’ and Drivers’ Championships.
 
 - Drivers’ Championship: 15 points  
 - Constructors’ Championship: 10 points
