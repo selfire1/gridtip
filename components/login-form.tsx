@@ -87,7 +87,7 @@ export function LoginForm({
               placeholder='blur'
               loading='eager'
               alt='Long exposure lights of race cars at night at the Spa-Francorchamps track'
-              className='absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] grayscale'
+              className='absolute inset-0 h-full w-full object-cover dark:brightness-[0.2]'
             />
           </div>
         </CardContent>
