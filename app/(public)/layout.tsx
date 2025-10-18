@@ -8,7 +8,7 @@ export default function DefaultLayout({
 }) {
   return (
     <div>
-      <header className='sticky top-0 z-50 bg-background/80 backdrop-blur-lg'>
+      <header className='sticky top-0 z-50 bg-gradient-to-b from-background to-transparent'>
         <AppHeader />
       </header>
       <main className='min-h-screen'>{children}</main>
