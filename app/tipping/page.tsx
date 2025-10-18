@@ -25,6 +25,7 @@ import {
   subMinutes,
   formatDistanceToNowStrict,
   differenceInHours,
+  isFuture,
 } from 'date-fns'
 import { and, eq, inArray } from 'drizzle-orm'
 import { LucideArrowRight, LucideClock, LucideIcon } from 'lucide-react'
@@ -219,7 +220,7 @@ export default async function DashboardPage() {
           title={
             <span className='flex flex-col gap-2'>
               <div className='flex items-center gap-2'>
-                {isSprint && tipsDue.sprint && (
+                {isSprint && tipsDue.sprint && isFuture(tipsDue.sprint) && (
                   <Badge variant={getBadgeVariant(tipsDue.sprint)}>
                     Sprint tips due in{' '}
                     {formatDistanceToNowStrict(tipsDue.sprint)}
