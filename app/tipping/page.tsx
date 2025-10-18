@@ -162,7 +162,7 @@ export default async function DashboardPage() {
 
       const peopleWhoTippedThisRace = await db.query.predictionsTable.findMany({
         where: (prediction, { eq, and }) =>
-          and(eq(prediction.groupId, groupId), eq(prediction.raceId, raceId)),
+          and(eq(prediction.groupId, groupId), eq(prediction.raceId, race.id)),
         columns: {
           id: true,
         },
