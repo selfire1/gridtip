@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import { marked } from 'marked'
+import 'server-only'
 
 export const metadata: Metadata = {
   title: 'Rules',
