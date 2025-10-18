@@ -35,7 +35,19 @@ export default async function GroupsPage() {
   )
 
   function JoinGroup({ className }: { className?: string }) {
-    return <pre>TODO: join group</pre>
+    return (
+      <Card {...{ className }}>
+        <CardHeader>
+          <CardTitle>Join group</CardTitle>
+          <CardDescription>
+            You can join a group with an invite link.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className='text-muted-foreground'>
+          Ask a member of an existing group to send you a link to join.
+        </CardContent>
+      </Card>
+    )
   }
 
   function YourGroups({ className }: { className?: string }) {
