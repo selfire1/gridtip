@@ -5,7 +5,7 @@ import {
   RacePredictionField,
 } from '@/constants'
 import { Database } from '@/db/types'
-import { isAfter, isPast, subMinutes } from 'date-fns'
+import { isAfter, isBefore, subMinutes } from 'date-fns'
 
 /**
  * Is this position part of the tips for a race
@@ -51,6 +51,7 @@ export function getTipsDue(race: Database.Race, cutoff: number) {
 export function getClosedFields(
   race: Database.Race,
   cutoff: number,
+  baseDate = new Date(),
 ): Set<RacePredictionField> {
   const isSprint = getIsSprint(race)
   const tipsDue = getTipsDue(race, cutoff)
