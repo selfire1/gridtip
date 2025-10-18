@@ -27,9 +27,9 @@ import z from 'zod'
 import { Spinner } from '@/components/ui/spinner'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { schema } from '@/lib/schemas/create-group'
+import { schema, validateSchema } from '@/lib/schemas/create-group'
 import { createGroup } from '@/actions/create-group'
-import GroupFields from '@/components/group-fields'
+import GroupFields, { GroupFieldsProps } from '@/components/group-fields'
 
 export default function CreateGroup({ className }: { className?: string }) {
   return (
@@ -52,15 +52,12 @@ function CreateGroupDialog() {
   const [open, setOpen] = useState(false)
 
   const [name, setName] = useState<string>('')
-
+  const [cutoff, setCutoff] = useState<number>(0)
   const [selectedIcon, setSelectedIcon] = useState<IconName>(
     SUPPORTED_ICON_NAMES[0],
   )
 
-  const [formErrors, setFormErrors] = useState<{
-    name: FieldErrors
-    icon: FieldErrors
-  }>()
+  const [formErrors, setFormErrors] = useState<GroupFieldsProps['errors']>()
 
   const formRef = useRef<HTMLFormElement>(null)
 
@@ -102,10 +99,23 @@ function CreateGroupDialog() {
           }}
         >
           <GroupFields
-            name={name}
-            setName={setName}
-            selectedIcon={selectedIcon}
-            setIcon={setSelectedIcon}
+            name={{
+              name: 'name',
+              value: name,
+              setValue: setName,
+              description: 'The name is visible to people you invite.',
+            }}
+            icon={{
+              name: 'icon',
+              value: selectedIcon,
+              setValue: setSelectedIcon,
+              description: 'You can change the icon later.',
+            }}
+            cutoff={{
+              name: 'cutoff',
+              value: cutoff,
+              setValue: setCutoff,
+            }}
             errors={formErrors}
           />
         </form>
@@ -129,18 +139,16 @@ function CreateGroupDialog() {
 
   function handleSubmit() {
     setFormErrors(undefined)
-    const result = schema.safeParse({ name, icon: selectedIcon })
-    if (!result.success) {
-      const errors = z.treeifyError(result.error)
-      setFormErrors({
-        name: errors.properties?.name?.errors?.map((e) => ({ message: e })),
-        icon: errors.properties?.icon?.errors?.map((e) => ({ message: e })),
-      })
+
+    const values = { name, icon: selectedIcon, cutoff }
+
+    const isOk = validateSchema(values, setFormErrors)
+    if (!isOk) {
       return
     }
 
     startTransition(async () => {
-      const response = await createGroup({ name, icon: selectedIcon })
+      const response = await createGroup(values)
       if (!response.ok) {
         toast.error(response.message, {
           description: response.error,

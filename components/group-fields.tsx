@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import { IconFromName, IconName, SUPPORTED_ICON_NAMES } from './icon-from-name'
+import type { Schema } from '@/lib/schemas/create-group'
 import {
   Field,
   FieldDescription,
@@ -12,19 +13,26 @@ import {
 } from './ui/field'
 import { Input } from './ui/input'
 
+type FieldConfig = {
+  name: string
+  value: string | number
+  setValue: (value: any) => void
+  description?: string
+}
+
+export type GroupFieldsProps = {
+  name: FieldConfig
+  icon: FieldConfig
+  cutoff: FieldConfig
+  errors?: Record<keyof Schema, FieldErrors>
+}
+
 export default function GroupFields({
   name,
-  selectedIcon,
-  setName,
-  setIcon,
+  icon,
+  cutoff,
   errors,
-}: {
-  name: string
-  selectedIcon: IconName
-  setName: (name: string) => void
-  setIcon: (icon: IconName) => void
-  errors?: { name: FieldErrors; icon: FieldErrors }
-}) {
+}: GroupFieldsProps) {
   return (
     <FieldSet>
       <Field data-invalid={errors?.name}>
@@ -32,13 +40,26 @@ export default function GroupFields({
         <Input
           id='name'
           autoComplete='off'
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={name.value}
+          onChange={(e) => name.setValue(e.target.value)}
         />
-        <FieldDescription>
-          The name is visible to people you invite.
-        </FieldDescription>
+        <FieldDescription>{name.description}</FieldDescription>
         {errors?.name && <FieldError errors={errors.name} />}
+      </Field>
+      <Field data-invalid={errors?.cutoff}>
+        <FieldLabel htmlFor='cutoff'>Tipping cutoff</FieldLabel>
+        <FieldDescription>
+          How many minutes before qualifying for the race starts should tipping
+          be closed?
+        </FieldDescription>
+        <Input
+          id='cutoff'
+          type='number'
+          value={cutoff.value}
+          onChange={(e) => cutoff.setValue(e.target.value)}
+        />
+        <FieldDescription>{cutoff.description}</FieldDescription>
+        {errors?.cutoff && <FieldError errors={errors.cutoff} />}
       </Field>
       <Field data-invalid={errors?.icon}>
         <FieldLabel>Icon</FieldLabel>
@@ -46,30 +67,30 @@ export default function GroupFields({
           className='flex flex-wrap gap-2 max-h-48 overflow-y-auto'
           style={{ ['--card-width' as string]: '3rem' }}
         >
-          {SUPPORTED_ICON_NAMES.map((icon) => (
+          {SUPPORTED_ICON_NAMES.map((iconOption) => (
             <button
               type='button'
               onClick={(e) => {
                 e.preventDefault()
-                setIcon(icon)
+                icon.setValue(iconOption)
               }}
-              key={icon}
+              key={iconOption}
               className={cn(
                 'p-2 border border-transparent hover:bg-secondary rounded-lg transition-all',
-                icon === selectedIcon && 'bg-secondary',
+                iconOption === icon.value && 'bg-secondary',
               )}
             >
               <IconFromName
-                iconName={icon}
+                iconName={iconOption}
                 className={cn(
                   'p-0.5 transition-transform size-6',
-                  icon === selectedIcon && 'scale-120',
+                  iconOption === icon.value && 'scale-120',
                 )}
               />
             </button>
           ))}
         </div>
-        <FieldDescription>You can change the icon later.</FieldDescription>
+        <FieldDescription>{icon.description}</FieldDescription>
       </Field>
     </FieldSet>
   )

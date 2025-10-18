@@ -5,11 +5,11 @@ import z from 'zod'
 import { db } from '@/db'
 import { groupMembersTable, groupsTable } from '@/db/schema/schema'
 import { Database } from '@/db/types'
-import { schema } from '@/lib/schemas/create-group'
+import { Schema, schema } from '@/lib/schemas/create-group'
 import { cookies } from 'next/headers'
 import { GROUP_ID_COOKIE_MAX_AGE, GROUP_ID_COOKIE_NAME } from '@/constants'
 
-export async function createGroup(data: z.infer<typeof schema>) {
+export async function createGroup(data: Schema) {
   const { user } = await verifySession()
 
   const result = schema.safeParse(data)
@@ -29,6 +29,7 @@ export async function createGroup(data: z.infer<typeof schema>) {
         name: data.name,
         iconName: data.icon,
         createdByUser: user.id,
+        cutoffInMinutes: data.cutoff,
       })
       .returning()
     group = createdGroup

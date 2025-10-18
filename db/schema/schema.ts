@@ -255,6 +255,8 @@ export const resultsRelations = relations(resultsTable, ({ many, one }) => ({
 
 export type Group = typeof groupsTable.$inferSelect
 
+export type GroupMember = typeof groupMembersTable.$inferSelect
+
 export type Race = typeof racesTable.$inferSelect
 export type InsertRace = typeof racesTable.$inferInsert
 

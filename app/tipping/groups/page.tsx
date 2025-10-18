@@ -17,14 +17,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { verifySession } from '@/lib/dal'
-import { getCurrentGroupId, getGroupsForUser } from '@/lib/utils/groups'
+import { getMemberStatus, verifySession } from '@/lib/dal'
 import CopyLink from './_components/copy-link'
 import CreateGroup from './_components/create-group'
+import { db } from '@/db'
+import { eq } from 'drizzle-orm'
+import { groupMembersTable } from '@/db/schema/schema'
+import { Badge } from '@/components/ui/badge'
+import { Suspense } from 'react'
+import EditGroup from './_components/edit-group'
+import { MemberStatus } from '@/types'
 
 export default async function GroupsPage() {
   const { userId } = await verifySession()
-  const groupsMemberships = await getGroupsForUser(userId)
 
   return (
     <div className='grid sm:grid-cols-2 gap-8'>
@@ -43,14 +48,16 @@ export default async function GroupsPage() {
             You can join a group with an invite link.
           </CardDescription>
         </CardHeader>
-        <CardContent className='text-muted-foreground'>
+        <CardContent className='text-muted-foreground text-pretty max-w-prose'>
           Ask a member of an existing group to send you a link to join.
         </CardContent>
       </Card>
     )
   }
 
-  function YourGroups({ className }: { className?: string }) {
+  async function YourGroups({ className }: { className?: string }) {
+    const groupsMemberships = await getGroupsForUser(userId)
+
     return (
       <Card {...{ className }}>
         <CardHeader>
@@ -65,7 +72,7 @@ export default async function GroupsPage() {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Link</TableHead>
-                <TableHead>Joined</TableHead>
+                <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -84,9 +91,15 @@ export default async function GroupsPage() {
                     <TableCell>
                       <CopyLink group={membership.group} />
                     </TableCell>
-                    <TableCell>
-                      {membership.joinedAt.toLocaleDateString()}
-                    </TableCell>
+                    <Suspense
+                      fallback={
+                        <TableCell>
+                          <Badge variant='ghost'>Loading…</Badge>
+                        </TableCell>
+                      }
+                    >
+                      <MembershipStatusCells info={membership} />
+                    </Suspense>
                   </TableRow>
                 )
               })}
@@ -95,5 +108,50 @@ export default async function GroupsPage() {
         </CardContent>
       </Card>
     )
+
+    async function MembershipStatusCells({
+      info: membership,
+    }: {
+      info: Awaited<ReturnType<typeof getGroupsForUser>>[number]
+    }) {
+      const status = await getMemberStatus(membership.group, groupsMemberships)
+      if (!status) {
+        return
+      }
+      const statusToVariant = {
+        [MemberStatus.Admin]: 'default',
+        [MemberStatus.Member]: 'secondary',
+      } as const
+      return (
+        <>
+          <TableCell>
+            <Badge variant={statusToVariant?.[status]}>{status}</Badge>
+          </TableCell>
+          <TableCell>
+            <EditGroup group={membership.group} status={status} />
+          </TableCell>
+        </>
+      )
+    }
+    async function getGroupsForUser(userId: string) {
+      return await db.query.groupMembersTable.findMany({
+        columns: {
+          joinedAt: true,
+          userId: true,
+        },
+        where: eq(groupMembersTable.userId, userId),
+        with: {
+          group: {
+            columns: {
+              id: true,
+              createdByUser: true,
+              name: true,
+              iconName: true,
+              cutoffInMinutes: true,
+            },
+          },
+        },
+      })
+    }
   }
 }
