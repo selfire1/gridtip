@@ -1,0 +1,2 @@
+ALTER TABLE `groups` RENAME COLUMN "created_by_user" TO "admin_user";--> statement-breakpoint
+ALTER TABLE `groups` ALTER COLUMN "admin_user" TO "admin_user" text NOT NULL REFERENCES user(id) ON DELETE no action ON UPDATE no action;

@@ -9,14 +9,14 @@ import { createId } from '@paralleldrive/cuid2'
 import { user } from './auth-schema'
 import { PREDICTION_FIELDS, DEFAULT_CUTOFF_MINS } from '@/constants'
 import { relations, sql } from 'drizzle-orm'
-import { SUPPORTED_ICON_NAMES } from '@/components/icon-from-name'
+import { SUPPORTED_ICON_NAMES } from '@/constants/icon-names'
 
 export const groupsTable = sqliteTable('groups', {
   id: text().primaryKey().$defaultFn(createId),
   name: text().notNull(),
-  createdByUser: text('created_by_user')
+  adminUser: text()
     .notNull()
-    .references(() => user.id, { onDelete: 'set null' }),
+    .references(() => user.id, { onDelete: 'no action' }),
   createdAt: integer('created_at', { mode: 'timestamp' })
     .default(sql`(unixepoch())`)
     .notNull(),
@@ -29,8 +29,8 @@ export const groupsTable = sqliteTable('groups', {
 })
 
 export const groupRelations = relations(groupsTable, ({ many, one }) => ({
-  createdByUser: one(user, {
-    fields: [groupsTable.createdByUser],
+  adminUser: one(user, {
+    fields: [groupsTable.adminUser],
     references: [user.id],
   }),
 }))

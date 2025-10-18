@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { IconFromName, IconName, SUPPORTED_ICON_NAMES } from './icon-from-name'
+import { IconFromName } from './icon-from-name'
 import type { Schema } from '@/lib/schemas/create-group'
 import {
   Field,
@@ -12,6 +12,7 @@ import {
   FieldSet,
 } from './ui/field'
 import { Input } from './ui/input'
+import { SUPPORTED_ICON_NAMES } from '@/constants/icon-names'
 
 type FieldConfig = {
   name: string

@@ -21,7 +21,6 @@ import {
 } from '@/components/ui/card'
 import { FieldErrors } from '@/components/ui/field'
 import { LucideArrowUpRight } from 'lucide-react'
-import { IconName, SUPPORTED_ICON_NAMES } from '@/components/icon-from-name'
 import { useEffect, useRef, useState, useTransition } from 'react'
 import z from 'zod'
 import { Spinner } from '@/components/ui/spinner'
@@ -30,6 +29,7 @@ import { useRouter } from 'next/navigation'
 import { schema, validateSchema } from '@/lib/schemas/create-group'
 import { createGroup } from '@/actions/create-group'
 import GroupFields, { GroupFieldsProps } from '@/components/group-fields'
+import { IconName, SUPPORTED_ICON_NAMES } from '@/constants/icon-names'
 
 export default function CreateGroup({ className }: { className?: string }) {
   return (

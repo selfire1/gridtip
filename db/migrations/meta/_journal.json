@@ -15,7 +15,13 @@
       "when": 1757578079084,
       "tag": "0001_group_icon",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1760760515759,
+      "tag": "0002_rename_to_admin",
+      "breakpoints": true
     }
   ]
 }
-

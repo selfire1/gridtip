@@ -22,12 +22,12 @@ export const verifySession = cache(async () => {
 
 export const getMemberStatus = cache(
   async (
-    group: Pick<Database.Group, 'createdByUser'>,
+    group: Pick<Database.Group, 'adminUser'>,
     members: Pick<Database.GroupMember, 'userId'>[],
   ) => {
     const { userId } = await verifySession()
 
-    if (group.createdByUser === userId) {
+    if (group.adminUser === userId) {
       return MemberStatus.Admin
     }
 

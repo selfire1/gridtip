@@ -1,5 +1,5 @@
-import { SUPPORTED_ICON_NAMES } from '@/components/icon-from-name'
 import { FieldErrors } from '@/components/ui/field'
+import { SUPPORTED_ICON_NAMES } from '@/constants/icon-names'
 import z from 'zod'
 
 export const schema = z.object({

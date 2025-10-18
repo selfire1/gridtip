@@ -144,7 +144,7 @@ export default async function GroupsPage() {
           group: {
             columns: {
               id: true,
-              createdByUser: true,
+              adminUser: true,
               name: true,
               iconName: true,
               cutoffInMinutes: true,

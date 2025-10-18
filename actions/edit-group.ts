@@ -61,7 +61,7 @@ export async function editGroup(groupId: Database.Group['id'], data: Schema) {
       with: {
         group: {
           columns: {
-            createdByUser: true,
+            adminUser: true,
           },
         },
       },

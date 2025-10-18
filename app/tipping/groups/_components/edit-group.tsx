@@ -32,13 +32,13 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { MemberStatus } from '@/types'
-import { IconName } from '@/components/icon-from-name'
 import GroupFields, { GroupFieldsProps } from '@/components/group-fields'
 import { validateSchema } from '@/lib/schemas/create-group'
 import { editGroup } from '@/actions/edit-group'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { Spinner } from '@/components/ui/spinner'
+import { IconName } from '@/constants/icon-names'
 
 type GroupProp = Pick<
   Database.Group,

@@ -28,7 +28,7 @@ export async function createGroup(data: Schema) {
       .values({
         name: data.name,
         iconName: data.icon,
-        createdByUser: user.id,
+        adminUser: user.id,
         cutoffInMinutes: data.cutoff,
       })
       .returning()

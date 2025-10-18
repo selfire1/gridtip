@@ -53,6 +53,10 @@ export enum QueryOrigin {
    */
   NotAllowed = 'not-logged-in',
   Join = 'join',
+  /**
+   * User deleted account
+   */
+  Deleted = 'deleted',
 }
 
 export const GROUP_ID_COOKIE_NAME = 'grid-tip-group-id' as const

@@ -14,7 +14,7 @@ import { authClient } from '@/lib/auth-client'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Loader2Icon } from 'lucide-react'
+import { LucideTrash } from 'lucide-react'
 import { QueryOrigin } from '@/constants'
 import { Spinner } from './ui/spinner'
 
@@ -27,12 +27,26 @@ export function LoginForm({
   const router = useRouter()
 
   useEffect(() => {
-    if (searchParams.get('origin') === QueryOrigin.NotAllowed) {
-      showSignInRequiredToast()
-      clearParams()
-      function clearParams() {
-        router.replace(pathname)
+    switch (searchParams.get('origin')) {
+      case QueryOrigin.NotAllowed: {
+        showSignInRequiredToast()
+        break
       }
+
+      case QueryOrigin.Deleted: {
+        toast.success('Account deleted', {
+          description: 'We’re sorry to see you go 😥',
+          icon: <LucideTrash size={16} />,
+        })
+        break
+      }
+
+      default:
+        break
+    }
+    clearParams()
+    function clearParams() {
+      router.replace(pathname)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
