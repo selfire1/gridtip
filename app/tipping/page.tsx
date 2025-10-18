@@ -582,14 +582,22 @@ export default async function DashboardPage() {
       }
       const isDriver = 'constructorId' in tip
       const isCurrentUser = user.id === userId
+      const cssVariable = {
+        ['--team-colour' as string]: getConstructorCssVariable(
+          isDriver ? tip.constructorId : tip.id,
+        ),
+      }
       const style = isDriver
-        ? getStyleForDriver(tip.id, tip.constructorId, false)
-        : { ['--team-colour' as string]: getConstructorCssVariable(tip.id) }
+        ? {
+            ...getStyleForDriver(tip.id, tip.constructorId, false),
+            ...cssVariable,
+          }
+        : cssVariable
 
       return (
         <div
           className={clsx(
-            'flex items-center justify-between p-2 rounded-lg border',
+            'flex items-center justify-between p-2 rounded-lg border relative isolate overflow-hidden',
             isCurrentUser && 'border-foreground/25',
             !isDriver && `bg-(--team-colour)/5`,
           )}
@@ -605,9 +613,9 @@ export default async function DashboardPage() {
           </div>
           <div>
             {isDriver ? (
-              <div className='flex items-baseline gap-1'>
-                <p>{tip.familyName}</p>
-                <p className='text-xs font-bold font-mono'>
+              <div>
+                <p className='relative z-10 pr-2'>{tip.familyName}</p>
+                <p className='text-3xl font-bold font-mono absolute right-1 inset-y-0 flex items-center justify-center bg-gradient-to-b from-(--team-colour)/20 to-(--team-colour)/10 text-transparent bg-clip-text'>
                   {tip.permanentNumber}
                 </p>
               </div>
