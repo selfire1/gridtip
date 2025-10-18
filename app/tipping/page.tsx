@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button'
-import Image from 'next/image'
 import { getImageHref } from '@/lib/utils/user'
 import {
   Accordion,
@@ -29,7 +28,7 @@ import {
 } from 'date-fns'
 import { and, eq, inArray } from 'drizzle-orm'
 import { LucideArrowRight, LucideClock, LucideIcon } from 'lucide-react'
-import React, { cache } from 'react'
+import React, { cache, ReactNode } from 'react'
 import { getConstructorCssVariable } from '@/lib/utils/index'
 import UserAvatar from '@/components/user-avatar'
 import clsx from 'clsx'
@@ -49,7 +48,8 @@ export default async function DashboardPage() {
 
   const getCutoff = cache(getCutoffUncached)
   const hasGroups = await getIsUserInGroups(userId)
-  const ongoingRace = await getOngoingRace(userId)
+  const ongoingRaceWithOffset = await getOngoingRace(userId, { plusDay: 1 })
+  const ongoingRaceStrict = await getOngoingRace(userId, { plusDay: 0 })
   const nextRace = await getNextRace(userId)
   const previousRace = await getPreviousRace(nextRace?.round)
 
@@ -63,11 +63,16 @@ export default async function DashboardPage() {
   function RequiresGroup({ groupId }: { groupId: string }) {
     return (
       <>
-        {ongoingRace && (
-          <CardEveryonesTips raceId={ongoingRace.id} groupId={groupId} />
+        {ongoingRaceWithOffset && (
+          <CardEveryonesTips
+            raceId={ongoingRaceWithOffset.id}
+            groupId={groupId}
+          />
         )}
-        {previousRace && <CardPrevious race={previousRace} />}
-        {nextRace && (
+        {!ongoingRaceStrict && previousRace && (
+          <CardPrevious race={previousRace} />
+        )}
+        {!ongoingRaceStrict && nextRace && (
           <>
             <CardTipNext race={nextRace} groupId={groupId} />
             <CardTipStatus groupId={groupId} race={nextRace} />
@@ -210,11 +215,7 @@ export default async function DashboardPage() {
     const hasTipped = await getHasTipped()
 
     return (
-      <Card className='relative isolate overflow-hidden'>
-        <div className='absolute inset-0 overflow-hidden z-[-1] blur-3xl'>
-          <div className='absolute inset-0 bg-gradient-to-br from-card/85 to-card' />
-          <img alt='' src={getCountryFlag(race.country)} />
-        </div>
+      <FlagBackgroundCard race={race}>
         <RaceHeader
           race={race}
           title={
@@ -252,7 +253,7 @@ export default async function DashboardPage() {
             </Link>
           </Button>
         </CardFooter>
-      </Card>
+      </FlagBackgroundCard>
     )
 
     function getBadgeVariant(
@@ -316,7 +317,12 @@ export default async function DashboardPage() {
     })
   }
 
-  async function getOngoingRace(userId: string) {
+  async function getOngoingRace(
+    userId: string,
+    config: {
+      plusDay: number
+    },
+  ) {
     if (!currentUserGroup) {
       return
     }
@@ -333,7 +339,7 @@ export default async function DashboardPage() {
         const isAfterQualyCutoff = lt(race.qualifyingDate, cutoffDate)
         const isBeforeEndOfGrandPrixPlusDay = gt(
           race.grandPrixDate,
-          subDays(referenceDate, 1),
+          subDays(referenceDate, config.plusDay),
         )
         return and(isAfterQualyCutoff, isBeforeEndOfGrandPrixPlusDay)
       },
@@ -464,7 +470,7 @@ export default async function DashboardPage() {
     const positionTips = getTipsOnPosition()
 
     return (
-      <Card>
+      <FlagBackgroundCard race={race}>
         {race && (
           <RaceHeader
             title='Race tips'
@@ -487,7 +493,7 @@ export default async function DashboardPage() {
             </p>
           </CardContent>
         )}
-      </Card>
+      </FlagBackgroundCard>
     )
 
     function TipsAccordion() {
@@ -589,22 +595,21 @@ export default async function DashboardPage() {
           )}
           style={style}
         >
-          <div className='flex items-center gap-2 text-xs'>
+          <div className='flex items-center gap-2'>
             <UserAvatar
               name={user.name}
               id={user.id}
               className='size-6 rounded-lg'
             />
-            <p className='text-muted-foreground'>{user.name}</p>
+            <p>{user.name}</p>
           </div>
           <div>
             {isDriver ? (
               <div className='flex items-baseline gap-1'>
+                <p>{tip.familyName}</p>
                 <p className='text-xs font-bold font-mono'>
                   {tip.permanentNumber}
                 </p>
-
-                <p>{tip.familyName}</p>
               </div>
             ) : (
               <Constructor constructor={tip} />
@@ -764,6 +769,26 @@ export default async function DashboardPage() {
         </div>
         {race && <CountryFlag country={race.country} />}
       </CardHeader>
+    )
+  }
+
+  function FlagBackgroundCard({
+    race,
+    children,
+  }: {
+    race: Pick<Database.Race, 'country'> | undefined
+    children: ReactNode
+  }) {
+    return (
+      <Card className='relative isolate overflow-hidden'>
+        {race && (
+          <div className='absolute inset-0 overflow-hidden z-[-1] blur-3xl'>
+            <div className='absolute inset-0 bg-gradient-to-br from-card/85 to-card' />
+            <img alt='' src={getCountryFlag(race.country)} />
+          </div>
+        )}
+        {children}
+      </Card>
     )
   }
 }
