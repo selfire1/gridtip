@@ -2,8 +2,6 @@
 @import 'tw-animate-css';
 @import './team-colours.css';
 
-@custom-variant dark (&:is(.dark *));
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -419,4 +417,3 @@
     @apply scroll-m-20 text-xl font-semibold text-balance tracking-tight sm:text-2xl xl:text-3xl;
   }
 }
-
