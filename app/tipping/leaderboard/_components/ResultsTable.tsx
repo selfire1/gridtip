@@ -277,7 +277,7 @@ export async function ResultsTable({ groupId }: { groupId: Group['id'] }) {
         }
         return {
           points: points - prev.points,
-          position: currentPos - prev.position,
+          position: prev.position - currentPos,
         }
       }
 
