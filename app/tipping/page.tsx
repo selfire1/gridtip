@@ -41,6 +41,7 @@ import { getIsSprint, getTipsDue } from '@/lib/utils/prediction-fields'
 import { Badge } from '@/components/ui/badge'
 import { Icon } from '@/components/icon'
 import { getCountryFlag } from '@/lib/utils/country-flag'
+import { cn } from '@/lib/utils'
 
 export default async function DashboardPage() {
   const { userId } = await verifySession()
@@ -469,6 +470,8 @@ export default async function DashboardPage() {
     const race = await getRaceInfo(props.raceId)
     const positionTips = getTipsOnPosition()
 
+    const usersByTip = getUsersByTip(positionTips)
+
     return (
       <FlagBackgroundCard race={race}>
         {race && (
@@ -496,7 +499,94 @@ export default async function DashboardPage() {
       </FlagBackgroundCard>
     )
 
+    function getUsersByTip(entries: typeof positionTips) {
+      return entries.map(({ position, tips }) => {
+        const tipsByValue = tips.reduce(
+          (acc, tip) => {
+            const { value, user } = tip
+            if (!value) {
+              return acc
+            }
+            const exists = acc.find((accTip) => accTip.tip.id === value.id)
+            if (exists) {
+              exists.users.push(user)
+              return acc
+            }
+            acc.push({ tip: value, users: [user] })
+            return acc
+          },
+          [] as Array<{
+            tip: NonNullable<
+              (typeof positionTips)[number]['tips'][number]['value']
+            >
+            users: Array<
+              (typeof predictionEntries)[number]['prediction']['user']
+            >
+          }>,
+        )
+        return {
+          position,
+          tipsByValue: tipsByValue.toSorted((a, b) => {
+            return getValue(a.tip).localeCompare(getValue(b.tip))
+
+            function getValue(tip: typeof a.tip) {
+              const isDriver = 'constructorId' in tip
+              return isDriver ? tip.familyName : tip.name
+            }
+          }),
+        }
+      })
+    }
     function TipsAccordion() {
+      return (
+        <CardContent>
+          <Accordion
+            type='single'
+            collapsible={true}
+            defaultValue={positionTips[0].position}
+          >
+            {usersByTip.map(({ position, tipsByValue }) => {
+              return (
+                <AccordionItem key={position} value={position}>
+                  <AccordionTrigger>{getLabel(position)}</AccordionTrigger>
+                  <AccordionContent className='space-y-4'>
+                    {tipsByValue.map(({ tip, users }) => {
+                      return (
+                        <TipRowByUser key={tip.id} users={users} tip={tip} />
+                      )
+                    })}
+                  </AccordionContent>
+                </AccordionItem>
+              )
+            })}
+            {
+              // {positionTips.map(({ position, tips }) => {
+              //   return (
+              //     <React.Fragment key={position}>
+              //       <AccordionItem value={position}>
+              //         <AccordionTrigger>{getLabel(position)}</AccordionTrigger>
+              //         <AccordionContent className='space-y-2'>
+              //           {tips.map((tip) => {
+              //             return (
+              //               <TipRow
+              //                 key={tip.id}
+              //                 user={tip.user}
+              //                 tip={tip.value}
+              //               />
+              //             )
+              //           })}
+              //         </AccordionContent>
+              //       </AccordionItem>
+              //     </React.Fragment>
+              //   )
+              // })}
+            }
+          </Accordion>
+        </CardContent>
+      )
+    }
+
+    function TipsAccordionOther() {
       return (
         <CardContent>
           <Accordion
@@ -546,14 +636,14 @@ export default async function DashboardPage() {
       )
     }
 
-    function getRaceInfo(raceId: string) {
-      return db.query.racesTable.findFirst({
+    async function getRaceInfo(raceId: string) {
+      return (await db.query.racesTable.findFirst({
         where: (race, { eq }) => eq(race.id, raceId),
         columns: {
           country: true,
           raceName: true,
         },
-      })
+      }))!
     }
 
     function getLabel(position: RacePredictionField) {
@@ -566,6 +656,77 @@ export default async function DashboardPage() {
         sprintP1: 'Sprint P1',
       }
       return positionToLabel[position]
+    }
+
+    function TipRowByUser({
+      tip,
+      users,
+    }: {
+      users: (typeof predictionEntries)[number]['prediction']['user'][]
+      tip:
+        | (typeof predictionEntries)[number]['constructor']
+        | (typeof predictionEntries)[number]['driver']
+    }) {
+      if (!tip) {
+        return
+      }
+      const isDriver = 'constructorId' in tip
+      const cssVariable = {
+        ['--team-colour' as string]: getConstructorCssVariable(
+          isDriver ? tip.constructorId : tip.id,
+        ),
+      }
+
+      const teamBg = isDriver
+        ? {
+            ...getStyleForDriver(tip.id, tip.constructorId, false),
+          }
+        : {}
+
+      return (
+        <div className='bg-background/50 overflow-hidden rounded-lg border'>
+          <div
+            className={clsx(
+              'relative isolate p-3 border-b',
+              !isDriver && `bg-(--team-colour)/5`,
+            )}
+            style={{ ...cssVariable, ...teamBg }}
+          >
+            <div>
+              {isDriver ? (
+                <div>
+                  <p className='relative z-10 pr-2 font-medium'>
+                    {tip.familyName}
+                  </p>
+                  <p className='text-3xl font-bold font-mono absolute right-2 inset-y-0 flex items-center justify-center bg-gradient-to-b from-(--team-colour)/30 to-(--team-colour)/10 text-transparent bg-clip-text'>
+                    {tip.permanentNumber}
+                  </p>
+                </div>
+              ) : (
+                <Constructor constructor={tip} className='font-medium' />
+              )}
+            </div>
+          </div>
+          <div className='space-y-3 p-3'>
+            {users.map((user) => (
+              <div
+                className={cn(
+                  'flex items-center gap-2',
+                  user.id === userId && 'font-semibold',
+                )}
+                key={user.id}
+              >
+                <UserAvatar
+                  name={user.name}
+                  id={user.id}
+                  className='size-6 rounded-lg'
+                />
+                <p>{user.name}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )
     }
 
     function TipRow({
@@ -639,8 +800,8 @@ export default async function DashboardPage() {
       }
       const GRADIENT_CONFIG = {
         default: {
-          start: 0.05,
-          end: 0.2,
+          start: 0.01,
+          end: 0.1,
         },
         current: {
           start: 0.2,

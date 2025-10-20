@@ -45,10 +45,6 @@ export function LoginForm({
       default:
         break
     }
-    clearParams()
-    function clearParams() {
-      router.replace(pathname)
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

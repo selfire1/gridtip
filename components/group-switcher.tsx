@@ -19,6 +19,7 @@ import {
 import { useRouter } from 'next/navigation'
 import { GROUP_ID_COOKIE_MAX_AGE, GROUP_ID_COOKIE_NAME } from '@/constants'
 import { IconFromName } from '@/components/icon-from-name'
+import { clearClientCookie, setClientCookie } from '@/lib/utils/group-cookie'
 
 type GroupData = Pick<Database.Group, 'id' | 'name' | 'iconName'>
 
@@ -134,10 +135,10 @@ export function GroupSwitcher({
     setGroupToState(group)
 
     if (!group) {
-      document.cookie = `${GROUP_ID_COOKIE_NAME}=''; max-age=${GROUP_ID_COOKIE_MAX_AGE}; samesite=lax; path=/;`
+      clearClientCookie()
       return
     }
-    document.cookie = `${GROUP_ID_COOKIE_NAME}=${group.id}; max-age=${GROUP_ID_COOKIE_MAX_AGE}; samesite=lax; path=/;`
+    setClientCookie(group.id)
 
     startTransition(() => {
       router.refresh()

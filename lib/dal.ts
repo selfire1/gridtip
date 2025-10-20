@@ -20,6 +20,12 @@ export const verifySession = cache(async () => {
   return { isAuth: true, userId: session.user.id, user: session.user }
 })
 
+export const getMaybeSession = cache(async () => {
+  return await auth.api.getSession({
+    headers: await headers(),
+  })
+})
+
 export const getMemberStatus = cache(
   async (
     group: Pick<Database.Group, 'adminUser'>,

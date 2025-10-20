@@ -6,8 +6,7 @@ import { db } from '@/db'
 import { groupMembersTable, groupsTable } from '@/db/schema/schema'
 import { Database } from '@/db/types'
 import { Schema, schema } from '@/lib/schemas/create-group'
-import { cookies } from 'next/headers'
-import { GROUP_ID_COOKIE_MAX_AGE, GROUP_ID_COOKIE_NAME } from '@/constants'
+import { setGroupCookie } from '@/lib/utils/group-cookie-server'
 
 export async function createGroup(data: Schema) {
   const { user } = await verifySession()
@@ -41,12 +40,7 @@ export async function createGroup(data: Schema) {
     }
   }
 
-  const cookieStore = await cookies()
-  cookieStore.set(GROUP_ID_COOKIE_NAME, group.id, {
-    maxAge: GROUP_ID_COOKIE_MAX_AGE,
-    sameSite: 'lax',
-    path: '/',
-  })
+  await setGroupCookie(group.id)
 
   try {
     await db.insert(groupMembersTable).values({

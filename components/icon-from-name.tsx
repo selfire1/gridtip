@@ -6,6 +6,7 @@ export function IconFromName(props: {
   iconName: string
   className?: string
   fallback?: IconName
+  size?: number
 }): React.ReactNode {
   const stringToIcon = new Map<IconName, Lucide.LucideIcon>([
     ['lucide:users', Lucide.LucideUsers],
@@ -78,5 +79,5 @@ export function IconFromName(props: {
   if (!IconComponent) {
     return
   }
-  return <IconComponent className={props.className} />
+  return <IconComponent className={props.className} size={props.size} />
 }
