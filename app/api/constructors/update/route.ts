@@ -1,5 +1,5 @@
 import { CacheTag } from '@/constants/cache'
-import { revalidateTag } from 'next/cache'
+import { revalidateTag, unstable_cache } from 'next/cache'
 import { NextRequest } from 'next/server'
 import { createResponse, fetchJolpica, validateToken } from '../../utils'
 import { ConstructorsResponse } from '@/types/ergast'
@@ -13,30 +13,93 @@ export const GET = async (_request: NextRequest) => {
     return validationResponse
   }
 
-  const constructors = await getConstructors()
-  if (!constructors?.length) {
+  type JolpicaConstructors =
+    ConstructorsResponse['MRData']['ConstructorTable']['Constructors']
+
+  const jolpicaConstructors = await getJolpicaConstructors()
+
+  if (!jolpicaConstructors?.length) {
     return createResponse(404, 'No constructors found')
   }
 
-  const ids = await setConstructorsInDatabase(constructors)
+  const isDifferent =
+    await getIsThereDifferenceInConstructors(jolpicaConstructors)
+  if (!isDifferent) {
+    return createResponse(200, 'No update required')
+  }
 
+  const ids = await setConstructorsInDatabase(jolpicaConstructors)
   revalidateTag(CacheTag.Constructors)
 
   return createResponse(201, {
     updated: ids.length,
-    received: constructors.length,
+    received: jolpicaConstructors.length,
   })
 
-  async function getConstructors() {
+  async function getIsThereDifferenceInConstructors(
+    newConstructors: JolpicaConstructors,
+  ) {
+    const getStoredConstructors = unstable_cache(
+      async () =>
+        await db.query.constructorsTable.findMany({
+          columns: {
+            id: true,
+            name: true,
+            nationality: true,
+          },
+        }),
+      [],
+      {
+        tags: [CacheTag.Constructors],
+      },
+    )
+    const storedConstructors = await getStoredConstructors()
+
+    if (storedConstructors.length !== newConstructors.length) {
+      console.log(
+        'difference: true',
+        storedConstructors.length,
+        newConstructors.length,
+      )
+      return true
+    }
+
+    const storedConstructorsMap = new Map(
+      storedConstructors.map((constructor) => [constructor.id, constructor]),
+    )
+
+    const hasNoDifference = newConstructors.every((newConstructor) => {
+      if (!newConstructor.constructorId) {
+        // if no id, assume no difference
+        return true
+      }
+      const storedConstructor = storedConstructorsMap.get(
+        newConstructor.constructorId,
+      )
+      if (!storedConstructorsMap.has(newConstructor.constructorId)) {
+        // if no stored constructor, assume difference
+        return false
+      }
+      if (
+        storedConstructor?.name === newConstructor.name ||
+        storedConstructor?.nationality === newConstructor.nationality
+      ) {
+        // same values => no difference
+        return true
+      }
+      return false
+    })
+    return !hasNoDifference
+  }
+
+  async function getJolpicaConstructors() {
     const response = await fetchJolpica<ConstructorsResponse>(
       '/ergast/f1/2025/constructors/',
     )
     return response.MRData.ConstructorTable.Constructors
   }
 
-  async function setConstructorsInDatabase(
-    constructors: ConstructorsResponse['MRData']['ConstructorTable']['Constructors'],
-  ) {
+  async function setConstructorsInDatabase(constructors: JolpicaConstructors) {
     const returning = await db
       .insert(constructorsTable)
       .values(

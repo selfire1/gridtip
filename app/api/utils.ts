@@ -46,7 +46,7 @@ export function createResponse(
   status: number,
   jsonOrMessage: Record<string, any> | string,
 ) {
-  if (!status.toString().startsWith('2')) {
+  if (status.toString().startsWith('4') || status.toString().startsWith('5')) {
     return NextResponse.json(
       {
         error: jsonOrMessage,
