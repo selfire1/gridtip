@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import '../css/globals.css'
 import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/theme-provider'
+import iconLight from '@/public/icons/icon-light.svg'
+import iconDark from '@/public/icons/icon-dark.svg'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -19,6 +21,18 @@ export const metadata: Metadata = {
     template: '%s | GridTip',
     default: 'GridTip – F1 Tipping',
   },
+  icons: [
+    {
+      media: '(prefers-color-scheme: light)',
+      url: iconLight.src,
+      type: 'image/svg+xml',
+    },
+    {
+      media: '(prefers-color-scheme: dark)',
+      url: iconDark.src,
+      type: 'image/svg+xml',
+    },
+  ],
   description:
     'Guess the outcome of the Formula One season with your friends. Predict the outcome of the Grand Prix weekends, and the championships. Have fun and find out who claims the tipping podium!',
   openGraph: {
