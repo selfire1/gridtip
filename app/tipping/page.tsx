@@ -25,6 +25,7 @@ import {
   formatDistanceToNowStrict,
   differenceInHours,
   isFuture,
+  differenceInDays,
 } from 'date-fns'
 import { and, eq, inArray } from 'drizzle-orm'
 import { LucideArrowRight, LucideClock, LucideIcon } from 'lucide-react'
@@ -73,15 +74,30 @@ export default async function DashboardPage() {
             groupId={groupId}
           />
         )}
-        {shouldShowPrevious && <CardPreviousRaceResults race={previousRace} />}
+        {shouldShowPrevious &&
+          getPreviousRaceStatus(previousRace) === 'current' && (
+            <CardPreviousRaceResults race={previousRace} isActive />
+          )}
         {shouldShouldShowOngoingCards && (
           <>
             <CardTipNext race={nextRace} groupId={groupId} />
             <CardTipStatus groupId={groupId} race={nextRace} />
           </>
         )}
+        {shouldShowPrevious &&
+          getPreviousRaceStatus(previousRace) === 'past' && (
+            <CardPreviousRaceResults race={previousRace} isActive={false} />
+          )}
       </>
     )
+  }
+
+  function getPreviousRaceStatus(race: Pick<Database.Race, 'grandPrixDate'>) {
+    const daysAgo = differenceInDays(race.grandPrixDate, new Date())
+    if (daysAgo >= 3) {
+      return 'current'
+    }
+    return 'past'
   }
 
   async function CardTipStatus({
@@ -402,18 +418,24 @@ export default async function DashboardPage() {
     )
   }
 
-  async function CardPreviousRaceResults(props: { race: Database.Race }) {
-    const hasResults = await getHasResults(props.race.id)
+  async function CardPreviousRaceResults({
+    race,
+    isActive = true,
+  }: {
+    race: Database.Race
+    isActive?: boolean
+  }) {
+    const hasResults = await getHasResults(race.id)
     return (
       <Card className='relative isolate overflow-hidden'>
         <div className='absolute inset-0 overflow-hidden z-[-1] blur-3xl'>
           <div className='absolute inset-0 bg-gradient-to-br from-card/85 to-card' />
-          <img alt='' src={getCountryFlag(props.race.country)} />
+          <img alt='' src={getCountryFlag(race.country)} />
         </div>
         <RaceHeader
-          race={props.race}
-          title={props.race.raceName}
-          description={'Round ' + props.race.round}
+          race={race}
+          title={race.raceName}
+          description={'Round ' + race.round}
         />
         <CardContent>
           {!hasResults ? (
@@ -443,7 +465,7 @@ export default async function DashboardPage() {
               </Link>
             </Button>
           ) : (
-            <Button asChild>
+            <Button asChild variant={isActive ? 'default' : 'outline'}>
               <Link href='/tipping/leaderboard'>
                 View results
                 <LucideArrowRight />
