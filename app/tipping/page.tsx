@@ -73,7 +73,7 @@ export default async function DashboardPage() {
             groupId={groupId}
           />
         )}
-        {shouldShowPrevious && <CardPrevious race={previousRace} />}
+        {shouldShowPrevious && <CardPreviousRaceResults race={previousRace} />}
         {shouldShouldShowOngoingCards && (
           <>
             <CardTipNext race={nextRace} groupId={groupId} />
@@ -402,7 +402,7 @@ export default async function DashboardPage() {
     )
   }
 
-  async function CardPrevious(props: { race: Database.Race }) {
+  async function CardPreviousRaceResults(props: { race: Database.Race }) {
     const hasResults = await getHasResults(props.race.id)
     return (
       <Card className='relative isolate overflow-hidden'>
