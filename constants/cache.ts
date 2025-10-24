@@ -5,4 +5,5 @@ export enum CacheTag {
   Results = 'results',
   Constructors = 'constructors',
   Drivers = 'drivers',
+  Races = 'races',
 }

@@ -60,3 +60,28 @@ export function createResponse(
       : jsonOrMessage
   return NextResponse.json(body, { status })
 }
+
+export function areFieldsTheSame<
+  TNewItem extends Record<string, any>,
+  TStoredItem extends Record<string, any>,
+>(
+  fields: (keyof TNewItem)[],
+
+  compare: {
+    newItem: TNewItem
+    storedItem: TStoredItem
+  },
+) {
+  const { newItem, storedItem } = compare
+  for (const field of fields) {
+    if (!(field in storedItem)) {
+      console.log('difference: true', 'no field', field)
+      return false
+    }
+    // @ts-expect-error can't be bothered to type this correctly now
+    if (newItem[field]?.toString() !== storedItem[field]?.toString()) {
+      return false
+    }
+  }
+  return true
+}
