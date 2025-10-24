@@ -54,6 +54,9 @@ export default async function DashboardPage() {
   const nextRace = await getNextRace(userId)
   const previousRace = await getPreviousRace(nextRace?.round)
 
+  const shouldShowPrevious = !ongoingRaceStrict && previousRace
+  const shouldShouldShowOngoingCards = !ongoingRaceStrict && nextRace
+
   return (
     <div className='is-grid-card-fit grid gap-8'>
       {(!hasGroups || !currentUserGroup) && <CardJoinGroup />}
@@ -70,10 +73,8 @@ export default async function DashboardPage() {
             groupId={groupId}
           />
         )}
-        {!ongoingRaceStrict && previousRace && (
-          <CardPrevious race={previousRace} />
-        )}
-        {!ongoingRaceStrict && nextRace && (
+        {shouldShowPrevious && <CardPrevious race={previousRace} />}
+        {shouldShouldShowOngoingCards && (
           <>
             <CardTipNext race={nextRace} groupId={groupId} />
             <CardTipStatus groupId={groupId} race={nextRace} />
