@@ -1,7 +1,12 @@
 import { CacheTag } from '@/constants/cache'
 import { revalidateTag, unstable_cache } from 'next/cache'
 import { NextRequest } from 'next/server'
-import { createResponse, fetchJolpica, validateToken } from '../../utils'
+import {
+  areFieldsTheSame,
+  createResponse,
+  fetchJolpica,
+  validateToken,
+} from '../../utils'
 import { ConstructorsResponse } from '@/types/ergast'
 import { db } from '@/db'
 import { constructorsTable } from '@/db/schema/schema'
@@ -81,8 +86,10 @@ export const GET = async (_request: NextRequest) => {
         return false
       }
       if (
-        storedConstructor?.name === newConstructor.name ||
-        storedConstructor?.nationality === newConstructor.nationality
+        areFieldsTheSame(['name', 'nationality'], {
+          storedItem: storedConstructor!,
+          newItem: newConstructor,
+        })
       ) {
         // same values => no difference
         return true

@@ -62,10 +62,11 @@ export function createResponse(
 }
 
 export function areFieldsTheSame<
-  TNewItem extends Record<string, any>,
-  TStoredItem extends Record<string, any>,
+  TField extends string,
+  TNewItem extends Partial<Record<TField, any> & Record<string, any>>,
+  TStoredItem extends Record<TField, any> & Record<string, any>,
 >(
-  fields: (keyof TNewItem)[],
+  fields: TField[],
 
   compare: {
     newItem: TNewItem
@@ -78,10 +79,16 @@ export function areFieldsTheSame<
       console.log('difference: true', 'no field', field)
       return false
     }
-    // @ts-expect-error can't be bothered to type this correctly now
-    if (newItem[field]?.toString() !== storedItem[field]?.toString()) {
+    if (
+      newItem[field]?.toString() !==
+      storedItem[field as keyof TStoredItem]?.toString()
+    ) {
       return false
     }
   }
   return true
+}
+
+export function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
