@@ -11,9 +11,9 @@ export default function Home() {
     <div className='py-12 is-container'>
       <div className='text-center max-w-prose mx-auto space-y-4'>
         <h1 className='text-primary leading-tighter text-4xl font-semibold tracking-tight text-balance lg:leading-[1.1] xl:text-5xl xl:tracking-tighter'>
-          Predict against your friends.
+          Out-tip your frenemies
         </h1>
-        <p className='text-balance'>
+        <p className='text-balance text-muted-foreground'>
           Gather your crew and establish once and for all who’s the F1 expert.
           Tip each race, accumulate points and predict your way to the podium.
         </p>
