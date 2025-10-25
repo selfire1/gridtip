@@ -17,6 +17,7 @@ import { useEffect, useState } from 'react'
 import { LucideTrash } from 'lucide-react'
 import { QueryOrigin } from '@/constants'
 import { Spinner } from './ui/spinner'
+import { filterQuery } from 'ufo'
 
 export function LoginForm({
   className,
@@ -30,6 +31,7 @@ export function LoginForm({
     switch (searchParams.get('origin')) {
       case QueryOrigin.NotAllowed: {
         showSignInRequiredToast()
+        removeSearchParam('origin')
         break
       }
 
@@ -91,6 +93,12 @@ export function LoginForm({
       </Card>
     </div>
   )
+
+  function removeSearchParam(param: string) {
+    const url = pathname
+    const urlWithParamRemoved = filterQuery(url, (key: string) => key !== param)
+    router.replace(urlWithParamRemoved)
+  }
 
   function showSignInRequiredToast() {
     toast.warning('Please sign in', {
