@@ -18,9 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { Database } from '@/db/types'
-import { ChevronsUpDown, LucideCheck } from 'lucide-react'
-import { UseFormReturn } from 'react-hook-form'
+import { ChevronsUpDown } from 'lucide-react'
 import { FormControl } from '@/components/ui/form'
 import ConstructorOption, {
   type ConstructorProps,
@@ -52,12 +50,7 @@ export function SelectConstructor({
       <Popover open={open} onOpenChange={setOpen}>
         <TriggerButton selected={selected} type='popover' disabled={disabled} />
         <PopoverContent className='w-[300px] p-0' align='start'>
-          <ConstructorsList
-            setOpen={setOpen}
-            selected={selected}
-            setSelected={setSelected}
-            constructors={constructors}
-          />
+          <ConstructorsList setOpen={setOpen} />
         </PopoverContent>
       </Popover>
     )
@@ -68,16 +61,42 @@ export function SelectConstructor({
       <TriggerButton selected={selected} type='drawer' disabled={disabled} />
       <DrawerContent>
         <div className='mt-4 border-t'>
-          <ConstructorsList
-            setOpen={setOpen}
-            selected={selected}
-            setSelected={setSelected}
-            constructors={constructors}
-          />
+          <ConstructorsList setOpen={setOpen} />
         </div>
       </DrawerContent>
     </Drawer>
   )
+  function ConstructorsList({ setOpen }: { setOpen: (open: boolean) => void }) {
+    return (
+      <Command>
+        <CommandInput placeholder='Search constructors…' />
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandGroup>
+            {constructors.map((constructor) => (
+              <CommandItem
+                key={constructor.id}
+                value={constructor.id}
+                onSelect={(value) => {
+                  onSelect(
+                    constructors.find(
+                      (constructor) => constructor.id === value,
+                    ) || undefined,
+                  )
+                  setOpen(false)
+                }}
+              >
+                <ConstructorOption
+                  constructor={constructor}
+                  isSelected={selected?.id === constructor.id}
+                />
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </Command>
+    )
+  }
 }
 
 function TriggerButton({
@@ -111,46 +130,4 @@ function TriggerButton({
   function EmptyState() {
     return <span>Select constructor</span>
   }
-}
-
-function ConstructorsList({
-  setOpen,
-  setSelected: setSelected,
-  selected,
-  constructors: constructors,
-}: {
-  setOpen: (open: boolean) => void
-  setSelected: (constructor: ConstructorProps | undefined) => void
-  selected: ConstructorProps | undefined
-  constructors: ConstructorProps[]
-}) {
-  return (
-    <Command>
-      <CommandInput placeholder='Search constructors…' />
-      <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
-        <CommandGroup>
-          {constructors.map((constructor) => (
-            <CommandItem
-              key={constructor.id}
-              value={constructor.id}
-              onSelect={(value) => {
-                setSelected(
-                  constructors.find(
-                    (constructor) => constructor.id === value,
-                  ) || undefined,
-                )
-                setOpen(false)
-              }}
-            >
-              <ConstructorOption
-                constructor={constructor}
-                isSelected={selected?.id === constructor.id}
-              />
-            </CommandItem>
-          ))}
-        </CommandGroup>
-      </CommandList>
-    </Command>
-  )
 }
