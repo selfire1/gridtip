@@ -370,7 +370,7 @@ export default function PastRacesClient({
             <Badge
               className={cn(
                 isCorrect
-                  ? 'bg-green-600 dark:bg-green-100'
+                  ? 'bg-green-600 dark:bg-green-400'
                   : 'text-muted-foreground',
               )}
               variant={isCorrect ? 'default' : 'outline'}
@@ -394,7 +394,7 @@ export default function PastRacesClient({
               )
             })}
             {props.users.length > localMaxUsers && (
-              <div className='size-6 lg:size-8 rounded-full bg-muted relative z-10 grid place-items-center text-xs font-medium ring-border text-muted-foreground tracking-tight ring-2'>
+              <div className='size-6 lg:size-8 rounded-full bg-muted relative z-10 grid place-items-center text-xs font-medium ring-border text-muted-foreground tracking-tight ring-2 dark:ring-background'>
                 +{props.users.length - localMaxUsers}
               </div>
             )}
