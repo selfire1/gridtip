@@ -5,6 +5,8 @@ import { eq } from 'drizzle-orm'
 import { cache } from 'react'
 import { GROUP_ID_COOKIE_NAME } from '@/constants'
 import { cookies } from 'next/headers'
+import { unstable_cache } from 'next/cache'
+import { CacheTag } from '@/constants/cache'
 
 export {
   cachedGetGroupsForUser as getGroupsForUser,
@@ -47,24 +49,38 @@ async function getCurrentGroup(userId: string) {
   return userWithGroups.find(({ group }) => group.id === cookieGroupId)?.group
 }
 
-export function getDriverOptions() {
-  return db.query.driversTable.findMany({
-    columns: {
-      id: true,
-      constructorId: true,
-      givenName: true,
-      familyName: true,
+export async function getDriverOptions() {
+  return await unstable_cache(
+    async () =>
+      db.query.driversTable.findMany({
+        columns: {
+          id: true,
+          constructorId: true,
+          givenName: true,
+          familyName: true,
+        },
+        orderBy: (driver, { asc }) => asc(driver.familyName),
+      }),
+    [],
+    {
+      tags: [CacheTag.Drivers],
     },
-    orderBy: (driver, { asc }) => asc(driver.familyName),
-  })
+  )()
 }
 
-export function getConstructorOptions() {
-  return db.query.constructorsTable.findMany({
-    columns: {
-      id: true,
-      name: true,
+export async function getConstructorOptions() {
+  return unstable_cache(
+    async () =>
+      await db.query.constructorsTable.findMany({
+        columns: {
+          id: true,
+          name: true,
+        },
+        orderBy: (constructor, { asc }) => asc(constructor.name),
+      }),
+    [],
+    {
+      tags: [CacheTag.Constructors],
     },
-    orderBy: (constructor, { asc }) => asc(constructor.name),
-  })
+  )()
 }
