@@ -25,6 +25,16 @@ export default async function TippingLayout({
             />
             <Breadcrumbs />
           </div>
+          <Button
+            asChild
+            className='sm:hidden ml-auto mr-4'
+            variant='ghost'
+            size='icon'
+          >
+            <Link href='/' title='Home' aria-label='Home'>
+              <LucideHome />
+            </Link>
+          </Button>
         </header>
         <div className='p-4 pt-0'>{children}</div>
       </SidebarInset>
