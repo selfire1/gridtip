@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/sidebar'
 import { verifySession } from '@/lib/dal'
 import { getCurrentGroup, getGroupsForUser } from '@/lib/utils/groups'
+import { getNextRace } from '@/lib/utils/races'
 
 export async function AppSidebar({
   ...props
@@ -19,6 +20,8 @@ export async function AppSidebar({
   const { userId, user } = await verifySession()
   const groupsOfUser = await getGroupsForUser(userId)
   const cookieGroup = await getCurrentGroup(userId)
+
+  const nextRace = await getNextRace()
 
   const groups = groupsOfUser
     .toSorted((a, b) => b.joinedAt.valueOf() - a.joinedAt.valueOf())
@@ -32,7 +35,9 @@ export async function AppSidebar({
         <GroupSwitcher currentlySelected={cookieGroup} groups={groups} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain />
+        <NavMain
+          addTipsUrl={nextRace ? `/tipping/add-tips/${nextRace.id}` : undefined}
+        />
       </SidebarContent>
       <SidebarFooter>
         <NavUser

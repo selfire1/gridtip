@@ -79,7 +79,7 @@ export const nav = [
   },
 ]
 
-export function NavMain() {
+export function NavMain({ addTipsUrl }: { addTipsUrl: string | undefined }) {
   return (
     <SidebarGroup>
       <SidebarMenu>
@@ -106,7 +106,13 @@ export function NavMain() {
                   {item.items?.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
                       <SidebarMenuSubButton asChild>
-                        <a href={subItem.url}>
+                        <a
+                          href={
+                            subItem.url === '/tipping/add-tips'
+                              ? addTipsUrl
+                              : subItem.url
+                          }
+                        >
                           <span>{subItem.title}</span>
                         </a>
                       </SidebarMenuSubButton>
