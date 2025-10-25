@@ -4,13 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack --port=4848",
+    "prebuild": "bun run scripts/save-avatars.ts",
     "build": "next build",
     "db:dump": "turso db shell f1-tipping .dump > dump.sql && rm local.db && cat dump.sql | sqlite3 local.db",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:prod:generate": "bun --env-file=.env.production run db:generate",
     "db:prod:migrate": "bun --env-file=.env.production run db:migrate",
-    "save-images": "bun run scripts/save-avatars.ts",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest"
