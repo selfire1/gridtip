@@ -22,6 +22,7 @@ import { submitTipSchema } from '../actions/schema'
 import { ConstructorProps } from '@/components/constructor'
 import { DriverOptionProps as DriverOption } from '@/components/driver-option'
 import { SelectConstructor } from '@/components/select-constructor'
+import { RacePredictionField } from '@/constants'
 
 const formSchema = submitTipSchema.partial()
 export type Schema = z.infer<typeof formSchema>
@@ -191,7 +192,10 @@ export default function TipForm({
         name: 'constructorWithMostPoints',
         type: 'constructor',
       },
-    ] as const
+    ] as const satisfies ({ name: RacePredictionField } & Record<
+      string,
+      string
+    >)[]
     return allFields.filter((field) =>
       field.name !== 'sprintP1' ? true : isSprint,
     )
