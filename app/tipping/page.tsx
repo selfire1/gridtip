@@ -113,7 +113,8 @@ export default async function DashboardPage() {
         <CardHeader>
           <CardTitle>Tipping status</CardTitle>
           <CardDescription>
-            Who has tipped the {race.raceName} already?
+            Who has tipped the{' '}
+            <span className='font-medium'>{race.raceName}</span> already?
           </CardDescription>
         </CardHeader>
         <CardContent>
