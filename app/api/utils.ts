@@ -39,7 +39,7 @@ export async function validateToken() {
   }
   return {
     ok: true,
-  }
+  } as const
 }
 
 export function createResponse(
