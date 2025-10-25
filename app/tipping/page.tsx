@@ -254,7 +254,7 @@ export default async function DashboardPage() {
             </span>
           }
           description={
-            <div className='flex items-center gap-2'>
+            <div className='flex flex-wrap gap-y-0 items-center gap-x-2'>
               <p className='font-medium'>{race.raceName}</p>
               <p>{race.circuitName}</p>
             </div>
