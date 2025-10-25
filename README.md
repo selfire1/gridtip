@@ -8,6 +8,8 @@ Live at [gridtip.joschua.io](https://gridtip.joschua.io).
 
 [Next.js](https://nextjs.org/docs) & [Turso](https://docs.turso.tech/turso-cloud) & [Drizzle](https://orm.drizzle.team/) & [Shadcn](https://ui.shadcn.com)
 
+Data provided by the [jolpica-f1 API](https://github.com/jolpica/jolpica-f1/blob/main/docs/README.md) 🫶
+
 ## Local development
 
 ```bash
