@@ -64,7 +64,7 @@ export function LoginForm({
           >
             <div className='flex flex-col gap-6'>
               <div className='flex flex-col items-center text-center'>
-                <h1 className='text-2xl font-bold'>Get started</h1>
+                <h1 className='text-2xl font-bold'>Join the Grid</h1>
                 <p className='text-muted-foreground text-balance'>
                   {description}
                 </p>
@@ -127,7 +127,7 @@ export function LoginForm({
       case QueryOrigin.Join:
         return 'Please sign in or create an account first before joining this group.'
       default:
-        return 'Sign in with Google to log in or set up a new GridTip account.'
+        return 'Log in to start tipping, or create a new GridTip account with Google.'
     }
   }
 
