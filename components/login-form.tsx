@@ -57,9 +57,9 @@ export function LoginForm({
         <CardContent className='grid p-0 md:grid-cols-2 md:min-h-96'>
           <form
             className='p-6 md:p-8 flex flex-col justify-center'
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault()
-              signInWithGoogle(searchParams.get('redirect'))
+              await signInWithGoogle(searchParams.get('redirect'))
             }}
           >
             <div className='flex flex-col gap-6'>
@@ -119,7 +119,6 @@ export function LoginForm({
       })
       return
     }
-    router.push('/tipping')
   }
 
   function getDescription(params: ReadonlyURLSearchParams) {
