@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack --port=4848",
+    "dev:prod": "NODE_ENV=production next dev --turbopack --port=4848",
     "prebuild": "bun run scripts/save-avatars.ts",
     "build": "next build",
     "db:dump": "turso db shell f1-tipping .dump > dump.sql && rm local.db && cat dump.sql | sqlite3 local.db",
