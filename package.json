@@ -14,7 +14,8 @@
     "db:prod:migrate": "bun --env-file=.env.production run db:migrate",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest"
+    "test": "vitest",
+    "update-tips": "bun run --env-file=.env.production scripts/_local/add-tips"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

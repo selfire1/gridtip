@@ -48,3 +48,5 @@ server/db/seed.ts
 
 # other
 public/img/user
+
+scripts/_local
