@@ -17,9 +17,9 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import { useRouter } from 'next/navigation'
-import { GROUP_ID_COOKIE_MAX_AGE, GROUP_ID_COOKIE_NAME } from '@/constants'
 import { IconFromName } from '@/components/icon-from-name'
 import { clearClientCookie, setClientCookie } from '@/lib/utils/group-cookie'
+import Link from 'next/link'
 
 type GroupData = Pick<Database.Group, 'id' | 'name' | 'iconName'>
 
@@ -65,14 +65,14 @@ export function GroupSwitcher({
 
   return (
     <SidebarMenu>
-      <SidebarMenuItem>
+      <SidebarMenuItem className='flex items-center gap-2 px-2'>
         <DropdownMenu>
+          <CurrentGroupLabel />
           <DropdownMenuTrigger disabled={isPending} asChild>
             <SidebarMenuButton
               size='lg'
-              className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
+              className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground w-auto'
             >
-              <CurrentGroupLabel />
               <ChevronsUpDown className='ml-auto' />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
@@ -109,7 +109,8 @@ export function GroupSwitcher({
 
   function CurrentGroupLabel() {
     return (
-      <>
+      <div className='flex items-center gap-2 relative'>
+        <Link href='/tipping' className='absolute inset-0' title='Dashboard' />
         <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg'>
           <IconFromName
             iconName={selectedGroup?.iconName ?? 'lucide:users'}
@@ -124,7 +125,7 @@ export function GroupSwitcher({
               : (selectedGroup?.name ?? 'Select a group')}
           </span>
         </div>
-      </>
+      </div>
     )
   }
 

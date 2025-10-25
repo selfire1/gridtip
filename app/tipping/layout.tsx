@@ -6,6 +6,9 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import Breadcrumbs from '../../components/breadcrumbs'
+import Link from 'next/link'
+import { LucideHome } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 export default async function TippingLayout({
   children,
