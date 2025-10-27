@@ -63,7 +63,7 @@ export default async function DashboardPage() {
     : await getHasResults(ongoingRaceWithOffset.id)
 
   return (
-    <div className='is-grid-card-fit grid gap-8'>
+    <div className='is-grid-card-fit grid gap-8 is-bg-muted'>
       {(!hasGroups || !currentUserGroup) && <CardJoinGroup />}
       {currentUserGroup && <RequiresGroup groupId={currentUserGroup} />}
     </div>

@@ -417,3 +417,7 @@
     @apply scroll-m-20 text-xl font-semibold text-balance tracking-tight sm:text-2xl xl:text-3xl;
   }
 }
+
+main[data-slot='sidebar-inset']:has(.is-bg-muted) {
+  @apply bg-muted/40;
+}
