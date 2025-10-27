@@ -1,10 +1,10 @@
-import Alert from '@/components/alert'
 import { verifySession } from '@/lib/dal'
 import { getCurrentGroupId } from '@/lib/utils/groups'
 import { Metadata } from 'next'
 import { ResultsTable } from './_components/ResultsTable'
 import PastRacesServer from './_components/PastRacesServer'
 import { Separator } from '@/components/ui/separator'
+import EmptyGroup from '@/components/empty-group'
 
 export const metadata: Metadata = {
   title: 'Leaderboard',
@@ -15,7 +15,7 @@ export default async function LeaderboardPage() {
   const groupId = await getCurrentGroupId()
 
   if (!groupId) {
-    return <Alert title='No group found' />
+    return <EmptyGroup />
   }
 
   return (
