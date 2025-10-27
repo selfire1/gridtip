@@ -58,6 +58,10 @@ export default async function DashboardPage() {
   const shouldShowPrevious = !ongoingRaceStrict && previousRace
   const shouldShouldShowOngoingCards = !ongoingRaceStrict && nextRace
 
+  const hasOngoingWithOffsetResults = !ongoingRaceWithOffset
+    ? false
+    : await getHasResults(ongoingRaceWithOffset.id)
+
   return (
     <div className='is-grid-card-fit grid gap-8'>
       {(!hasGroups || !currentUserGroup) && <CardJoinGroup />}
@@ -65,19 +69,20 @@ export default async function DashboardPage() {
     </div>
   )
 
-  function RequiresGroup({ groupId }: { groupId: string }) {
+  async function RequiresGroup({ groupId }: { groupId: string }) {
     return (
       <>
-        {ongoingRaceWithOffset && (
-          <CardEveryonesTips
-            raceId={ongoingRaceWithOffset.id}
-            groupId={groupId}
-          />
-        )}
         {shouldShowPrevious &&
           getPreviousRaceStatus(previousRace) === 'current' && (
             <CardPreviousRaceResults race={previousRace} isActive />
           )}
+        {ongoingRaceWithOffset && (
+          <CardEveryonesTips
+            raceId={ongoingRaceWithOffset.id}
+            groupId={groupId}
+            collapsed={hasOngoingWithOffsetResults}
+          />
+        )}
         {shouldShouldShowOngoingCards && (
           <>
             <CardTipNext race={nextRace} groupId={groupId} />
@@ -94,7 +99,7 @@ export default async function DashboardPage() {
 
   function getPreviousRaceStatus(race: Pick<Database.Race, 'grandPrixDate'>) {
     const daysAgo = differenceInDays(race.grandPrixDate, new Date())
-    if (daysAgo >= 3) {
+    if (daysAgo <= 3) {
       return 'current'
     }
     return 'past'
@@ -476,14 +481,13 @@ export default async function DashboardPage() {
         </CardFooter>
       </Card>
     )
-    function getHasResults(id: string) {
-      return db.query.resultsTable.findFirst({
-        where: (result, { eq }) => eq(result.raceId, id),
-      })
-    }
   }
 
-  type CardOngoingProps = { raceId: string; groupId: string }
+  type CardOngoingProps = {
+    raceId: string
+    groupId: string
+    collapsed?: boolean
+  }
   async function CardEveryonesTips(props: CardOngoingProps) {
     const predictionEntries = await getPredictionEntries()
     const positionToTips = reduceIntoObject(predictionEntries)
@@ -567,7 +571,9 @@ export default async function DashboardPage() {
           <Accordion
             type='single'
             collapsible={true}
-            defaultValue={positionTips[0].position}
+            defaultValue={
+              props.collapsed ? undefined : positionTips[0].position
+            }
           >
             {usersByTip.map(({ position, tipsByValue }) => {
               return (
@@ -1005,3 +1011,14 @@ export default async function DashboardPage() {
 //             LazyCardTipStatus(:race='nextRace')
 // </template>
 //
+async function getHasResults(id: string) {
+  return cache(
+    async () =>
+      !!(await db.query.resultsTable.findFirst({
+        where: (result, { eq }) => eq(result.raceId, id),
+        columns: {
+          id: true,
+        },
+      })),
+  )()
+}
