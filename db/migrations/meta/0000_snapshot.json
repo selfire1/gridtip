@@ -125,12 +125,8 @@
           "name": "drivers_constructor_id_constructors_id_fk",
           "tableFrom": "drivers",
           "tableTo": "constructors",
-          "columnsFrom": [
-            "constructor_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["constructor_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -178,12 +174,8 @@
           "name": "group_members_group_id_groups_id_fk",
           "tableFrom": "group_members",
           "tableTo": "groups",
-          "columnsFrom": [
-            "group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["group_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -191,12 +183,8 @@
           "name": "group_members_user_id_user_id_fk",
           "tableFrom": "group_members",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -252,12 +240,8 @@
           "name": "groups_created_by_user_user_id_fk",
           "tableFrom": "groups",
           "tableTo": "user",
-          "columnsFrom": [
-            "created_by_user"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by_user"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -316,10 +300,7 @@
       "indexes": {
         "prediction_entries_prediction_id_position_unique": {
           "name": "prediction_entries_prediction_id_position_unique",
-          "columns": [
-            "prediction_id",
-            "position"
-          ],
+          "columns": ["prediction_id", "position"],
           "isUnique": true
         }
       },
@@ -328,12 +309,8 @@
           "name": "prediction_entries_prediction_id_predictions_id_fk",
           "tableFrom": "prediction_entries",
           "tableTo": "predictions",
-          "columnsFrom": [
-            "prediction_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["prediction_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -341,12 +318,8 @@
           "name": "prediction_entries_driver_id_drivers_id_fk",
           "tableFrom": "prediction_entries",
           "tableTo": "drivers",
-          "columnsFrom": [
-            "driver_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["driver_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -354,12 +327,8 @@
           "name": "prediction_entries_constructor_id_constructors_id_fk",
           "tableFrom": "prediction_entries",
           "tableTo": "constructors",
-          "columnsFrom": [
-            "constructor_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["constructor_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -419,30 +388,22 @@
       "indexes": {
         "predictions_user_id_idx": {
           "name": "predictions_user_id_idx",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": false
         },
         "predictions_group_id_idx": {
           "name": "predictions_group_id_idx",
-          "columns": [
-            "group_id"
-          ],
+          "columns": ["group_id"],
           "isUnique": false
         },
         "predictions_is_for_championship_idx": {
           "name": "predictions_is_for_championship_idx",
-          "columns": [
-            "is_for_championship"
-          ],
+          "columns": ["is_for_championship"],
           "isUnique": false
         },
         "predictions_race_id_idx": {
           "name": "predictions_race_id_idx",
-          "columns": [
-            "race_id"
-          ],
+          "columns": ["race_id"],
           "isUnique": false
         }
       },
@@ -451,12 +412,8 @@
           "name": "predictions_user_id_user_id_fk",
           "tableFrom": "predictions",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -464,12 +421,8 @@
           "name": "predictions_group_id_groups_id_fk",
           "tableFrom": "predictions",
           "tableTo": "groups",
-          "columnsFrom": [
-            "group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["group_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -477,12 +430,8 @@
           "name": "predictions_race_id_races_id_fk",
           "tableFrom": "predictions",
           "tableTo": "races",
-          "columnsFrom": [
-            "race_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["race_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -675,12 +624,8 @@
           "name": "results_race_id_races_id_fk",
           "tableFrom": "results",
           "tableTo": "races",
-          "columnsFrom": [
-            "race_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["race_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -688,12 +633,8 @@
           "name": "results_driver_id_drivers_id_fk",
           "tableFrom": "results",
           "tableTo": "drivers",
-          "columnsFrom": [
-            "driver_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["driver_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -701,12 +642,8 @@
           "name": "results_constructor_id_constructors_id_fk",
           "tableFrom": "results",
           "tableTo": "constructors",
-          "columnsFrom": [
-            "constructor_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["constructor_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -816,12 +753,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -893,9 +826,7 @@
       "indexes": {
         "session_token_unique": {
           "name": "session_token_unique",
-          "columns": [
-            "token"
-          ],
+          "columns": ["token"],
           "isUnique": true
         }
       },
@@ -904,12 +835,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -974,9 +901,7 @@
       "indexes": {
         "user_email_unique": {
           "name": "user_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         }
       },
