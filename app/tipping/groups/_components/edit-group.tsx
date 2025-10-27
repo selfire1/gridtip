@@ -166,7 +166,6 @@ function EditGroupDialogContent({
     const values = { name, icon: selectedIcon, cutoff }
     const isOk = validateSchema(values, setFormErrors)
     if (!isOk) {
-      console.warn('not ok') // FIXME: remove
       return
     }
 
