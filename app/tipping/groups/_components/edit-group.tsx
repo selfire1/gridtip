@@ -1,14 +1,12 @@
 'use client'
 
-import { useEffect, useRef, useState, useTransition } from 'react'
-import { MoreHorizontalIcon, LucideEdit2 } from 'lucide-react'
+import { useRef, useState, useTransition } from 'react'
+import { MoreHorizontalIcon, LucideEdit2, LucideCog } from 'lucide-react'
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
@@ -21,16 +19,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
 import { Database } from '@/db/types'
-import {
-  Field,
-  FieldErrors,
-  FieldGroup,
-  FieldLabel,
-} from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
 import { MemberStatus } from '@/types'
 import GroupFields, { GroupFieldsProps } from '@/components/group-fields'
 import { validateSchema } from '@/lib/schemas/create-group'
@@ -39,6 +29,7 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { Spinner } from '@/components/ui/spinner'
 import { IconName } from '@/constants/icon-names'
+import Link from 'next/link'
 
 type GroupProp = Pick<
   Database.Group,
@@ -70,6 +61,12 @@ export default function EditGroup({
           <DropdownMenuItem onSelect={() => setShowNewDialog(true)}>
             <LucideEdit2 className='size-4' />
             Edit Group
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href='/tipping/settings-group'>
+              <LucideCog className='size-4' />
+              Group settings
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
