@@ -7,6 +7,9 @@ import { redirect } from 'next/navigation'
 import { QueryOrigin } from '@/constants'
 import { Database } from '@/db/types'
 import { MemberStatus } from '@/types'
+import { db } from '@/db'
+import { groupMembersTable } from '@/db/schema/schema'
+import { eq } from 'drizzle-orm'
 
 export const verifySession = cache(async () => {
   const session = await auth.api.getSession({
@@ -42,3 +45,38 @@ export const getMemberStatus = cache(
     }
   },
 )
+
+async function uncachedVerifyIsAdmin(groupId: Database.Group['id']) {
+  const membership = await db.query.groupMembersTable.findMany({
+    where: eq(groupMembersTable.groupId, groupId),
+    columns: {
+      userId: true,
+    },
+    with: {
+      group: {
+        columns: {
+          adminUser: true,
+        },
+      },
+    },
+  })
+
+  if (!membership?.length) {
+    return {
+      isAdmin: false,
+      message: 'Not a member of the group',
+    }
+  }
+
+  const status = await getMemberStatus(membership[0].group, membership)
+  if (status !== MemberStatus.Admin) {
+    return {
+      isAdmin: false,
+      message: 'Not an admin of the group',
+    }
+  }
+  return {
+    isAdmin: true,
+  }
+}
+export const verifyIsAdmin = cache(uncachedVerifyIsAdmin)

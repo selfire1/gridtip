@@ -1,6 +1,6 @@
 'use server'
 
-import { getMemberStatus, verifySession } from '@/lib/dal'
+import { getMemberStatus, verifyIsAdmin, verifySession } from '@/lib/dal'
 import z from 'zod'
 import { db } from '@/db'
 import { groupMembersTable, groupsTable } from '@/db/schema/schema'
@@ -12,7 +12,7 @@ import { MemberStatus } from '@/types'
 export async function editGroup(groupId: Database.Group['id'], data: Schema) {
   const _session = await verifySession()
 
-  const { ok: isAdmin, message } = await verifyIsAdmin()
+  const { isAdmin, message } = await verifyIsAdmin(groupId)
   if (!isAdmin) {
     return {
       ok: false,
@@ -49,40 +49,6 @@ export async function editGroup(groupId: Database.Group['id'], data: Schema) {
       ok: false,
       error: (error as Error)?.message,
       message: 'Could not update group',
-    }
-  }
-
-  async function verifyIsAdmin() {
-    const membership = await db.query.groupMembersTable.findMany({
-      where: eq(groupMembersTable.groupId, groupId),
-      columns: {
-        userId: true,
-      },
-      with: {
-        group: {
-          columns: {
-            adminUser: true,
-          },
-        },
-      },
-    })
-
-    if (!membership?.length) {
-      return {
-        ok: false,
-        message: 'Not a member of the group',
-      }
-    }
-
-    const status = await getMemberStatus(membership[0].group, membership)
-    if (status !== MemberStatus.Admin) {
-      return {
-        ok: false,
-        message: 'Not an admin of the group',
-      }
-    }
-    return {
-      ok: true,
     }
   }
 }
