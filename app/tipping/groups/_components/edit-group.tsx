@@ -63,7 +63,7 @@ export default function EditGroup({
             Edit Group
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href='/tipping/settings-group'>
+            <Link href='/tipping/group-admin'>
               <LucideCog className='size-4' />
               Group settings
             </Link>

@@ -116,7 +116,7 @@ export function NavMain({
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
                         <a
-                          href={'/tipping/settings-group'}
+                          href={'/tipping/group-admin'}
                           title={`Settings for ${currentGroup.name}`}
                         >
                           <span>{currentGroup.name}</span>
