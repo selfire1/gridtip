@@ -198,7 +198,13 @@ async function getRacesThatAreAfterCutoff(groupId: string) {
 }
 
 const getRaceIdToResultMap = cache(uncachedGetRaceIdToResultMap)
-const getOnlyRacesWithResults = cache(uncachedGetOnlyRacesWithResults)
+const getOnlyRacesWithResults = unstable_cache(
+  cache(uncachedGetOnlyRacesWithResults),
+  [],
+  {
+    tags: [CacheTag.Results],
+  },
+)
 const getPredictionsOfRacesAfterCutoff = cache(
   uncachedGetPredictionsOfRacesAfterCutoff,
 )
