@@ -16,6 +16,8 @@ import { Database as Db } from '@/db/types'
 import { isPositionAfterCutoff as getIsAfterCutoff } from '@/lib/utils/prediction-fields'
 import { conflictUpdateAllExcept } from '@/lib/utils/drizzle'
 import { serverSubmitTipSchema as schema } from './schema'
+import { revalidateTag } from 'next/cache'
+import { CacheTag } from '@/constants/cache'
 
 export async function submitChanges(input: Record<string, any>) {
   type Schema = z.infer<typeof schema>
@@ -48,9 +50,11 @@ export async function submitChanges(input: Record<string, any>) {
 
   if (prediction) {
     await updatePredictionEntries(prediction.id, parsed)
+    revalidateCache()
     return
   }
   await createPrediction(parsed)
+  revalidateCache()
 
   async function createPrediction(body: Schema) {
     const [{ id: predictionId }] = await db
@@ -71,6 +75,10 @@ export async function submitChanges(input: Record<string, any>) {
       .values(values)
       .returning()
     return entries
+  }
+
+  function revalidateCache() {
+    revalidateTag(CacheTag.Predictions)
   }
 
   async function updatePredictionEntries(

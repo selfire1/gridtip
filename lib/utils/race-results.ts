@@ -209,8 +209,70 @@ const getPredictionsOfRacesAfterCutoff = cache(
   uncachedGetPredictionsOfRacesAfterCutoff,
 )
 
+export type AllPredictions = Awaited<
+  ReturnType<typeof uncachedGetAllPredictions>
+>
+async function uncachedGetAllPredictions(groupId: Database.Group['id']) {
+  const predictionEntries = await db.query.predictionEntriesTable.findMany({
+    where: inArray(
+      predictionEntriesTable.predictionId,
+      db
+        .select({ id: predictionsTable.id })
+        .from(predictionsTable)
+        .where(eq(predictionsTable.groupId, groupId)),
+    ),
+    columns: {
+      id: true,
+      position: true,
+      constructorId: true,
+      driverId: true,
+    },
+    with: {
+      prediction: {
+        columns: {
+          raceId: true,
+        },
+        with: {
+          user: {
+            columns: {
+              id: true,
+              name: true,
+              image: true,
+            },
+          },
+        },
+      },
+      driver: {
+        columns: {
+          constructorId: true,
+          givenName: true,
+          familyName: true,
+          id: true,
+        },
+      },
+      constructor: {
+        columns: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  })
+  return predictionEntries
+}
+
+const createGetAllPredictions = (groupId: Database.Group['id']) =>
+  unstable_cache(
+    async () => await uncachedGetAllPredictions(groupId),
+    [groupId],
+    {
+      tags: [CacheTag.Predictions],
+    },
+  )
+
 export {
   getRaceIdToResultMap,
   getOnlyRacesWithResults,
   getPredictionsOfRacesAfterCutoff,
+  createGetAllPredictions,
 }
