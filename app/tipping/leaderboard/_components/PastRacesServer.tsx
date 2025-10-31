@@ -25,7 +25,6 @@ export default async function PastRacesServer({
 }: {
   groupId: string
 }) {
-  const CACHE_TTL = 60 * 20 // 20 minutes
   const getCachedInfo = unstable_cache(
     async () =>
       await Promise.all([
@@ -33,7 +32,7 @@ export default async function PastRacesServer({
         getAllPredictions(groupId),
       ]),
     [groupId],
-    { tags: [CacheTag.Results], revalidate: CACHE_TTL },
+    { tags: [CacheTag.Results] },
   )
 
   const constructors = await unstable_cache(() => getConstructors(), [], {
