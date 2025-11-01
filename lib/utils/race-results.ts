@@ -231,6 +231,7 @@ async function uncachedGetAllPredictions(groupId: Database.Group['id']) {
       prediction: {
         columns: {
           raceId: true,
+          createdAt: true,
         },
         with: {
           user: {

@@ -58,6 +58,7 @@ export async function getDriverOptions() {
           constructorId: true,
           givenName: true,
           familyName: true,
+          permanentNumber: true,
         },
         orderBy: (driver, { asc }) => asc(driver.familyName),
       }),

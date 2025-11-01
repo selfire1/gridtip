@@ -9,10 +9,12 @@ export default function Constructor({
   constructor,
   className,
   isSelected = false,
+  classNameImg,
 }: {
   constructor: ConstructorProps
   className?: string
   isSelected?: boolean
+  classNameImg?: string
 }) {
   return (
     <div
@@ -26,6 +28,7 @@ export default function Constructor({
         width={24}
         height={24}
         alt=''
+        className={classNameImg}
         src={`/img/constructors/${constructor.id}.avif`}
       />
       <span>{constructor.name}</span>
