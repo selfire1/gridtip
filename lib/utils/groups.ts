@@ -85,3 +85,19 @@ export async function getConstructorOptions() {
     },
   )()
 }
+
+export async function getGroupMembers(groupId: string) {
+  return (
+    await db.query.groupMembersTable.findMany({
+      where: (member, { eq }) => eq(member.groupId, groupId),
+      with: {
+        user: {
+          columns: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    })
+  ).map((member) => member.user)
+}
