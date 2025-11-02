@@ -3,7 +3,7 @@ import { LucideCheck } from 'lucide-react'
 
 export type DriverOptionProps = Pick<
   Database.Driver,
-  'constructorId' | 'givenName' | 'familyName' | 'id' | 'permanentNumber'
+  'constructorId' | 'givenName' | 'familyName' | 'id'
 >
 
 export default function DriverOption({
