@@ -126,6 +126,7 @@ export default function CreateTipDialog({
           </FieldGroup>
           {message && (
             <Alert
+              className='mt-4'
               variant='destructive'
               title={message.title}
               description={message.description}

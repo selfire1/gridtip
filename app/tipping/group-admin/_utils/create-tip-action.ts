@@ -51,7 +51,8 @@ export async function createTip(data: Schema): Promise<ServerResponse> {
   if (prediction && (await hasPredictionEntry(prediction.id))) {
     return {
       ok: false,
-      message: 'Tip already exists. Please edit instead.',
+      message:
+        'A tip for this race and position already exists for the selected user. Please edit the existing tip instead.',
     }
   }
 
