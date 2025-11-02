@@ -38,7 +38,11 @@ import CountryFlag from '@/components/country-flag'
 import { Database } from '@/db/types'
 import Link from 'next/link'
 import RaceTimes from '@/components/race-times'
-import { getIsSprint, getTipsDue } from '@/lib/utils/prediction-fields'
+import {
+  getIsSprint,
+  getLabel,
+  getTipsDue,
+} from '@/lib/utils/prediction-fields'
 import { Badge } from '@/components/ui/badge'
 import { Icon } from '@/components/icon'
 import { getCountryFlag } from '@/lib/utils/country-flag'
@@ -674,18 +678,6 @@ export default async function DashboardPage() {
           raceName: true,
         },
       }))!
-    }
-
-    function getLabel(position: RacePredictionField) {
-      const positionToLabel: Record<RacePredictionField, string> = {
-        pole: 'Pole position',
-        p1: 'P1',
-        p10: 'P10',
-        last: 'Last position',
-        constructorWithMostPoints: 'Constructor with most points',
-        sprintP1: 'Sprint P1',
-      }
-      return positionToLabel[position]
     }
 
     function TipRowByUser({

@@ -58,6 +58,7 @@ export async function getDriverOptions() {
           constructorId: true,
           givenName: true,
           familyName: true,
+          permanentNumber: true,
         },
         orderBy: (driver, { asc }) => asc(driver.familyName),
       }),
@@ -83,4 +84,20 @@ export async function getConstructorOptions() {
       tags: [CacheTag.Constructors],
     },
   )()
+}
+
+export async function getGroupMembers(groupId: string) {
+  return (
+    await db.query.groupMembersTable.findMany({
+      where: (member, { eq }) => eq(member.groupId, groupId),
+      with: {
+        user: {
+          columns: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    })
+  ).map((member) => member.user)
 }

@@ -20,6 +20,7 @@ import {
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar'
 import { Icon } from './icon'
+import { Database } from '@/db/types'
 
 export const nav = [
   {
@@ -59,7 +60,7 @@ export const nav = [
     ],
   },
   {
-    title: 'Manage',
+    title: 'Manage' as const,
     url: '#',
     icon: Settings2,
     items: [
@@ -79,7 +80,15 @@ export const nav = [
   },
 ]
 
-export function NavMain({ addTipsUrl }: { addTipsUrl: string | undefined }) {
+export function NavMain({
+  addTipsUrl,
+  currentGroup,
+  isAdmin,
+}: {
+  addTipsUrl: string | undefined
+  currentGroup: Pick<Database.Group, 'name'> | undefined
+  isAdmin: boolean
+}) {
   return (
     <SidebarGroup>
       <SidebarMenu>
@@ -103,6 +112,18 @@ export function NavMain({ addTipsUrl }: { addTipsUrl: string | undefined }) {
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <SidebarMenuSub>
+                  {item.title === 'Manage' && isAdmin && currentGroup && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <a
+                          href={'/tipping/group-admin'}
+                          title={`Settings for ${currentGroup.name}`}
+                        >
+                          <span>{currentGroup.name}</span>
+                        </a>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
                   {item.items?.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
                       <SidebarMenuSubButton asChild>

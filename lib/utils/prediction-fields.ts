@@ -126,3 +126,29 @@ function getCutoffDateForPosition(
   const lastChanceToEnterTips = subMinutes(rawCutoffDate, cutoff)
   return lastChanceToEnterTips
 }
+
+export function getLabel(
+  position: RacePredictionField,
+  options?: { short?: boolean },
+) {
+  const positionToLabel: Record<RacePredictionField, string> = {
+    pole: 'Pole position',
+    p1: 'P1',
+    p10: 'P10',
+    last: 'Last position',
+    constructorWithMostPoints: 'Constructor with most points',
+    sprintP1: 'Sprint P1',
+  }
+  const positionToLabelShort: Record<RacePredictionField, string> = {
+    pole: 'Pole',
+    p1: 'P1',
+    p10: 'P10',
+    last: 'Last',
+    constructorWithMostPoints: 'Constructor (most points)',
+    sprintP1: 'Sprint P1',
+  }
+  if (options?.short) {
+    return positionToLabelShort[position]
+  }
+  return positionToLabel[position]
+}

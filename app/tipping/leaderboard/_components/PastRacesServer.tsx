@@ -1,13 +1,13 @@
 import { unstable_cache } from 'next/cache'
 import { PREDICTION_FIELDS } from '@/constants'
 import { db } from '@/db'
-import { predictionEntriesTable, predictionsTable } from '@/db/schema/schema'
 import { Database } from '@/db/types'
 import {
+  AllPredictions,
+  createGetAllPredictions,
   getOnlyRacesWithResults,
   getRaceIdToResultMap,
 } from '@/lib/utils/race-results'
-import { eq, inArray } from 'drizzle-orm'
 import { CacheTag } from '@/constants/cache'
 import PastRacesClient from './PastRacesClient'
 
@@ -25,24 +25,15 @@ export default async function PastRacesServer({
 }: {
   groupId: string
 }) {
-  const CACHE_TTL = 60 * 20 // 20 minutes
-  const getCachedInfo = unstable_cache(
-    async () =>
-      await Promise.all([
-        getOnlyRacesWithResults(),
-        getAllPredictions(groupId),
-      ]),
-    [groupId],
-    { tags: [CacheTag.Results], revalidate: CACHE_TTL },
-  )
+  const getAllPredictions = createGetAllPredictions(groupId)
 
   const constructors = await unstable_cache(() => getConstructors(), [], {
     tags: [CacheTag.Constructors],
   })()
 
-  console.log('constructors', constructors) // FIXME: remove
+  const racesWithResults = await getOnlyRacesWithResults()
+  const allPredictionsWithUser = await getAllPredictions()
 
-  const [racesWithResults, allPredictionsWithUser] = await getCachedInfo()
   const results = await getRaceIdToResultMap()
 
   const resultsPerRaceMap = getResultsMaps(racesWithResults, {
@@ -60,7 +51,6 @@ export default async function PastRacesServer({
 }
 
 type Race = Awaited<ReturnType<typeof getOnlyRacesWithResults>>[number]
-type AllPredictions = Awaited<ReturnType<typeof getAllPredictions>>
 type Results = Awaited<ReturnType<typeof getRaceIdToResultMap>>
 
 type GetTipsInfo = {
@@ -146,55 +136,6 @@ function getGpTips({
           driver.id,
     }
   })
-}
-
-async function getAllPredictions(groupId: Database.Group['id']) {
-  const predictionEntries = await db.query.predictionEntriesTable.findMany({
-    where: inArray(
-      predictionEntriesTable.predictionId,
-      db
-        .select({ id: predictionsTable.id })
-        .from(predictionsTable)
-        .where(eq(predictionsTable.groupId, groupId)),
-    ),
-    columns: {
-      id: true,
-      position: true,
-      constructorId: true,
-      driverId: true,
-    },
-    with: {
-      prediction: {
-        columns: {
-          raceId: true,
-        },
-        with: {
-          user: {
-            columns: {
-              id: true,
-              name: true,
-              image: true,
-            },
-          },
-        },
-      },
-      driver: {
-        columns: {
-          constructorId: true,
-          givenName: true,
-          familyName: true,
-          id: true,
-        },
-      },
-      constructor: {
-        columns: {
-          id: true,
-          name: true,
-        },
-      },
-    },
-  })
-  return predictionEntries
 }
 
 function getPredictionsByUser(currentRacePredictions: AllPredictions) {

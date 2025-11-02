@@ -25,6 +25,7 @@ import {
   getPredictionsOfRacesAfterCutoff,
 } from '@/lib/utils/race-results'
 import { Card, CardContent } from '@/components/ui/card'
+import { getGroupMembers } from '@/lib/utils/groups'
 
 type Leaderboard = {
   place: number
@@ -298,22 +299,6 @@ export async function ResultsTable({ groupId }: { groupId: Group['id'] }) {
       acc.push(entry.points)
       return acc
     }, [] as number[])
-  }
-
-  async function getGroupMembers(groupId: string) {
-    return (
-      await db.query.groupMembersTable.findMany({
-        where: (member, { eq }) => eq(member.groupId, groupId),
-        with: {
-          user: {
-            columns: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-      })
-    ).map((member) => member.user)
   }
 
   function PositionDelta({ delta }: { delta: Row['pointsDelta'] }) {
