@@ -68,6 +68,7 @@ export default function CreateTipDialog({
   React.useEffect(() => {
     if (!open) {
       form.reset()
+      setMessage(undefined)
     }
   }, [open])
 
@@ -338,10 +339,14 @@ export default function CreateTipDialog({
   }
 
   async function onSubmit(data: Schema) {
+    setMessage(undefined)
     startTransition(async () => {
       const response = await createTip(data)
       if (!response.ok) {
-        toast.error('Error saving', { description: response.message })
+        setMessage({
+          title: 'Did not save',
+          description: response.message,
+        })
         return
       }
       toast.success('Tip created')
