@@ -26,7 +26,7 @@ import { Database } from '@/db/types'
 import { getIsSprint, getLabel } from '@/lib/utils/prediction-fields'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { isFuture } from 'date-fns'
-import { LucidePlus, LucideTriangleAlert } from 'lucide-react'
+import { LucideInfo, LucidePlus, LucideTriangleAlert } from 'lucide-react'
 import React from 'react'
 import {
   Controller,
@@ -81,6 +81,7 @@ export default function CreateTipDialog({
   const [message, setMessage] = React.useState<{
     title: string
     description?: string
+    isError?: boolean
   }>()
 
   const sprintRaceIds = new Set(
@@ -128,10 +129,10 @@ export default function CreateTipDialog({
           {message && (
             <Alert
               className='mt-4'
-              variant='destructive'
+              variant={message.isError ? 'destructive' : 'default'}
               title={message.title}
               description={message.description}
-              icon={LucideTriangleAlert}
+              icon={message.isError ? LucideTriangleAlert : LucideInfo}
             />
           )}
 
@@ -346,6 +347,7 @@ export default function CreateTipDialog({
         setMessage({
           title: 'Did not save',
           description: response.message,
+          isError: true,
         })
         return
       }
