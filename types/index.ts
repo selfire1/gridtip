@@ -8,3 +8,8 @@ export enum MemberStatus {
   Admin = 'Admin',
   Member = 'Member',
 }
+
+export type ServerResponse = {
+  ok: boolean
+  message: string
+} & Record<string, unknown>

@@ -7,7 +7,12 @@ import UserAvatar from '@/components/user-avatar'
 import { getLabel } from '@/lib/utils/prediction-fields'
 import RowAction from './row-action'
 import { Button } from '@/components/ui/button'
-import { LucideArrowDown, LucideArrowUp, LucideArrowUpDown } from 'lucide-react'
+import {
+  LucideArrowDown,
+  LucideArrowUp,
+  LucideArrowUpDown,
+  LucideMinus,
+} from 'lucide-react'
 
 export const columns: ColumnDef<PredictionRow>[] = [
   {
@@ -64,6 +69,25 @@ export const columns: ColumnDef<PredictionRow>[] = [
       },
     }) {
       return getLabel(position, { short: true })
+    },
+  },
+  {
+    accessorKey: 'overwrite',
+    header: 'Overwrite',
+    cell({
+      row: {
+        original: { overwrite },
+      },
+    }) {
+      switch (overwrite) {
+        case 'countAsCorrect':
+          return <p className='text-green-600 dark:text-green-200'>Correct</p>
+        case 'countAsIncorrect':
+          return <p className='text-destructive'>Incorrect</p>
+
+        default:
+          return <p className='italic text-muted-foreground/50 text-xs'>None</p>
+      }
     },
   },
   {

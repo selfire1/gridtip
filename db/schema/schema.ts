@@ -169,6 +169,7 @@ export const predictionEntriesTable = sqliteTable(
         onDelete: 'cascade',
       },
     ),
+    overwriteTo: text({ enum: ['countAsCorrect', 'countAsIncorrect'] }),
     createdAt: integer('created_at', { mode: 'timestamp' })
       .default(sql`(unixepoch())`)
       .notNull(),
@@ -254,6 +255,7 @@ export const resultsRelations = relations(resultsTable, ({ many, one }) => ({
 }))
 
 export type Group = typeof groupsTable.$inferSelect
+export type GroupId = Group['id']
 
 export type GroupMember = typeof groupMembersTable.$inferSelect
 
@@ -266,9 +268,11 @@ export type InsertDriver = typeof driversTable.$inferInsert
 export type Constructor = typeof constructorsTable.$inferSelect
 
 export type Prediction = typeof predictionsTable.$inferSelect
+export type PredictionId = Prediction['id']
 export type InsertPrediction = typeof predictionsTable.$inferInsert
 
 export type PredictionEntry = typeof predictionEntriesTable.$inferSelect
+export type PredictionEntryId = PredictionEntry['id']
 export type InsertPredictionEntry = typeof predictionEntriesTable.$inferInsert
 
 export type Result = typeof resultsTable.$inferSelect

@@ -37,16 +37,17 @@ const buttonVariants = cva(
   },
 )
 
+export type ShadButtonProps = React.ComponentProps<'button'> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean
+  }
 function Button({
   className,
   variant,
   size,
   asChild = false,
   ...props
-}: React.ComponentProps<'button'> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean
-  }) {
+}: ShadButtonProps) {
   const Comp = asChild ? Slot : 'button'
 
   return (

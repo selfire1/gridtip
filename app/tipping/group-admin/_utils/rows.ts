@@ -21,6 +21,7 @@ export type PredictionRow = {
   created: string
   position: RacePredictionField
   type: 'driver' | 'constructor'
+  overwrite: Database.PredictionEntry['overwriteTo']
 }
 
 export function formatPredictionsToRows(
@@ -46,6 +47,7 @@ export function formatPredictionsToRows(
       return {
         id: entry.id,
         created: entry.prediction.createdAt.toString(),
+        overwrite: entry.overwriteTo,
         raceDate: race.grandPrixDate.toString(),
         race: {
           id: entry.prediction.raceId!,
