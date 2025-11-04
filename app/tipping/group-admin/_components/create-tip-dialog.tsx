@@ -45,19 +45,31 @@ type RaceOption = Pick<
   'id' | 'locality' | 'grandPrixDate' | 'sprintQualifyingDate'
 >
 
+export type TipFormData = {
+  users: Pick<Database.User, 'id' | 'name'>[]
+  drivers: DriverOptionProps[]
+  constructors: ConstructorProps[]
+  races: RaceOption[]
+}
+
+type TipFormProps = TipFormData & {
+  defaultValues?: Partial<Schema>
+  button?: React.ReactNode
+}
+
 export default function CreateTipDialog({
   users,
   races,
   drivers,
   constructors,
-}: {
-  users: Pick<Database.User, 'id' | 'name'>[]
-  drivers: DriverOptionProps[]
-  constructors: ConstructorProps[]
-  races: RaceOption[]
-}) {
+  defaultValues,
+  button = (
+    <Button variant='outline' size='sm' icon={LucidePlus} label='Create tip' />
+  ),
+}: TipFormProps) {
   const form = useForm<Schema>({
     resolver: zodResolver(formSchema),
+    defaultValues,
   })
 
   const router = useRouter()
@@ -104,14 +116,7 @@ export default function CreateTipDialog({
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
-      <DialogTrigger asChild>
-        <Button
-          variant='outline'
-          size='sm'
-          icon={LucidePlus}
-          label='Create tip'
-        />
-      </DialogTrigger>
+      <DialogTrigger asChild>{button}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create new tip</DialogTitle>

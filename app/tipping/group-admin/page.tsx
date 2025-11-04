@@ -14,7 +14,8 @@ import { formatPredictionsToRows } from './_utils/rows'
 import { unstable_cache } from 'next/cache'
 import { db } from '@/db'
 import { CacheTag } from '@/constants/cache'
-import CreateTipDialog from './_components/create-tip-dialog'
+import CreateTipDialog, { TipFormData } from './_components/create-tip-dialog'
+import TipFormProvider from './_components/edit-tip-context'
 
 export default async function GroupSettings() {
   const { userId } = await verifySession()
@@ -51,6 +52,13 @@ export default async function GroupSettings() {
     race: raceMap,
   })
 
+  const formProps: TipFormData = {
+    users: members,
+    races,
+    constructors,
+    drivers,
+  }
+
   return (
     <div className='space-y-6'>
       <div className='space-y-1'>
@@ -68,14 +76,11 @@ export default async function GroupSettings() {
               group member.
             </p>
           </div>
-          <CreateTipDialog
-            users={members}
-            races={races}
-            constructors={constructors}
-            drivers={drivers}
-          />
+          <CreateTipDialog {...formProps} />
         </div>
-        <DataTable columns={columns} data={rows} />
+        <TipFormProvider context={formProps}>
+          <DataTable columns={columns} data={rows} />
+        </TipFormProvider>
       </section>
     </div>
   )
