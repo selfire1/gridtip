@@ -99,6 +99,7 @@ export async function submitChanges(input: Record<string, any>) {
           'predictionId',
           'position',
           'createdAt',
+          'overwriteTo',
         ]),
       })
   }
