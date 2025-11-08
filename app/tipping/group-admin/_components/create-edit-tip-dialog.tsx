@@ -34,33 +34,53 @@ import {
   ControllerRenderProps,
   useForm,
 } from 'react-hook-form'
-import { createTip } from '../_utils/create-tip-action'
+import { createTip, updateTip } from '../_utils/create-tip-action'
 import { toast } from 'sonner'
 import Button from '@/components/button'
 import { formSchema, Schema } from '../_utils/schema'
 import { useRouter } from 'next/navigation'
+import { SelectUser } from './select-user'
 
 type RaceOption = Pick<
   Database.Race,
   'id' | 'locality' | 'grandPrixDate' | 'sprintQualifyingDate'
 >
 
-export default function CreateTipDialog({
-  users,
-  races,
-  drivers,
-  constructors,
-}: {
+export type TipFormData = {
   users: Pick<Database.User, 'id' | 'name'>[]
   drivers: DriverOptionProps[]
   constructors: ConstructorProps[]
   races: RaceOption[]
-}) {
+}
+
+type TipFormProps = TipFormData & {
+  defaultValues?: Partial<Schema>
+  button?: React.ReactNode
+  predictionEntryId?: Database.PredictionEntryId
+}
+
+export default function CreateOrEditTipDialog({
+  users,
+  races,
+  drivers,
+  constructors,
+  defaultValues,
+  predictionEntryId,
+  button = (
+    <Button variant='outline' size='sm' icon={LucidePlus} label='Create tip' />
+  ),
+}: TipFormProps) {
   const form = useForm<Schema>({
     resolver: zodResolver(formSchema),
+    defaultValues,
   })
 
   const router = useRouter()
+
+  const mode = !Object.values(defaultValues ?? {})?.length ? 'create' : 'edit'
+  const isEditing = mode === 'edit'
+
+  const copy = getCopy()
 
   const [isPending, startTransition] = React.useTransition()
   const [open, setOpen] = React.useState(false)
@@ -104,20 +124,11 @@ export default function CreateTipDialog({
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
-      <DialogTrigger asChild>
-        <Button
-          variant='outline'
-          size='sm'
-          icon={LucidePlus}
-          label='Create tip'
-        />
-      </DialogTrigger>
+      <DialogTrigger asChild>{button}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create new tip</DialogTitle>
-          <DialogDescription>
-            Create a tip on behalf of a member of the group.
-          </DialogDescription>
+          <DialogTitle>{copy.title[mode]}</DialogTitle>
+          <DialogDescription>{copy.description[mode]}</DialogDescription>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
@@ -137,7 +148,7 @@ export default function CreateTipDialog({
           )}
 
           <Field className='mt-4'>
-            <div className='flex justify-end gap-2'>
+            <div className='flex justify-between gap-2'>
               <Button
                 label='Cancel'
                 type='button'
@@ -145,7 +156,7 @@ export default function CreateTipDialog({
                 variant='outline'
               />
               <Button
-                label='Save'
+                label={copy.button[mode]}
                 type='submit'
                 isPending={isPending}
                 variant='default'
@@ -179,7 +190,7 @@ export default function CreateTipDialog({
     if (isFuture) {
       setMessage({
         title: 'This race is in the future',
-        description: 'Are you sure you want to set a tip for it?',
+        description: `Are you sure you want to ${mode === 'create' ? 'set a tip for it' : 'edit the tip for it'}?`,
       })
     }
 
@@ -202,6 +213,7 @@ export default function CreateTipDialog({
           return (
             <Combobox
               items={availablePositions.map((field) => ({ id: field }))}
+              disabled={isEditing}
               value={field.value}
               onSelect={(value) => {
                 field.onChange(value)
@@ -241,7 +253,9 @@ export default function CreateTipDialog({
               getSearchValue={(driver) =>
                 [driver.givenName, driver.familyName].join(' ')
               }
-              renderItem={(driver) => driver.familyName}
+              renderItem={(driver) =>
+                [driver.givenName, driver.familyName].join(' ')
+              }
             />
           )
         }}
@@ -256,23 +270,11 @@ export default function CreateTipDialog({
         label='Tipper'
         renderItem={({ field }) => {
           return (
-            <Combobox
-              items={users}
+            <SelectUser
+              users={users}
               value={field.value}
               onSelect={field.onChange}
-              getSearchValue={(user) => user.name}
-              placeholder='Search users…'
-              emptyText='Select a user'
-              renderItem={(user) => (
-                <div className='flex items-center gap-2'>
-                  <UserAvatar
-                    name={user.name}
-                    id={user.id}
-                    className='size-6'
-                  />
-                  <p>{user.name}</p>
-                </div>
-              )}
+              disabled={isEditing}
             />
           )
         }}
@@ -322,6 +324,7 @@ export default function CreateTipDialog({
         renderItem={({ field }) => (
           <Combobox
             items={sortedRaces}
+            disabled={isEditing}
             value={field.value}
             onSelect={(raceId) => {
               field.onChange(raceId)
@@ -341,8 +344,16 @@ export default function CreateTipDialog({
 
   async function onSubmit(data: Schema) {
     setMessage(undefined)
+    if (!predictionEntryId) {
+      toast.error('Something went wrong', {
+        description: 'Tip does not seem to exist',
+      })
+      return
+    }
     startTransition(async () => {
-      const response = await createTip(data)
+      const response = isEditing
+        ? await updateTip(predictionEntryId, data)
+        : await createTip(data)
       if (!response.ok) {
         setMessage({
           title: 'Did not save',
@@ -351,10 +362,31 @@ export default function CreateTipDialog({
         })
         return
       }
-      toast.success('Tip created')
+      toast.success(copy.toast[mode])
       setOpen(false)
       router.refresh()
       return
     })
+  }
+
+  function getCopy() {
+    return {
+      title: {
+        create: 'Create new tip',
+        edit: 'Update tip',
+      },
+      description: {
+        create: 'Create a tip on behalf of a member of the group.',
+        edit: 'Change this existing tip',
+      },
+      button: {
+        create: 'Save',
+        edit: 'Save',
+      },
+      toast: {
+        create: 'Tip created',
+        edit: 'Tip updated',
+      },
+    } as const
   }
 }

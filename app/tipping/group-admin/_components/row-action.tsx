@@ -1,9 +1,8 @@
 'use client'
 
 import { PredictionRow } from '../_utils/rows'
-import { LucideMoreHorizontal } from 'lucide-react'
+import { LucideMoreHorizontal, LucidePen } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,21 +11,45 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useTipFormContext } from './edit-tip-context'
+import CreateOrEditTipDialog from './create-edit-tip-dialog'
+import Button from '@/components/button'
+import { Button as ShadButton } from '@/components/ui/button'
 
 export default function RowAction({ row }: { row: PredictionRow }) {
+  const context = useTipFormContext()
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant='ghost' className='h-8 w-8 p-0'>
+        <ShadButton variant='ghost' className='h-8 w-8 p-0'>
           <span className='sr-only'>Open menu</span>
           <LucideMoreHorizontal className='h-4 w-4' />
-        </Button>
+        </ShadButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end'>
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>View customer</DropdownMenuItem>
-        <DropdownMenuItem>View payment details</DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <CreateOrEditTipDialog
+            {...context}
+            predictionEntryId={row.id}
+            defaultValues={{
+              userId: row.user.id,
+              raceId: row.race.id,
+              position: row.position,
+              valueId: row.value.id,
+            }}
+            button={
+              <Button
+                label='Edit tip'
+                icon={LucidePen}
+                variant='ghost'
+                className='w-full text-start justify-start'
+              />
+            }
+          />
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

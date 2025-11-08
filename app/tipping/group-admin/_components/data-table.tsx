@@ -9,6 +9,8 @@ import {
   getPaginationRowModel,
   SortingState,
   getSortedRowModel,
+  Row,
+  SortingFn,
 } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
 
@@ -20,6 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { RACE_PREDICTION_FIELDS } from '@/constants'
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -37,6 +40,10 @@ export function DataTable<TData, TValue>({
     },
     {
       id: 'user',
+      desc: true,
+    },
+    {
+      id: 'position',
       desc: true,
     },
   ])
@@ -130,4 +137,13 @@ export function DataTable<TData, TValue>({
       </div>
     </div>
   )
+  function sortByPosition<TData>(): SortingFn<TData> {
+    const fields = RACE_PREDICTION_FIELDS
+    return (rowA: Row<TData>, rowB: Row<TData>, columnId: string) => {
+      return (
+        fields.indexOf(rowA.getValue(columnId)) -
+        fields.indexOf(rowB.getValue(columnId))
+      )
+    }
+  }
 }
