@@ -4,13 +4,13 @@ import { SQLiteTable } from 'drizzle-orm/sqlite-core'
 /**
  * @link https://github.com/drizzle-team/drizzle-orm/issues/1728#issuecomment-2148635569
  */
-export function conflictUpdateAllExcept<
-  T extends SQLiteTable,
-  E extends (keyof T['$inferInsert'])[],
->(table: T, except: E) {
+export function onConflictUpdateKeys<
+  TTable extends SQLiteTable,
+  TInclude extends (keyof TTable['$inferInsert'])[],
+>(table: TTable, include: TInclude) {
   const columns = getTableColumns(table)
-  const updateColumns = Object.entries(columns).filter(
-    ([col]) => !except.includes(col as keyof typeof table.$inferInsert),
+  const updateColumns = Object.entries(columns).filter(([col]) =>
+    include.includes(col as keyof typeof table.$inferInsert),
   )
 
   return updateColumns.reduce(
@@ -19,5 +19,5 @@ export function conflictUpdateAllExcept<
       [colName]: sql.raw(`excluded.${table.name}`),
     }),
     {},
-  ) as Omit<Record<keyof typeof table.$inferInsert, SQL>, E[number]>
+  ) as Omit<Record<keyof typeof table.$inferInsert, SQL>, TInclude[number]>
 }
