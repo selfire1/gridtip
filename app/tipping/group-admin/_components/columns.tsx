@@ -8,6 +8,7 @@ import { getLabel } from '@/lib/utils/prediction-fields'
 import RowAction from './row-action'
 import { Button } from '@/components/ui/button'
 import { LucideArrowDown, LucideArrowUp, LucideArrowUpDown } from 'lucide-react'
+import { RACE_PREDICTION_FIELDS } from '@/constants'
 
 export const columns: ColumnDef<PredictionRow>[] = [
   {
@@ -57,7 +58,16 @@ export const columns: ColumnDef<PredictionRow>[] = [
   },
   {
     accessorKey: 'position',
-    header: 'Position',
+    id: 'position',
+    // header: 'Position',
+    header: ({ column }) => <SortHeader column={column} label='Position' />,
+    sortingFn: (rowA, roB, columnId) => {
+      const fields = RACE_PREDICTION_FIELDS
+      return (
+        fields.indexOf(roB.getValue(columnId)) -
+        fields.indexOf(rowA.getValue(columnId))
+      )
+    },
     cell({
       row: {
         original: { position },
