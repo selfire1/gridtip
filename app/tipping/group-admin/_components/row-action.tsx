@@ -50,7 +50,6 @@ export default function RowAction({ row }: { row: PredictionRow }) {
             }
           />
         </DropdownMenuItem>
-        <DropdownMenuItem disabled>TODO: Delete</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
