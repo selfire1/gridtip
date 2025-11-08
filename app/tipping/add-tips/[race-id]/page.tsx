@@ -18,7 +18,7 @@ import { eq } from 'drizzle-orm'
 import {
   getClosedFields,
   getIsSprint,
-  getPositionType,
+  getTipTypeFromPosition,
   isPredictionForRace,
   isRaceAbleToBeTipped,
 } from '@/lib/utils/prediction-fields'
@@ -164,7 +164,9 @@ export default async function RaceFormPage({
           return acc
         }
         const savedTip =
-          getPositionType(position) === 'driver' ? tip.driver : tip.constructor
+          getTipTypeFromPosition(position) === 'driver'
+            ? tip.driver
+            : tip.constructor
         if (!savedTip) {
           return acc
         }

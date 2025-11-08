@@ -11,6 +11,7 @@ import { revalidateTag } from 'next/cache'
 import { CacheTag } from '@/constants/cache'
 import { eq } from 'drizzle-orm'
 import { RacePredictionField } from '@/constants'
+import { getTipTypeFromPosition } from '@/lib/utils/prediction-fields'
 
 export async function createTip(data: Schema): Promise<ServerResponse> {
   const result = await verifyRequest(data)
@@ -193,7 +194,7 @@ export async function updateTip(
 }
 
 function getValueObject(data: Schema) {
-  const isForDriver = data.position !== 'constructorWithMostPoints'
+  const isForDriver = getTipTypeFromPosition(data.position) === 'driver'
   return isForDriver
     ? {
         driverId: data.valueId,

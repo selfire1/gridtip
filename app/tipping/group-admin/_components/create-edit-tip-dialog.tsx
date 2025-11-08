@@ -23,7 +23,12 @@ import {
 import UserAvatar from '@/components/user-avatar'
 import { RACE_PREDICTION_FIELDS, RacePredictionField } from '@/constants'
 import { Database } from '@/db/types'
-import { getIsSprint, getLabel } from '@/lib/utils/prediction-fields'
+import {
+  getIsSprint,
+  getLabel,
+  getTipTypeFromPosition,
+  TipType,
+} from '@/lib/utils/prediction-fields'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { isFuture } from 'date-fns'
 import { LucideInfo, LucidePlus, LucideTriangleAlert } from 'lucide-react'
@@ -96,7 +101,11 @@ export default function CreateOrEditTipDialog({
     RacePredictionField[]
   >([...RACE_PREDICTION_FIELDS])
 
-  const [tipType, setTipType] = React.useState<'constructor' | 'driver'>()
+  const [tipType, setTipType] = React.useState<TipType>(
+    defaultValues?.position
+      ? getTipTypeFromPosition(defaultValues.position)
+      : 'driver',
+  )
 
   const [message, setMessage] = React.useState<{
     title: string
@@ -173,11 +182,12 @@ export default function CreateOrEditTipDialog({
   )
 
   function onPositionChange(position: RacePredictionField | undefined) {
-    if (position === 'constructorWithMostPoints') {
-      setTipType('constructor')
+    if (!position) {
+      setTipType('driver')
       return
     }
-    setTipType('driver')
+    const type = getTipTypeFromPosition(position)
+    setTipType(type)
   }
 
   function onRaceChange(raceId: RaceOption['id'] | undefined) {

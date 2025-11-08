@@ -16,23 +16,6 @@ export function isPredictionForRace(
   return RACE_PREDICTION_FIELDS.includes(position as RacePredictionField)
 }
 
-export function getPositionType(
-  position: PredictionField,
-): 'driver' | 'constructor' {
-  switch (position) {
-    case 'sprintP1':
-    case 'pole':
-    case 'p1':
-    case 'p10':
-    case 'last':
-    case 'championshipDriver':
-      return 'driver'
-    case 'constructorWithMostPoints':
-    case 'championshipConstructor':
-      return 'constructor'
-  }
-}
-
 export function getIsSprint(race: Pick<Database.Race, 'sprintQualifyingDate'>) {
   return !!race.sprintQualifyingDate
 }
@@ -151,4 +134,17 @@ export function getLabel(
     return positionToLabelShort[position]
   }
   return positionToLabel[position]
+}
+
+export type TipType = 'driver' | 'constructor'
+export function getTipTypeFromPosition(position: RacePredictionField): TipType {
+  const positionToType: Record<RacePredictionField, TipType> = {
+    sprintP1: 'driver',
+    pole: 'driver',
+    p1: 'driver',
+    p10: 'driver',
+    last: 'driver',
+    constructorWithMostPoints: 'constructor',
+  }
+  return positionToType[position]
 }

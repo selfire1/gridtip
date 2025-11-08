@@ -310,7 +310,7 @@ export async function submitChanges(input: Record<string, any>) {
     )
 
     const driverKeys = DRIVER_RACE_PREDICTION_FIELDS
-    const constructorKeys = ['constructorWithMostPoints'] as const
+    const constructorKeys = CONSTRUCTOR_RACE_PREDICTION_FIELDS
 
     driverKeys.forEach((key) => {
       const givenId = body[key]?.id
