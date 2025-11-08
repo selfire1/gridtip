@@ -336,7 +336,7 @@ export async function ResultsTable({ groupId }: { groupId: Group['id'] }) {
       }
       return {
         string: delta,
-        className: 'text-green-600 dark:text-green-200',
+        className: 'text-success',
         icon: LucideArrowUp,
       }
     }
@@ -379,7 +379,7 @@ export async function ResultsTable({ groupId }: { groupId: Group['id'] }) {
       }
       return {
         string: `+${delta}`,
-        className: 'text-green-600 dark:text-green-200',
+        className: 'text-success',
         // icon: LucideArrowUp,
       }
     }

@@ -11,6 +11,11 @@ import { PREDICTION_FIELDS, DEFAULT_CUTOFF_MINS } from '@/constants'
 import { relations, sql } from 'drizzle-orm'
 import { SUPPORTED_ICON_NAMES } from '@/constants/icon-names'
 
+export const TIP_OVERWRITE_OPTIONS = [
+  'countAsCorrect',
+  'countAsIncorrect',
+] as const
+
 export const groupsTable = sqliteTable('groups', {
   id: text().primaryKey().$defaultFn(createId),
   name: text().notNull(),
@@ -169,7 +174,7 @@ export const predictionEntriesTable = sqliteTable(
         onDelete: 'cascade',
       },
     ),
-    overwriteTo: text({ enum: ['countAsCorrect', 'countAsIncorrect'] }),
+    overwriteTo: text({ enum: TIP_OVERWRITE_OPTIONS }),
     createdAt: integer('created_at', { mode: 'timestamp' })
       .default(sql`(unixepoch())`)
       .notNull(),

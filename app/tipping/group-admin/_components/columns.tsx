@@ -9,6 +9,12 @@ import RowAction from './row-action'
 import { Button } from '@/components/ui/button'
 import { LucideArrowDown, LucideArrowUp, LucideArrowUpDown } from 'lucide-react'
 import { RACE_PREDICTION_FIELDS } from '@/constants'
+import { Icon } from '@/components/icon'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 export const columns: ColumnDef<PredictionRow>[] = [
   {
@@ -86,9 +92,23 @@ export const columns: ColumnDef<PredictionRow>[] = [
     }) {
       switch (overwrite) {
         case 'countAsCorrect':
-          return <p className='text-green-600 dark:text-green-200'>Correct</p>
+          return (
+            <Tooltip>
+              <TooltipTrigger className='flex items-center'>
+                <Icon.CorrectTip className='text-success' size={16} />
+              </TooltipTrigger>
+              <TooltipContent>Scored as correct</TooltipContent>
+            </Tooltip>
+          )
         case 'countAsIncorrect':
-          return <p className='text-destructive'>Incorrect</p>
+          return (
+            <Tooltip>
+              <TooltipTrigger className='flex items-center'>
+                <Icon.IncorrectTip className='text-destructive' size={16} />
+              </TooltipTrigger>
+              <TooltipContent>Scored as incorrect</TooltipContent>
+            </Tooltip>
+          )
 
         default:
           return <p className='italic text-muted-foreground/50 text-xs'>None</p>
