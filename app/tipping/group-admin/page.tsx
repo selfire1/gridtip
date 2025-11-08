@@ -18,7 +18,6 @@ import CreateOrEditTipDialog, {
   TipFormData,
 } from './_components/create-edit-tip-dialog'
 import TipFormProvider from './_components/edit-tip-context'
-import { Combobox } from '@/components/combobox'
 
 export default async function GroupSettings() {
   const { userId } = await verifySession()
