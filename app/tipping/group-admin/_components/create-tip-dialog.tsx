@@ -246,7 +246,9 @@ export default function CreateTipDialog({
               getSearchValue={(driver) =>
                 [driver.givenName, driver.familyName].join(' ')
               }
-              renderItem={(driver) => driver.familyName}
+              renderItem={(driver) =>
+                [driver.givenName, driver.familyName].join(' ')
+              }
             />
           )
         }}
