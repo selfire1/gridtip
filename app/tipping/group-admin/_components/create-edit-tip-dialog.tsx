@@ -39,6 +39,7 @@ import { toast } from 'sonner'
 import Button from '@/components/button'
 import { formSchema, Schema } from '../_utils/schema'
 import { useRouter } from 'next/navigation'
+import { SelectUser } from './select-user'
 
 type RaceOption = Pick<
   Database.Race,
@@ -269,24 +270,11 @@ export default function CreateOrEditTipDialog({
         label='Tipper'
         renderItem={({ field }) => {
           return (
-            <Combobox
-              items={users}
+            <SelectUser
+              users={users}
               value={field.value}
               onSelect={field.onChange}
-              getSearchValue={(user) => user.name}
-              placeholder='Search users…'
-              emptyText='Select a user'
               disabled={isEditing}
-              renderItem={(user) => (
-                <div className='flex items-center gap-2'>
-                  <UserAvatar
-                    name={user.name}
-                    id={user.id}
-                    className='size-6'
-                  />
-                  <p>{user.name}</p>
-                </div>
-              )}
             />
           )
         }}

@@ -18,6 +18,7 @@ import CreateOrEditTipDialog, {
   TipFormData,
 } from './_components/create-edit-tip-dialog'
 import TipFormProvider from './_components/edit-tip-context'
+import { Combobox } from '@/components/combobox'
 
 export default async function GroupSettings() {
   const { userId } = await verifySession()
@@ -80,9 +81,14 @@ export default async function GroupSettings() {
           </div>
           <CreateOrEditTipDialog {...formProps} />
         </div>
-        <TipFormProvider context={formProps}>
-          <DataTable columns={columns} data={rows} />
-        </TipFormProvider>
+        <div>
+          <div className='flex items-center flex-wrap gap-2'>
+            <p>Filters</p>
+          </div>
+          <TipFormProvider context={formProps}>
+            <DataTable columns={columns} data={rows} />
+          </TipFormProvider>
+        </div>
       </section>
     </div>
   )
