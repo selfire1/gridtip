@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useTipFormContext } from './edit-tip-context'
-import CreateTipDialog from './create-tip-dialog'
+import CreateOrEditTipDialog from './create-edit-tip-dialog'
 import Button from '@/components/button'
 import { Button as ShadButton } from '@/components/ui/button'
 
@@ -31,8 +31,9 @@ export default function RowAction({ row }: { row: PredictionRow }) {
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <CreateTipDialog
+          <CreateOrEditTipDialog
             {...context}
+            predictionEntryId={row.id}
             defaultValues={{
               userId: row.user.id,
               raceId: row.race.id,

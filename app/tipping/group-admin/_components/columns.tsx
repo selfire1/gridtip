@@ -7,12 +7,7 @@ import UserAvatar from '@/components/user-avatar'
 import { getLabel } from '@/lib/utils/prediction-fields'
 import RowAction from './row-action'
 import { Button } from '@/components/ui/button'
-import {
-  LucideArrowDown,
-  LucideArrowUp,
-  LucideArrowUpDown,
-  LucideMinus,
-} from 'lucide-react'
+import { LucideArrowDown, LucideArrowUp, LucideArrowUpDown } from 'lucide-react'
 
 export const columns: ColumnDef<PredictionRow>[] = [
   {

@@ -1,6 +1,6 @@
 'use client'
 import * as React from 'react'
-import { TipFormData } from './create-tip-dialog'
+import { TipFormData } from './create-edit-tip-dialog'
 
 const GroupAdminContext = React.createContext<TipFormData | null>(null)
 export function useTipFormContext() {

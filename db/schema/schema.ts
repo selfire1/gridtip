@@ -260,6 +260,7 @@ export type GroupId = Group['id']
 export type GroupMember = typeof groupMembersTable.$inferSelect
 
 export type Race = typeof racesTable.$inferSelect
+export type RaceId = Race['id']
 export type InsertRace = typeof racesTable.$inferInsert
 
 export type Driver = typeof driversTable.$inferSelect
@@ -279,3 +280,4 @@ export type Result = typeof resultsTable.$inferSelect
 export type InsertResult = typeof resultsTable.$inferInsert
 
 export type User = typeof user.$inferSelect
+export type UserId = User['id']

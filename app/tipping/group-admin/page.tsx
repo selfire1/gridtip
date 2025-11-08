@@ -14,7 +14,9 @@ import { formatPredictionsToRows } from './_utils/rows'
 import { unstable_cache } from 'next/cache'
 import { db } from '@/db'
 import { CacheTag } from '@/constants/cache'
-import CreateTipDialog, { TipFormData } from './_components/create-tip-dialog'
+import CreateOrEditTipDialog, {
+  TipFormData,
+} from './_components/create-edit-tip-dialog'
 import TipFormProvider from './_components/edit-tip-context'
 
 export default async function GroupSettings() {
@@ -76,7 +78,7 @@ export default async function GroupSettings() {
               group member.
             </p>
           </div>
-          <CreateTipDialog {...formProps} />
+          <CreateOrEditTipDialog {...formProps} />
         </div>
         <TipFormProvider context={formProps}>
           <DataTable columns={columns} data={rows} />
