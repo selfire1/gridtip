@@ -41,8 +41,7 @@ export const GET = async (_request: NextRequest) => {
   }
 
   const ids = await setResultsInDatabase(jolpicaResults)
-  revalidateTag(CacheTag.Races)
-  revalidateTag(CacheTag.Predictions)
+  revalidateTag(CacheTag.Results)
 
   return createResponse(201, {
     updated: ids.length,
