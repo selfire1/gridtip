@@ -18,6 +18,11 @@ import CreateOrEditTipDialog, {
   TipFormData,
 } from './_components/create-edit-tip-dialog'
 import TipFormProvider from './_components/edit-tip-context'
+import Button from '@/components/button'
+import React from 'react'
+import { updateCache } from './_utils/update-results-action'
+import { toast } from 'sonner'
+import { UpdateResultsButton } from './_components/update-results-button'
 
 export default async function GroupSettings() {
   const { userId } = await verifySession()
@@ -68,6 +73,7 @@ export default async function GroupSettings() {
         <p className='text-muted-foreground'>
           You can manage this group through these admin settings.
         </p>
+        <UpdateResultsButton />
       </div>
       <section className='space-y-4'>
         <div className='flex gap-x-4 flex-wrap justify-between items-end gap-y-2'>
