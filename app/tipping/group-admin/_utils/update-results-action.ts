@@ -18,9 +18,16 @@ export async function updateCache() {
   if (!isAdmin) {
     return {
       ok: false,
-      message: 'Only admins can create a new tip',
+      message: 'Only admins can clear the cache',
     } as const
   }
-  revalidateTag(CacheTag.Predictions)
+  const _result = [
+    CacheTag.Results,
+    CacheTag.Constructors,
+    CacheTag.Drivers,
+    CacheTag.Races,
+    CacheTag.Predictions,
+  ].forEach((tag) => revalidateTag(tag))
+
   return { ok: true }
 }

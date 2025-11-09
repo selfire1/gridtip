@@ -10,7 +10,7 @@ export function UpdateResultsButton() {
 
   return (
     <Button
-      label='Refresh results'
+      label='Clear cache'
       isPending={isPending}
       onClick={handleClick}
     ></Button>
