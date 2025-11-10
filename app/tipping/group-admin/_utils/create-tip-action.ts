@@ -65,7 +65,7 @@ export async function createTip(data: Schema): Promise<ServerResponse> {
       await db.insert(predictionEntriesTable).values({
         predictionId,
         position,
-        overwriteTo: data.overwriteTo,
+        overwriteTo: getOverwrite(data.overwriteTo),
         ...valueObject,
       })
     }
@@ -189,10 +189,7 @@ export async function updateTip(
       .update(predictionEntriesTable)
       .set({
         ...getValueObject(data),
-        overwriteTo:
-          data.overwriteTo === undefined || data.overwriteTo === 'normal'
-            ? null
-            : data.overwriteTo,
+        overwriteTo: getOverwrite(data.overwriteTo),
       })
       .where(eq(predictionEntriesTable.id, predictionEntryId))
   }
@@ -225,4 +222,14 @@ async function getPrediction({
       )
     },
   })
+}
+
+function getOverwrite(overwrite: Schema['overwriteTo']) {
+  if (!overwrite) {
+    return null
+  }
+  if (overwrite === 'normal') {
+    return null
+  }
+  return overwrite
 }
