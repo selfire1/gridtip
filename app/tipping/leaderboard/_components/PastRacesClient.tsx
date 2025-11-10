@@ -251,7 +251,7 @@ export default function PastRacesClient({
                 <TableCell>
                   <div>
                     <UserResults
-                      positionText='Pole'
+                      positionText='P1'
                       userInfo={row.predictedP1By}
                       isCorrect={row.isP1Correct}
                     />
