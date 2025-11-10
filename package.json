@@ -13,7 +13,7 @@
     "db:prod:generate": "bun --env-file=.env.production run db:generate",
     "db:prod:migrate": "bun --env-file=.env.production run db:migrate",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "next lint",
     "test": "vitest",
     "update-tips": "bun run --env-file=.env.production scripts/_local/add-tips"
   },
