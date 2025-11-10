@@ -1,10 +1,12 @@
 import {
+  LucideCheckCircle,
   LucideCheckSquare,
   LucideHammer,
   LucideListOrdered,
   LucideSquareArrowRight,
   LucideTrophy,
   LucideUsers,
+  LucideXCircle,
 } from 'lucide-react'
 
 export const Icon = {
@@ -14,4 +16,6 @@ export const Icon = {
   GrandPrix: LucideTrophy,
   Sprint: LucideSquareArrowRight,
   Constructor: LucideHammer,
+  CorrectTip: LucideCheckCircle,
+  IncorrectTip: LucideXCircle,
 }

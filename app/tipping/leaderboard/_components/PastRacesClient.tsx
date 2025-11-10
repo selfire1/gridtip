@@ -5,6 +5,7 @@ import {
   Constructors,
   RacePredictionMaps,
   RacesWithResults,
+  UserMapEntry,
 } from './PastRacesServer'
 import { Button } from '@/components/ui/button'
 import {
@@ -146,21 +147,21 @@ export default function PastRacesClient({
                   <div>
                     <UserResults
                       positionText='P1'
-                      users={row.predictedP1By}
+                      userInfo={row.predictedP1By}
                       isCorrect={row.isP1Correct}
                     />
                   </div>
                   <div>
                     <UserResults
                       positionText='P10'
-                      users={row.predictedP10By}
+                      userInfo={row.predictedP10By}
                       isCorrect={row.isP10Correct}
                     />
                   </div>
                   <div>
                     <UserResults
                       positionText='Last'
-                      users={row.predictedLast}
+                      userInfo={row.predictedLast}
                       isCorrect={row.isLastCorrect}
                     />
                   </div>
@@ -188,7 +189,7 @@ export default function PastRacesClient({
                   <div>
                     <UserResults
                       positionText='Pole'
-                      users={row.predictedBy}
+                      userInfo={row.predictedBy}
                       isCorrect={row.isCorrect}
                       maxUsersOverwrite={6}
                     />
@@ -223,7 +224,7 @@ export default function PastRacesClient({
                 <TableCell>
                   <div>
                     <UserResults
-                      users={row.users}
+                      userInfo={row.users}
                       isCorrect={row.isCorrect}
                       maxUsersOverwrite={8}
                     />
@@ -250,8 +251,8 @@ export default function PastRacesClient({
                 <TableCell>
                   <div>
                     <UserResults
-                      positionText='Pole'
-                      users={row.predictedP1By}
+                      positionText='P1'
+                      userInfo={row.predictedP1By}
                       isCorrect={row.isP1Correct}
                     />
                   </div>
@@ -306,32 +307,32 @@ export default function PastRacesClient({
   }
 
   function UserResults({
-    users,
+    userInfo: userInfo,
     positionText,
     isCorrect,
     maxUsersOverwrite,
   }: {
-    users?: Pick<Database.User, 'id' | 'name' | 'image'>[]
+    userInfo?: UserMapEntry[]
     positionText?: string
     isCorrect: boolean
     maxUsersOverwrite?: number
   }) {
-    if (!users?.length) {
+    if (!userInfo?.length) {
       return
     }
     const localMaxUsers = maxUsersOverwrite ?? maxUsers
     return (
       <Collapsible>
         <CollapsibleTrigger className='flex items-center'>
-          <TriggerRow users={users} />
+          <TriggerRow users={userInfo} />
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <Content users={users} />
+          <Content users={userInfo} />
         </CollapsibleContent>
       </Collapsible>
     )
 
-    function Content(props: { users: NonNullable<typeof users> }) {
+    function Content(props: { users: NonNullable<typeof userInfo> }) {
       return (
         <>
           <Separator className='my-3' />
@@ -340,19 +341,19 @@ export default function PastRacesClient({
               {positionText ? `Tipped ${positionText} by` : 'Tipped by'}
             </p>
             <ul className='py-2'>
-              {props.users.map((user) => {
+              {props.users.map((userInfo) => {
                 return (
                   <li
                     className='py-2 first:pt-0 last:pb-0 border-b last:border-b-0 flex items-center gap-1'
-                    key={user.id}
+                    key={userInfo.user.id}
                   >
                     <UserAvatar
-                      key={user.id}
-                      {...user}
+                      key={userInfo.user.id}
+                      {...userInfo.user}
                       className='hidden sm:block size-6 lg:size-8 rounded-lg'
                     />
                     <span className='text-xs lg:text-sm text-muted-foreground'>
-                      {user.name}
+                      {userInfo.user.name}
                     </span>
                   </li>
                 )
@@ -363,7 +364,7 @@ export default function PastRacesClient({
       )
     }
 
-    function TriggerRow(props: { users: NonNullable<typeof users> }) {
+    function TriggerRow(props: { users: NonNullable<typeof userInfo> }) {
       return (
         <span className='flex items-center gap-1'>
           {positionText && (
@@ -381,17 +382,28 @@ export default function PastRacesClient({
           <div
             className={cn(
               '*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2',
-              !isCorrect && '*:data-[slot=avatar]:grayscale',
             )}
           >
-            {users?.slice(0, localMaxUsers).map((user) => {
+            {userInfo?.slice(0, localMaxUsers).map((userInfo) => {
               return (
                 <UserAvatar
-                  key={user.id}
-                  {...user}
-                  className='size-6 lg:size-8 rounded-full'
+                  key={userInfo.user.id}
+                  {...userInfo.user}
+                  className={cn(
+                    'size-6 lg:size-8 rounded-full ',
+                    getIsGrayscale() && 'data-[slot=avatar]:grayscale',
+                  )}
                 />
               )
+              function getIsGrayscale() {
+                if (userInfo.overwriteTo === 'countAsIncorrect') {
+                  return true
+                }
+                if (userInfo.overwriteTo === 'countAsCorrect') {
+                  return false
+                }
+                return !isCorrect
+              }
             })}
             {props.users.length > localMaxUsers && (
               <div className='size-6 lg:size-8 rounded-full bg-muted relative z-10 grid place-items-center text-xs font-medium ring-border text-muted-foreground tracking-tight ring-2 dark:ring-background'>

@@ -178,12 +178,20 @@ export async function ResultsTable({ groupId }: { groupId: Group['id'] }) {
       ({
         position: predictedPosition,
         driverId: predictedDriverId,
+        overwriteTo,
         constructorId,
         raceId,
         userId,
       }) => {
         if (!raceId) {
           console.warn('No race id')
+          return
+        }
+        if (overwriteTo === 'countAsCorrect') {
+          increaseUserPoints(userId)
+          return
+        }
+        if (overwriteTo === 'countAsIncorrect') {
           return
         }
         const raceResults = resultsMap.get(raceId)
@@ -336,7 +344,7 @@ export async function ResultsTable({ groupId }: { groupId: Group['id'] }) {
       }
       return {
         string: delta,
-        className: 'text-green-600 dark:text-green-200',
+        className: 'text-success',
         icon: LucideArrowUp,
       }
     }
@@ -379,7 +387,7 @@ export async function ResultsTable({ groupId }: { groupId: Group['id'] }) {
       }
       return {
         string: `+${delta}`,
-        className: 'text-green-600 dark:text-green-200',
+        className: 'text-success',
         // icon: LucideArrowUp,
       }
     }

@@ -78,7 +78,7 @@ export function Combobox<
   function ItemList({ setOpen }: { setOpen: (open: boolean) => void }) {
     return (
       <Command>
-        <CommandInput placeholder={placeholder} />
+        <CommandInput placeholder={placeholder} autoFocus={true} />
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
           <CommandGroup>

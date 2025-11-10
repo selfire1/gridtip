@@ -86,14 +86,9 @@ export default async function GroupSettings() {
           </div>
           <CreateOrEditTipDialog {...formProps} />
         </div>
-        <div>
-          <div className='flex items-center flex-wrap gap-2'>
-            <p>Filters</p>
-          </div>
-          <TipFormProvider context={formProps}>
-            <DataTable columns={columns} data={rows} />
-          </TipFormProvider>
-        </div>
+        <TipFormProvider context={formProps}>
+          <DataTable columns={columns} data={rows} />
+        </TipFormProvider>
       </section>
     </div>
   )

@@ -421,3 +421,9 @@
 main[data-slot='sidebar-inset']:has(.is-bg-muted) {
   @apply bg-muted/40;
 }
+
+@layer utilities {
+  .text-success {
+    @apply text-green-600 dark:text-green-200;
+  }
+}

@@ -138,26 +138,37 @@ function getGpTips({
   })
 }
 
+export type UserMapEntry = {
+  user: Pick<Database.User, 'id' | 'name' | 'image'>
+  overwriteTo: Database.PredictionEntry['overwriteTo']
+}
+
 function getPredictionsByUser(currentRacePredictions: AllPredictions) {
-  return currentRacePredictions?.reduce((driverMap, el) => {
+  return currentRacePredictions?.reduce((driverMap, entry) => {
     const {
       driverId,
       position,
       prediction: { user: rawUser },
-    } = el
+      overwriteTo,
+    } = entry
     const user = rawUser as Pick<Database.User, 'id' | 'name' | 'image'>
     if (!driverId) {
       return driverMap
     }
+    const userInfo = {
+      user,
+      overwriteTo,
+    }
+
     if (!driverMap.has(driverId)) {
-      driverMap.set(driverId, new Map([[position, [user]]]))
+      driverMap.set(driverId, new Map([[position, [userInfo]]]))
       return driverMap
     }
     const positionMap = driverMap.get(driverId)!
     const existing = positionMap.get(position)
-    positionMap.set(position, [...(existing || []), user])
+    positionMap.set(position, [...(existing || []), userInfo])
     return driverMap
-  }, new Map<Database.Driver['id'], Map<(typeof PREDICTION_FIELDS)[number], Pick<Database.User, 'id' | 'name' | 'image'>[]>>())
+  }, new Map<Database.Driver['id'], Map<(typeof PREDICTION_FIELDS)[number], UserMapEntry[]>>())
 }
 
 function getQualifyingResults({
@@ -244,7 +255,13 @@ function getConstructorResults({
             predictionEntry.position === 'constructorWithMostPoints' &&
             constructorId === predictionEntry.constructorId,
         )
-        .map((prediction) => prediction.prediction.user)
+        .map((prediction) => {
+          const entry: UserMapEntry = {
+            user: prediction.prediction.user,
+            overwriteTo: prediction.overwriteTo,
+          }
+          return entry
+        })
       return {
         points,
         constructorId,

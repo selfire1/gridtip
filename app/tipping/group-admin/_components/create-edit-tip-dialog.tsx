@@ -1,5 +1,12 @@
 'use client'
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue as ShadSelectValue,
+} from '@/components/ui/select'
 import Alert from '@/components/alert'
 import { Combobox } from '@/components/combobox'
 import { ConstructorProps } from '@/components/constructor'
@@ -20,7 +27,6 @@ import {
   FieldGroup,
   FieldLabel,
 } from '@/components/ui/field'
-import UserAvatar from '@/components/user-avatar'
 import { RACE_PREDICTION_FIELDS, RacePredictionField } from '@/constants'
 import { Database } from '@/db/types'
 import {
@@ -31,7 +37,13 @@ import {
 } from '@/lib/utils/prediction-fields'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { isFuture } from 'date-fns'
-import { LucideInfo, LucidePlus, LucideTriangleAlert } from 'lucide-react'
+import {
+  LucideCheckCircle,
+  LucideInfo,
+  LucidePlus,
+  LucideTriangleAlert,
+  LucideXCircle,
+} from 'lucide-react'
 import React from 'react'
 import {
   Controller,
@@ -45,6 +57,8 @@ import Button from '@/components/button'
 import { formSchema, Schema } from '../_utils/schema'
 import { useRouter } from 'next/navigation'
 import { SelectUser } from './select-user'
+import { TIP_OVERWRITE_OPTIONS } from '@/db/schema/schema'
+import { Icon } from '@/components/icon'
 
 type RaceOption = Pick<
   Database.Race,
@@ -145,6 +159,30 @@ export default function CreateOrEditTipDialog({
             <SelectRace />
             <SelectPosition />
             <SelectValue />
+            <FormField
+              name='overwriteTo'
+              label='Score as'
+              renderItem={({ field }) => (
+                <Select
+                  value={field.value ?? undefined}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger className='w-[180px]'>
+                    <ShadSelectValue placeholder='Select' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getSelectOptions().map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.icon && (
+                          <option.icon className={option.className} />
+                        )}
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </FieldGroup>
           {message && (
             <Alert
@@ -180,6 +218,32 @@ export default function CreateOrEditTipDialog({
       </DialogContent>
     </Dialog>
   )
+
+  function getSelectOptions() {
+    const options = [
+      {
+        label: 'Normal',
+        value: 'normal',
+      },
+      {
+        label: 'Correct',
+        value: 'countAsCorrect',
+        className: 'text-success',
+        icon: Icon.CorrectTip,
+      },
+      {
+        label: 'Incorrect',
+        value: 'countAsIncorrect',
+        className: 'text-destructive',
+        icon: Icon.IncorrectTip,
+      },
+    ] satisfies ({
+      value: (typeof TIP_OVERWRITE_OPTIONS)[number] | 'normal'
+      label: string
+    } & Record<string, any>)[]
+
+    return options
+  }
 
   function onPositionChange(position: RacePredictionField | undefined) {
     if (!position) {

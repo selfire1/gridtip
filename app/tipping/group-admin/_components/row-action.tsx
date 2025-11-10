@@ -39,6 +39,7 @@ export default function RowAction({ row }: { row: PredictionRow }) {
               raceId: row.race.id,
               position: row.position,
               valueId: row.value.id,
+              overwriteTo: row.overwrite,
             }}
             button={
               <Button
