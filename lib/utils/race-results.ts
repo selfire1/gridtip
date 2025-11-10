@@ -157,6 +157,7 @@ async function getPredictionsOfRaces(groupId: string, ids: string[]) {
       position: predictionEntriesTable.position,
       driverId: predictionEntriesTable.driverId,
       constructorId: predictionEntriesTable.constructorId,
+      overwriteTo: predictionEntriesTable.overwriteTo,
     })
     .from(predictionsTable)
     .leftJoin(
