@@ -178,12 +178,20 @@ export async function ResultsTable({ groupId }: { groupId: Group['id'] }) {
       ({
         position: predictedPosition,
         driverId: predictedDriverId,
+        overwriteTo,
         constructorId,
         raceId,
         userId,
       }) => {
         if (!raceId) {
           console.warn('No race id')
+          return
+        }
+        if (overwriteTo === 'countAsCorrect') {
+          increaseUserPoints(userId)
+          return
+        }
+        if (overwriteTo === 'countAsIncorrect') {
           return
         }
         const raceResults = resultsMap.get(raceId)
