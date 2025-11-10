@@ -418,16 +418,8 @@ export default function CreateOrEditTipDialog({
 
   async function onSubmit(data: Schema) {
     setMessage(undefined)
-    if (!predictionEntryId) {
-      toast.error('Something went wrong', {
-        description: 'Tip does not seem to exist',
-      })
-      return
-    }
     startTransition(async () => {
-      const response = isEditing
-        ? await updateTip(predictionEntryId, data)
-        : await createTip(data)
+      const response = await getResponse()
       if (!response.ok) {
         setMessage({
           title: 'Did not save',
@@ -440,6 +432,23 @@ export default function CreateOrEditTipDialog({
       setOpen(false)
       router.refresh()
       return
+
+      async function getResponse() {
+        if (isEditing) {
+          return await handleIsEditing()
+        }
+        return await createTip(data)
+
+        async function handleIsEditing() {
+          if (!predictionEntryId) {
+            return {
+              ok: false,
+              message: 'Tip does not seem to exist',
+            }
+          }
+          return await updateTip(predictionEntryId, data)
+        }
+      }
     })
   }
 
