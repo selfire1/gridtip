@@ -23,15 +23,18 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { RACE_PREDICTION_FIELDS } from '@/constants'
+import { LucideEye, LucideEyeOff } from 'lucide-react'
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  currentUserId: string
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  currentUserId,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([
     {
@@ -47,6 +50,7 @@ export function DataTable<TData, TValue>({
       desc: true,
     },
   ])
+  const [showSpoilers, setShowSpoilers] = React.useState(false)
 
   const table = useReactTable({
     data,
@@ -58,6 +62,10 @@ export function DataTable<TData, TValue>({
     state: {
       sorting,
     },
+    meta: {
+      showSpoilers,
+      currentUserId,
+    },
     initialState: {
       pagination: {
         pageSize: 50,
@@ -66,7 +74,26 @@ export function DataTable<TData, TValue>({
   })
 
   return (
-    <div>
+    <div className={showSpoilers ? 'show-spoilers' : ''}>
+      <div className='mb-4 flex justify-end'>
+        <Button
+          variant='outline'
+          size='sm'
+          onClick={() => setShowSpoilers(!showSpoilers)}
+        >
+          {showSpoilers ? (
+            <>
+              <LucideEyeOff className='mr-2 h-4 w-4' />
+              Hide spoilers
+            </>
+          ) : (
+            <>
+              <LucideEye className='mr-2 h-4 w-4' />
+              Show spoilers
+            </>
+          )}
+        </Button>
+      </div>
       <div className='overflow-hidden rounded-md border'>
         <Table>
           <TableHeader>

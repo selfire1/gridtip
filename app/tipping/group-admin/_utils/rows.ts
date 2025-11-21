@@ -17,11 +17,13 @@ export type PredictionRow = {
   race: {
     id: Database.Race['id']
     label: string
+    grandPrixDate: Date
   }
   created: string
   position: RacePredictionField
   type: 'driver' | 'constructor'
   overwrite: Database.PredictionEntry['overwriteTo']
+  lastUpdatedBy: Database.PredictionEntry['lastUpdatedBy']
 }
 
 export function formatPredictionsToRows(
@@ -52,6 +54,7 @@ export function formatPredictionsToRows(
         race: {
           id: entry.prediction.raceId!,
           label: race.locality,
+          grandPrixDate: race.grandPrixDate,
         },
         userName: user.name,
         user: {
@@ -61,6 +64,7 @@ export function formatPredictionsToRows(
         value: getValue()!,
         position: entry.position as RacePredictionField,
         type: getType(),
+        lastUpdatedBy: entry.lastUpdatedBy,
       }
 
       function getType() {

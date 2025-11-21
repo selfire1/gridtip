@@ -48,7 +48,27 @@ export const columns: ColumnDef<PredictionRow>[] = [
   {
     accessorKey: 'value',
     header: 'Tip',
-    cell({ row }) {
+    cell({ row, table }) {
+      const meta = table.options.meta as
+        | { showSpoilers: boolean; currentUserId: string }
+        | undefined
+      const showSpoilers = meta?.showSpoilers ?? true
+      const currentUserId = meta?.currentUserId
+
+      const { lastUpdatedBy, race } = row.original
+      const isRaceInFuture = race.grandPrixDate > new Date()
+      const isNotUpdatedByCurrentUser = lastUpdatedBy !== currentUserId
+      const shouldHideSpoiler =
+        !showSpoilers && isRaceInFuture && isNotUpdatedByCurrentUser
+
+      if (shouldHideSpoiler) {
+        return (
+          <span className='text-muted-foreground italic text-sm'>
+            No spoilers
+          </span>
+        )
+      }
+
       const type = row.original.type
       if (type === 'driver') {
         const driver = row.original.value as DriverOptionProps

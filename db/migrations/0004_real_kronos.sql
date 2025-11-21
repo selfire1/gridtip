@@ -1,0 +1,1 @@
+ALTER TABLE `prediction_entries` ADD `last_updated_by` text REFERENCES user(id);

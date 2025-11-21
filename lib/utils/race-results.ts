@@ -228,6 +228,7 @@ async function uncachedGetAllPredictions(groupId: Database.Group['id']) {
       constructorId: true,
       driverId: true,
       overwriteTo: true,
+      lastUpdatedBy: true,
     },
     with: {
       prediction: {

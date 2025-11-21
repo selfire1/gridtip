@@ -18,7 +18,7 @@ export async function createTip(data: Schema): Promise<ServerResponse> {
   if (!result.ok) {
     return result
   }
-  const { group, parsed } = result
+  const { group, parsed, adminUserId } = result
   const prediction = await getPrediction({
     groupId: group.id,
     raceId: data.raceId,
@@ -36,6 +36,7 @@ export async function createTip(data: Schema): Promise<ServerResponse> {
       prediction?.id,
       parsed.data,
       group.id,
+      adminUserId,
     )
     revalidateTag(CacheTag.Predictions)
     return {
@@ -53,6 +54,7 @@ export async function createTip(data: Schema): Promise<ServerResponse> {
     predictionIdInput: Database.PredictionId | undefined,
     data: Schema,
     groupId: Database.GroupId,
+    adminUserId: Database.UserId,
   ) {
     const { userId, raceId, position, valueId } = data
 
@@ -66,6 +68,7 @@ export async function createTip(data: Schema): Promise<ServerResponse> {
         predictionId,
         position,
         overwriteTo: getOverwrite(data.overwriteTo),
+        lastUpdatedBy: adminUserId,
         ...valueObject,
       })
     }
@@ -148,6 +151,7 @@ async function verifyRequest(data: Schema) {
     message: '',
     parsed,
     userId,
+    adminUserId,
   }
 
   async function getUserIsMemberOfGroup(groupId: Database.Group['id']) {
@@ -170,6 +174,7 @@ export async function updateTip(
   if (!result.ok) {
     return result
   }
+  const { adminUserId } = result
   try {
     await updatePrediction()
     revalidateTag(CacheTag.Predictions)
@@ -190,6 +195,7 @@ export async function updateTip(
       .set({
         ...getValueObject(data),
         overwriteTo: getOverwrite(data.overwriteTo),
+        lastUpdatedBy: adminUserId,
       })
       .where(eq(predictionEntriesTable.id, predictionEntryId))
   }
