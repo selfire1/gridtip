@@ -97,6 +97,7 @@ export async function submitChanges(input: Record<string, any>) {
         set: onConflictUpdateKeys(predictionEntriesTable, [
           'driverId',
           'constructorId',
+          'lastUpdatedBy',
         ]),
       })
   }
@@ -112,7 +113,12 @@ export async function submitChanges(input: Record<string, any>) {
       if (!id) {
         return acc
       }
-      acc.push({ predictionId, position: entry, driverId: id })
+      acc.push({
+        predictionId,
+        position: entry,
+        driverId: id,
+        lastUpdatedBy: userId,
+      })
       return acc
     }, [] as Db.InsertPredictionEntry[])
 
@@ -123,7 +129,12 @@ export async function submitChanges(input: Record<string, any>) {
       if (!id) {
         return acc
       }
-      acc.push({ predictionId, position: entry, constructorId: id })
+      acc.push({
+        predictionId,
+        position: entry,
+        constructorId: id,
+        lastUpdatedBy: userId,
+      })
       return acc
     }, [] as Db.InsertPredictionEntry[])
 

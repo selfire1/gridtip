@@ -87,7 +87,7 @@ export default async function GroupSettings() {
           <CreateOrEditTipDialog {...formProps} />
         </div>
         <TipFormProvider context={formProps}>
-          <DataTable columns={columns} data={rows} />
+          <DataTable columns={columns} data={rows} currentUserId={userId} />
         </TipFormProvider>
       </section>
     </div>

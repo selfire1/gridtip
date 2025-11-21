@@ -175,6 +175,9 @@ export const predictionEntriesTable = sqliteTable(
       },
     ),
     overwriteTo: text({ enum: TIP_OVERWRITE_OPTIONS }),
+    lastUpdatedBy: text('last_updated_by').references(() => user.id, {
+      onDelete: 'set null',
+    }),
     createdAt: integer('created_at', { mode: 'timestamp' })
       .default(sql`(unixepoch())`)
       .notNull(),
@@ -198,6 +201,10 @@ export const predictionEntriesRelations = relations(
     constructor: one(constructorsTable, {
       fields: [predictionEntriesTable.constructorId],
       references: [constructorsTable.id],
+    }),
+    lastUpdatedByUser: one(user, {
+      fields: [predictionEntriesTable.lastUpdatedBy],
+      references: [user.id],
     }),
   }),
 )
