@@ -13,6 +13,17 @@ import { and, eq, inArray, lt } from 'drizzle-orm'
 import { unstable_cache } from 'next/cache'
 import { cache } from 'react'
 
+/**
+ * Checks if a position indicates a disqualification or invalid result.
+ * A position of 0 or less indicates the driver was disqualified or did not finish in a valid position.
+ *
+ * @param position - The position value to check (can be null, undefined, or a number)
+ * @returns true if the position is invalid (null, undefined, 0, or negative), false otherwise
+ */
+function isPositionDisqualified(position: number | null | undefined): boolean {
+  return position === null || position === undefined || position <= 0
+}
+
 async function uncachedGetOnlyRacesWithResults() {
   const resultsByRaceAndPosition = await getRaceIdToResultMap()
   const allRaces = await db.query.racesTable.findMany({
@@ -65,26 +76,28 @@ async function uncachedGetRaceIdToResultMap(): Promise<ResultsMap | undefined> {
 
     const raceMap = resultsMap.get(result.raceId)!
     if (result.driver) {
-      raceMap.qualifying.set(result.grid ?? 0, result.driver)
+      if (!isPositionDisqualified(result.grid)) {
+        raceMap.qualifying.set(result.grid, result.driver)
+      }
     } else {
       console.warn('No driver for `grid`', result)
     }
 
     if (result.driver) {
-      if (result.position && result.position > 0) {
+      if (!isPositionDisqualified(result.position)) {
         raceMap.gp.set(result.position, result.driver)
       }
     } else {
       console.warn('No driver for `position`', result)
     }
 
-    if (result.sprint && result.sprint > 0) {
+    if (!isPositionDisqualified(result.sprint)) {
       if (!raceMap?.sprint) {
         raceMap.sprint = new Map<number, DriverOptionProps>()
       }
 
       if (result.driver) {
-        raceMap.sprint.set(result.sprint, result.driver ?? {})
+        raceMap.sprint.set(result.sprint, result.driver)
       } else {
         console.warn('No driver for `sprint`', result)
       }
