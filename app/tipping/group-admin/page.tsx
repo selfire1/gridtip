@@ -1,7 +1,6 @@
-import { columns } from './_components/columns'
-import { DataTable } from './_components/data-table'
 import EmptyGroup from '@/components/empty-group'
 import { verifyIsAdmin, verifySession } from '@/lib/dal'
+import { PredictionsTableWrapper } from './_components/predictions-table-wrapper'
 import {
   getConstructorOptions,
   getCurrentGroup,
@@ -87,7 +86,7 @@ export default async function GroupSettings() {
           <CreateOrEditTipDialog {...formProps} />
         </div>
         <TipFormProvider context={formProps}>
-          <DataTable columns={columns} data={rows} />
+          <PredictionsTableWrapper rows={rows} races={races} users={members} />
         </TipFormProvider>
       </section>
     </div>
