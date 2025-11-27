@@ -64,32 +64,23 @@ async function uncachedGetRaceIdToResultMap(): Promise<ResultsMap | undefined> {
     }
 
     const raceMap = resultsMap.get(result.raceId)!
-    if (result.driver) {
-      // TODO: refactor the `isPositionDisqualified` logic into functions that return early, rather than the nested if checks
+
+    if (!result.driver) {
+      console.warn('No driver for result', result)
+    } else {
       if (!isPositionDisqualified(result.grid)) {
         raceMap.qualifying.set(result.grid, result.driver)
       }
-    } else {
-      console.warn('No driver for `grid`', result)
-    }
 
-    if (result.driver) {
       if (!isPositionDisqualified(result.position)) {
         raceMap.gp.set(result.position, result.driver)
       }
-    } else {
-      console.warn('No driver for `position`', result)
-    }
 
-    if (!isPositionDisqualified(result.sprint)) {
-      if (!raceMap?.sprint) {
-        raceMap.sprint = new Map<number, DriverOptionProps>()
-      }
-
-      if (result.driver) {
+      if (!isPositionDisqualified(result.sprint)) {
+        if (!raceMap.sprint) {
+          raceMap.sprint = new Map<number, DriverOptionProps>()
+        }
         raceMap.sprint.set(result.sprint, result.driver)
-      } else {
-        console.warn('No driver for `sprint`', result)
       }
     }
 
@@ -276,9 +267,7 @@ const createGetAllPredictions = (groupId: Database.Group['id']) =>
     },
   )
 
-function isPositionDisqualified(
-  position: number | null | undefined,
-): position is number {
+function isPositionDisqualified(position: number | null | undefined) {
   return position === null || position === undefined || position <= 0
 }
 
