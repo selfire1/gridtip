@@ -13,13 +13,6 @@ import { and, eq, inArray, lt } from 'drizzle-orm'
 import { unstable_cache } from 'next/cache'
 import { cache } from 'react'
 
-/**
- * Checks if a position indicates a disqualification or invalid result.
- * A position of 0 or less indicates the driver was disqualified or did not finish in a valid position.
- *
- * @param position - The position value to check (can be null, undefined, or a number)
- * @returns true if the position is invalid (null, undefined, 0, or negative), false otherwise
- */
 function isPositionDisqualified(position: number | null | undefined): boolean {
   return position === null || position === undefined || position <= 0
 }
