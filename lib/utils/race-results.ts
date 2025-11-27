@@ -68,15 +68,15 @@ async function uncachedGetRaceIdToResultMap(): Promise<ResultsMap | undefined> {
     if (!result.driver) {
       console.warn('No driver for result', result)
     } else {
-      if (!isPositionDisqualified(result.grid)) {
+      if (isValidPosition(result.grid)) {
         raceMap.qualifying.set(result.grid, result.driver)
       }
 
-      if (!isPositionDisqualified(result.position)) {
+      if (isValidPosition(result.position)) {
         raceMap.gp.set(result.position, result.driver)
       }
 
-      if (!isPositionDisqualified(result.sprint)) {
+      if (isValidPosition(result.sprint)) {
         if (!raceMap.sprint) {
           raceMap.sprint = new Map<number, DriverOptionProps>()
         }
@@ -267,8 +267,10 @@ const createGetAllPredictions = (groupId: Database.Group['id']) =>
     },
   )
 
-function isPositionDisqualified(position: number | null | undefined) {
-  return position === null || position === undefined || position <= 0
+function isValidPosition(
+  position: number | null | undefined,
+): position is number {
+  return position !== null && position !== undefined && position > 0
 }
 
 export {
