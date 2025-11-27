@@ -13,10 +13,6 @@ import { and, eq, inArray, lt } from 'drizzle-orm'
 import { unstable_cache } from 'next/cache'
 import { cache } from 'react'
 
-function isPositionDisqualified(position: number | null | undefined): boolean {
-  return position === null || position === undefined || position <= 0
-}
-
 async function uncachedGetOnlyRacesWithResults() {
   const resultsByRaceAndPosition = await getRaceIdToResultMap()
   const allRaces = await db.query.racesTable.findMany({
@@ -69,6 +65,7 @@ async function uncachedGetRaceIdToResultMap(): Promise<ResultsMap | undefined> {
 
     const raceMap = resultsMap.get(result.raceId)!
     if (result.driver) {
+      // TODO: refactor the `isPositionDisqualified` logic into functions that return early, rather than the nested if checks
       if (!isPositionDisqualified(result.grid)) {
         raceMap.qualifying.set(result.grid, result.driver)
       }
@@ -278,6 +275,12 @@ const createGetAllPredictions = (groupId: Database.Group['id']) =>
       tags: [CacheTag.Predictions],
     },
   )
+
+function isPositionDisqualified(
+  position: number | null | undefined,
+): position is number {
+  return position === null || position === undefined || position <= 0
+}
 
 export {
   getRaceIdToResultMap,
