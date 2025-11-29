@@ -12,7 +12,7 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command'
-import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 import {
   Popover,
   PopoverContent,
@@ -57,14 +57,13 @@ export function SelectDriver({
   }
 
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <TriggerButton type='drawer' disabled={disabled} />
-      <DrawerContent>
-        <div className='mt-4 border-t'>
-          <DriverList setOpen={setOpen} />
-        </div>
-      </DrawerContent>
-    </Drawer>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <TriggerButton type='sheet' disabled={disabled} />
+      <SheetContent side='bottom'>
+        <SheetTitle className='sr-only'>Select Driver</SheetTitle>
+        <DriverList setOpen={setOpen} />
+      </SheetContent>
+    </Sheet>
   )
 
   function DriverList({ setOpen }: { setOpen: (open: boolean) => void }) {
@@ -106,10 +105,10 @@ export function SelectDriver({
     type,
     disabled,
   }: {
-    type: 'drawer' | 'popover'
+    type: 'sheet' | 'popover'
     disabled?: boolean
   }) {
-    const Trigger = type === 'drawer' ? DrawerTrigger : PopoverTrigger
+    const Trigger = type === 'sheet' ? SheetTrigger : PopoverTrigger
     return (
       <Trigger asChild>
         <FormControl>

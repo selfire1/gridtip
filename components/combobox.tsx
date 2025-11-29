@@ -12,7 +12,12 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command'
-import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetTitle,
+} from '@/components/ui/sheet'
 import {
   Popover,
   PopoverContent,
@@ -65,14 +70,13 @@ export function Combobox<
   }
 
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <TriggerButton type='drawer' disabled={disabled} />
-      <DrawerContent>
-        <div className='mt-4 border-t'>
-          <ItemList setOpen={setOpen} />
-        </div>
-      </DrawerContent>
-    </Drawer>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <TriggerButton type='sheet' disabled={disabled} />
+      <SheetContent side='bottom'>
+        <SheetTitle className='sr-only'>Select Item</SheetTitle>
+        <ItemList setOpen={setOpen} />
+      </SheetContent>
+    </Sheet>
   )
 
   function ItemList({ setOpen }: { setOpen: (open: boolean) => void }) {
@@ -110,10 +114,10 @@ export function Combobox<
     type,
     disabled,
   }: {
-    type: 'drawer' | 'popover'
+    type: 'sheet' | 'popover'
     disabled?: boolean
   }) {
-    const Trigger = type === 'drawer' ? DrawerTrigger : PopoverTrigger
+    const Trigger = type === 'sheet' ? SheetTrigger : PopoverTrigger
     return (
       <Trigger asChild>
         <Button

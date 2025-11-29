@@ -12,7 +12,7 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command'
-import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 import {
   Popover,
   PopoverContent,
@@ -57,14 +57,13 @@ export function SelectConstructor({
   }
 
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <TriggerButton selected={selected} type='drawer' disabled={disabled} />
-      <DrawerContent>
-        <div className='mt-4 border-t'>
-          <ConstructorsList setOpen={setOpen} />
-        </div>
-      </DrawerContent>
-    </Drawer>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <TriggerButton selected={selected} type='sheet' disabled={disabled} />
+      <SheetContent side='bottom'>
+        <SheetTitle className='sr-only'>Select Constructor</SheetTitle>
+        <ConstructorsList setOpen={setOpen} />
+      </SheetContent>
+    </Sheet>
   )
   function ConstructorsList({ setOpen }: { setOpen: (open: boolean) => void }) {
     return (
@@ -105,10 +104,10 @@ function TriggerButton({
   disabled,
 }: {
   selected: ConstructorProps | undefined
-  type: 'drawer' | 'popover'
+  type: 'sheet' | 'popover'
   disabled?: boolean
 }) {
-  const Trigger = type === 'drawer' ? DrawerTrigger : PopoverTrigger
+  const Trigger = type === 'sheet' ? SheetTrigger : PopoverTrigger
   return (
     <Trigger asChild>
       <FormControl>
