@@ -22,6 +22,7 @@ import React from 'react'
 import { updateCache } from './_utils/update-results-action'
 import { toast } from 'sonner'
 import { UpdateResultsButton } from './_components/update-results-button'
+import { ChampionshipRevealDate } from './_components/championship-reveal-date'
 
 export default async function GroupSettings() {
   const { userId } = await verifySession()
@@ -74,6 +75,10 @@ export default async function GroupSettings() {
         </p>
         <UpdateResultsButton />
       </div>
+      <ChampionshipRevealDate
+        groupId={group.id}
+        currentDate={group.championshipTipsRevalDate}
+      />
       <section className='space-y-4'>
         <div className='flex gap-x-4 flex-wrap justify-between items-end gap-y-2'>
           <div className='space-y-1'>

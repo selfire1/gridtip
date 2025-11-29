@@ -28,6 +28,7 @@ async function getGroupsForUser(userId: string) {
           id: true,
           name: true,
           iconName: true,
+          championshipTipsRevalDate: true,
         },
       },
     },

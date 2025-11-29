@@ -16,7 +16,11 @@ import {
 } from '@/components/ui/card'
 import { RACE_PREDICTION_FIELDS, RacePredictionField } from '@/constants'
 import { db } from '@/db'
-import { predictionEntriesTable, predictionsTable } from '@/db/schema/schema'
+import {
+  groupMembersTable,
+  predictionEntriesTable,
+  predictionsTable,
+} from '@/db/schema/schema'
 import { verifySession } from '@/lib/dal'
 import { getCurrentGroupId } from '@/lib/utils/groups'
 import {
@@ -26,6 +30,9 @@ import {
   differenceInHours,
   isFuture,
   differenceInDays,
+  isWithinInterval,
+  addDays,
+  isPast,
 } from 'date-fns'
 import { and, eq, inArray } from 'drizzle-orm'
 import { LucideArrowRight, LucideClock, LucideIcon } from 'lucide-react'
@@ -66,14 +73,32 @@ export default async function DashboardPage() {
     ? false
     : await getHasResults(ongoingRaceWithOffset.id)
 
+  const currentGroup = await getCurrentGroupInfo(userId)
+
   return (
     <div className='is-grid-card-fit grid gap-8 is-bg-muted'>
       {(!hasGroups || !currentUserGroup) && <CardJoinGroup />}
-      {currentUserGroup && <RequiresGroup groupId={currentUserGroup} />}
+      {currentUserGroup && currentGroup && (
+        <RequiresGroup groupId={currentUserGroup} group={currentGroup} />
+      )}
     </div>
   )
 
-  async function RequiresGroup({ groupId }: { groupId: string }) {
+  async function RequiresGroup({
+    groupId,
+    group,
+  }: {
+    groupId: string
+    group: NonNullable<Awaited<ReturnType<typeof getCurrentGroupInfo>>>
+  }) {
+    const showChampionshipCard =
+      group.championshipTipsRevalDate &&
+      isPast(group.championshipTipsRevalDate) &&
+      isWithinInterval(new Date(), {
+        start: group.championshipTipsRevalDate,
+        end: addDays(group.championshipTipsRevalDate, 3),
+      })
+
     return (
       <>
         {shouldShowPrevious &&
@@ -92,6 +117,9 @@ export default async function DashboardPage() {
             <CardTipNext race={nextRace} groupId={groupId} />
             <CardTipStatus groupId={groupId} race={nextRace} />
           </>
+        )}
+        {showChampionshipCard && (
+          <CardChampionshipTips revealDate={group.championshipTipsRevalDate!} />
         )}
         {shouldShowPrevious &&
           getPreviousRaceStatus(previousRace) === 'past' && (
@@ -981,6 +1009,53 @@ export default async function DashboardPage() {
         {children}
       </Card>
     )
+  }
+
+  function CardChampionshipTips({ revealDate }: { revealDate: Date }) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Championship Tips Revealed!</CardTitle>
+          <CardDescription>Check out tips now!</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className='text-muted-foreground'>
+            See what everyone in your group predicted for the driver and
+            constructor championships.
+          </p>
+        </CardContent>
+        <CardFooter className='mt-auto'>
+          <Button asChild>
+            <Link href='/tipping/championships'>
+              View championship tips
+              <LucideArrowRight />
+            </Link>
+          </Button>
+        </CardFooter>
+      </Card>
+    )
+  }
+
+  async function getCurrentGroupInfo(userId: string) {
+    const cookieGroupId = await getCurrentGroupId()
+    if (!cookieGroupId) {
+      return
+    }
+    const userWithGroups = await db.query.groupMembersTable.findMany({
+      columns: {
+        joinedAt: true,
+      },
+      where: eq(groupMembersTable.userId, userId),
+      with: {
+        group: {
+          columns: {
+            id: true,
+            championshipTipsRevalDate: true,
+          },
+        },
+      },
+    })
+    return userWithGroups.find(({ group }) => group.id === cookieGroupId)?.group
   }
 }
 
