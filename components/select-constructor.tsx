@@ -12,7 +12,6 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command'
-import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
 import {
   Popover,
   PopoverContent,
@@ -23,6 +22,10 @@ import { FormControl } from '@/components/ui/form'
 import ConstructorOption, {
   type ConstructorProps,
 } from '@/components/constructor'
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from '@/components/ui/native-select'
 
 export function SelectConstructor({
   constructors,
@@ -48,7 +51,22 @@ export function SelectConstructor({
   if (isDesktop) {
     return (
       <Popover open={open} onOpenChange={setOpen}>
-        <TriggerButton selected={selected} type='popover' disabled={disabled} />
+        <PopoverTrigger asChild>
+          <FormControl>
+            <Button
+              variant='outline'
+              className='justify-between'
+              disabled={disabled}
+            >
+              {selected ? (
+                <ConstructorOption constructor={selected} isSelected={false} />
+              ) : (
+                <span>Select constructor</span>
+              )}
+              <ChevronsUpDown className='opacity-50' />
+            </Button>
+          </FormControl>
+        </PopoverTrigger>
         <PopoverContent className='w-[300px] p-0' align='start'>
           <ConstructorsList setOpen={setOpen} />
         </PopoverContent>
@@ -57,14 +75,23 @@ export function SelectConstructor({
   }
 
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <TriggerButton selected={selected} type='drawer' disabled={disabled} />
-      <DrawerContent>
-        <div className='mt-4 border-t'>
-          <ConstructorsList setOpen={setOpen} />
-        </div>
-      </DrawerContent>
-    </Drawer>
+    <FormControl>
+      <NativeSelect
+        disabled={disabled}
+        value={value?.id || ''}
+        onChange={(e) => {
+          const constructor = constructors.find((c) => c.id === e.target.value)
+          onSelect(constructor)
+        }}
+      >
+        <NativeSelectOption value=''>Select constructor</NativeSelectOption>
+        {constructors.map((constructor) => (
+          <NativeSelectOption key={constructor.id} value={constructor.id}>
+            {constructor.name}
+          </NativeSelectOption>
+        ))}
+      </NativeSelect>
+    </FormControl>
   )
   function ConstructorsList({ setOpen }: { setOpen: (open: boolean) => void }) {
     return (
@@ -96,38 +123,5 @@ export function SelectConstructor({
         </CommandList>
       </Command>
     )
-  }
-}
-
-function TriggerButton({
-  selected,
-  type,
-  disabled,
-}: {
-  selected: ConstructorProps | undefined
-  type: 'drawer' | 'popover'
-  disabled?: boolean
-}) {
-  const Trigger = type === 'drawer' ? DrawerTrigger : PopoverTrigger
-  return (
-    <Trigger asChild>
-      <FormControl>
-        <Button
-          variant='outline'
-          className='justify-between'
-          disabled={disabled}
-        >
-          {selected ? (
-            <ConstructorOption constructor={selected} isSelected={false} />
-          ) : (
-            <EmptyState />
-          )}
-          <ChevronsUpDown className='opacity-50' />
-        </Button>
-      </FormControl>
-    </Trigger>
-  )
-  function EmptyState() {
-    return <span>Select constructor</span>
   }
 }

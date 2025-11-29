@@ -12,7 +12,6 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command'
-import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
 import {
   Popover,
   PopoverContent,
@@ -21,7 +20,10 @@ import {
 import { ChevronsUpDown } from 'lucide-react'
 import { FormControl } from '@/components/ui/form'
 import DriverOption, { DriverOptionProps } from '@/components/driver-option'
-// import DriverOption from '@/components/driver-option'
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from '@/components/ui/native-select'
 
 export function SelectDriver({
   drivers,
@@ -48,7 +50,22 @@ export function SelectDriver({
   if (isDesktop) {
     return (
       <Popover open={open} onOpenChange={setOpen}>
-        <TriggerButton type='popover' disabled={disabled} />
+        <PopoverTrigger asChild>
+          <FormControl>
+            <Button
+              disabled={disabled}
+              variant='outline'
+              className='justify-between flex'
+            >
+              {selected ? (
+                <DriverOption driver={selected} isSelected={false} />
+              ) : (
+                <span>Select driver</span>
+              )}
+              <ChevronsUpDown className='opacity-50' />
+            </Button>
+          </FormControl>
+        </PopoverTrigger>
         <PopoverContent className='w-[300px] p-0' align='start'>
           <DriverList setOpen={setOpen} />
         </PopoverContent>
@@ -57,14 +74,23 @@ export function SelectDriver({
   }
 
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <TriggerButton type='drawer' disabled={disabled} />
-      <DrawerContent>
-        <div className='mt-4 border-t'>
-          <DriverList setOpen={setOpen} />
-        </div>
-      </DrawerContent>
-    </Drawer>
+    <FormControl>
+      <NativeSelect
+        disabled={disabled}
+        value={value?.id || ''}
+        onChange={(e) => {
+          const driver = drivers.find((d) => d.id === e.target.value)
+          onSelect(driver)
+        }}
+      >
+        <NativeSelectOption value=''>Select driver</NativeSelectOption>
+        {drivers.map((driver) => (
+          <NativeSelectOption key={driver.id} value={driver.id}>
+            {driver.givenName} {driver.familyName}
+          </NativeSelectOption>
+        ))}
+      </NativeSelect>
+    </FormControl>
   )
 
   function DriverList({ setOpen }: { setOpen: (open: boolean) => void }) {
@@ -102,34 +128,4 @@ export function SelectDriver({
     }
   }
 
-  function TriggerButton({
-    type,
-    disabled,
-  }: {
-    type: 'drawer' | 'popover'
-    disabled?: boolean
-  }) {
-    const Trigger = type === 'drawer' ? DrawerTrigger : PopoverTrigger
-    return (
-      <Trigger asChild>
-        <FormControl>
-          <Button
-            disabled={disabled}
-            variant='outline'
-            className='justify-between flex'
-          >
-            {selected ? (
-              <DriverOption driver={selected} isSelected={false} />
-            ) : (
-              <EmptyState />
-            )}
-            <ChevronsUpDown className='opacity-50' />
-          </Button>
-        </FormControl>
-      </Trigger>
-    )
-    function EmptyState() {
-      return <span>Select driver</span>
-    }
-  }
 }
