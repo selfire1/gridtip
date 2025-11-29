@@ -35,15 +35,17 @@ export function Filters({
 
   // Add "All" option to races
   const racesWithAll = [
-    { id: 'all', locality: 'All races', country: '', grandPrixDate: new Date() },
+    {
+      id: 'all',
+      locality: 'All races',
+      country: '',
+      grandPrixDate: new Date(),
+    },
     ...sortedRaces,
   ]
 
   // Add "All" option to users
-  const usersWithAll = [
-    { id: 'all', name: 'All users' },
-    ...sortedUsers,
-  ]
+  const usersWithAll = [{ id: 'all', name: 'All users' }, ...sortedUsers]
 
   return (
     <div className='flex gap-4 flex-wrap'>
@@ -64,7 +66,7 @@ export function Filters({
                 <CountryFlag
                   country={race.country}
                   isEager={false}
-                  className='size-5'
+                  className='size-6'
                 />
               )}
               <span>{race.locality}</span>

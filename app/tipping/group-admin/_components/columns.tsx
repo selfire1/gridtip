@@ -4,6 +4,7 @@ import { PredictionRow } from '../_utils/rows'
 import DriverOption, { DriverOptionProps } from '@/components/driver-option'
 import Constructor, { ConstructorProps } from '@/components/constructor'
 import UserAvatar from '@/components/user-avatar'
+import CountryFlag from '@/components/country-flag'
 import { getLabel } from '@/lib/utils/prediction-fields'
 import RowAction from './row-action'
 import { Button } from '@/components/ui/button'
@@ -42,7 +43,13 @@ export const columns: ColumnDef<PredictionRow>[] = [
     accessorKey: 'raceDate',
     header: ({ column }) => <SortHeader column={column} label='Race' />,
     cell({ row }) {
-      return row.original.race.label
+      const { label, country } = row.original.race
+      return (
+        <div className='flex items-center gap-1'>
+          <CountryFlag country={country} isEager={false} className='size-5' />
+          <span>{label}</span>
+        </div>
+      )
     },
   },
   {
