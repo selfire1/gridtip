@@ -1,16 +1,14 @@
 'use client'
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Database } from '@/db/types'
+import { Combobox } from '@/components/combobox'
+import CountryFlag from '@/components/country-flag'
+import UserAvatar from '@/components/user-avatar'
 
 interface FiltersProps {
-  races: Array<Pick<Database.Race, 'id' | 'locality' | 'grandPrixDate'>>
+  races: Array<
+    Pick<Database.Race, 'id' | 'locality' | 'country' | 'grandPrixDate'>
+  >
   users: Array<{ id: string; name: string }>
   selectedRaceId: string | null
   selectedUserId: string | null
@@ -35,54 +33,70 @@ export function Filters({
   // Sort users alphabetically
   const sortedUsers = [...users].sort((a, b) => a.name.localeCompare(b.name))
 
+  // Add "All" option to races
+  const racesWithAll = [
+    { id: 'all', locality: 'All races', country: '', grandPrixDate: new Date() },
+    ...sortedRaces,
+  ]
+
+  // Add "All" option to users
+  const usersWithAll = [
+    { id: 'all', name: 'All users' },
+    ...sortedUsers,
+  ]
+
   return (
     <div className='flex gap-4 flex-wrap'>
       <div className='flex flex-col gap-1.5'>
         <label htmlFor='race-filter' className='text-sm font-medium'>
           Race
         </label>
-        <Select
+        <Combobox
+          items={racesWithAll}
           value={selectedRaceId ?? 'all'}
-          onValueChange={(value) =>
-            onRaceChange(value === 'all' ? null : value)
-          }
-        >
-          <SelectTrigger id='race-filter' className='w-[200px]'>
-            <SelectValue placeholder='All races' />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='all'>All races</SelectItem>
-            {sortedRaces.map((race) => (
-              <SelectItem key={race.id} value={race.id}>
-                {race.locality}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          onSelect={(value) => onRaceChange(value === 'all' ? null : value)}
+          getSearchValue={(race) => race.locality}
+          placeholder='Search races...'
+          emptyText='All races'
+          renderItem={(race) => (
+            <div className='flex items-center gap-2'>
+              {race.id !== 'all' && (
+                <CountryFlag
+                  country={race.country}
+                  isEager={false}
+                  className='size-5'
+                />
+              )}
+              <span>{race.locality}</span>
+            </div>
+          )}
+        />
       </div>
 
       <div className='flex flex-col gap-1.5'>
         <label htmlFor='user-filter' className='text-sm font-medium'>
           User
         </label>
-        <Select
+        <Combobox
+          items={usersWithAll}
           value={selectedUserId ?? 'all'}
-          onValueChange={(value) =>
-            onUserChange(value === 'all' ? null : value)
-          }
-        >
-          <SelectTrigger id='user-filter' className='w-[200px]'>
-            <SelectValue placeholder='All users' />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='all'>All users</SelectItem>
-            {sortedUsers.map((user) => (
-              <SelectItem key={user.id} value={user.id}>
-                {user.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          onSelect={(value) => onUserChange(value === 'all' ? null : value)}
+          getSearchValue={(user) => user.name}
+          placeholder='Search users...'
+          emptyText='All users'
+          renderItem={(user) => (
+            <div className='flex items-center gap-2'>
+              {user.id !== 'all' && (
+                <UserAvatar
+                  id={user.id}
+                  name={user.name}
+                  className='size-5 rounded-full'
+                />
+              )}
+              <span>{user.name}</span>
+            </div>
+          )}
+        />
       </div>
     </div>
   )

@@ -9,7 +9,9 @@ import { Database } from '@/db/types'
 
 interface PredictionsTableWrapperProps {
   rows: PredictionRow[]
-  races: Array<Pick<Database.Race, 'id' | 'locality' | 'grandPrixDate'>>
+  races: Array<
+    Pick<Database.Race, 'id' | 'locality' | 'country' | 'grandPrixDate'>
+  >
   users: Array<{ id: string; name: string }>
 }
 

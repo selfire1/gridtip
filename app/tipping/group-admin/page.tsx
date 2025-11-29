@@ -99,6 +99,7 @@ export default async function GroupSettings() {
           columns: {
             id: true,
             locality: true,
+            country: true,
             grandPrixDate: true,
             sprintQualifyingDate: true,
           },
