@@ -29,8 +29,7 @@ export function Filters({
   // Sort races by date (most recent first)
   const sortedRaces = [...races].sort(
     (a, b) =>
-      new Date(b.grandPrixDate).getTime() -
-      new Date(a.grandPrixDate).getTime(),
+      new Date(b.grandPrixDate).getTime() - new Date(a.grandPrixDate).getTime(),
   )
 
   // Sort users alphabetically
