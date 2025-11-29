@@ -46,11 +46,7 @@ export const columns: ColumnDef<PredictionRow>[] = [
       const { label, country } = row.original.race
       return (
         <div className='flex items-center gap-1'>
-          <CountryFlag
-            country={country}
-            isEager={false}
-            className='size-5'
-          />
+          <CountryFlag country={country} isEager={false} className='size-5' />
           <span>{label}</span>
         </div>
       )
