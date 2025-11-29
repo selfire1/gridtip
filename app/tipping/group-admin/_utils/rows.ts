@@ -17,6 +17,7 @@ export type PredictionRow = {
   race: {
     id: Database.Race['id']
     label: string
+    country: string
   }
   created: string
   position: RacePredictionField
@@ -31,7 +32,7 @@ export function formatPredictionsToRows(
     constructor: Map<Database.Constructor['id'], ConstructorProps>
     race: Map<
       Database.Race['id'],
-      Pick<Database.Race, 'locality' | 'grandPrixDate'>
+      Pick<Database.Race, 'locality' | 'grandPrixDate' | 'country'>
     >
   },
 ): PredictionRow[] {
@@ -52,6 +53,7 @@ export function formatPredictionsToRows(
         race: {
           id: entry.prediction.raceId!,
           label: race.locality,
+          country: race.country,
         },
         userName: user.name,
         user: {
