@@ -17,11 +17,7 @@ import CreateOrEditTipDialog, {
   TipFormData,
 } from './_components/create-edit-tip-dialog'
 import TipFormProvider from './_components/edit-tip-context'
-import Button from '@/components/button'
 import React from 'react'
-import { updateCache } from './_utils/update-results-action'
-import { toast } from 'sonner'
-import { UpdateResultsButton } from './_components/update-results-button'
 import { ChampionshipRevealDate } from './_components/championship-reveal-date'
 
 export default async function GroupSettings() {
