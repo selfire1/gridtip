@@ -73,7 +73,6 @@ export default async function GroupSettings() {
         <p className='text-muted-foreground'>
           You can manage this group through these admin settings.
         </p>
-        <UpdateResultsButton />
       </div>
       <ChampionshipRevealDate
         groupId={group.id}
