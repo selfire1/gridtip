@@ -118,9 +118,7 @@ export default async function DashboardPage() {
             <CardTipStatus groupId={groupId} race={nextRace} />
           </>
         )}
-        {showChampionshipCard && (
-          <CardChampionshipTips revealDate={group.championshipTipsRevalDate!} />
-        )}
+        {showChampionshipCard && <CardChampionshipTips />}
         {shouldShowPrevious &&
           getPreviousRaceStatus(previousRace) === 'past' && (
             <CardPreviousRaceResults race={previousRace} isActive={false} />
@@ -1011,12 +1009,11 @@ export default async function DashboardPage() {
     )
   }
 
-  function CardChampionshipTips({ revealDate }: { revealDate: Date }) {
+  function CardChampionshipTips() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Championship Tips Revealed!</CardTitle>
-          <CardDescription>Check out tips now!</CardDescription>
+          <CardTitle>Championship Tips Revealed</CardTitle>
         </CardHeader>
         <CardContent>
           <p className='text-muted-foreground'>

@@ -3,7 +3,6 @@ import {
   getCurrentGroup,
   getCurrentGroupId,
   getDriverOptions,
-  getGroupMembers,
 } from '@/lib/utils/groups'
 import ChampionshipForm, { Schema } from './components/championship-form'
 import { verifySession } from '@/lib/dal'
@@ -12,6 +11,7 @@ import { DeepPartial } from '@/types'
 import { isPast } from 'date-fns'
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -36,8 +36,7 @@ export default async function ChampionshipPage() {
 
   const group = groupId ? await getCurrentGroup(userId) : null
   const showEveryonesTips =
-    group?.championshipTipsRevalDate &&
-    isPast(group.championshipTipsRevalDate)
+    group?.championshipTipsRevalDate && isPast(group.championshipTipsRevalDate)
 
   const everyonesTips = showEveryonesTips
     ? await getEveryonesTips(groupId!)
@@ -47,20 +46,22 @@ export default async function ChampionshipPage() {
     <div className='space-y-8'>
       <div className='space-y-2'>
         <h1 className='page-title'>
-          {isAfterDeadline ? 'Your Championship Tips' : 'Tip Championships'}
+          {isAfterDeadline ? 'Championship Tips' : 'Tip Championships'}
         </h1>
         <p className='text-muted-foreground'>
           {isAfterDeadline
-            ? 'Score extra points by guessing the Constructors' and Drivers' Championships.'
-            : 'Guess the Constructors' and Drivers' Championships to secure extra points.'}
+            ? `Score extra points by guessing the Constructors’ and Drivers’ Championships.`
+            : `Guess the Constructors’ and Drivers’ Championships to secure extra points.`}
         </p>
       </div>
-      <ChampionshipForm
-        defaultValues={defaults}
-        drivers={drivers}
-        constructors={constructors}
-        disabled={isAfterDeadline}
-      />
+      {!showEveryonesTips && (
+        <ChampionshipForm
+          defaultValues={defaults}
+          drivers={drivers}
+          constructors={constructors}
+          disabled={isAfterDeadline}
+        />
+      )}
       {showEveryonesTips && everyonesTips && (
         <EveryonesChampionshipTips
           tips={everyonesTips}
@@ -260,13 +261,14 @@ function EveryonesChampionshipTips({
   return (
     <div className='space-y-6'>
       <div>
-        <h2 className='title-2 mb-4'>Everyone's Championship Tips</h2>
+        <h2 className='title-2 mb-4'>Everyone’s Championship Tips</h2>
         <div className='grid md:grid-cols-2 gap-6'>
           <Card>
             <CardHeader>
-              <CardTitle>Driver Championship</CardTitle>
+              <CardTitle>Drivers’ Championship</CardTitle>
+              <CardAction>15 points</CardAction>
               <CardDescription>
-                Who everyone thinks will win the drivers' championship
+                Who everyone thinks will win the drivers’ championship
               </CardDescription>
             </CardHeader>
             <CardContent className='space-y-4'>
@@ -307,9 +309,11 @@ function EveryonesChampionshipTips({
 
           <Card>
             <CardHeader>
-              <CardTitle>Constructor Championship</CardTitle>
+              <CardTitle>Constructors’ Championship</CardTitle>
+              <CardAction>10 points</CardAction>
+
               <CardDescription>
-                Who everyone thinks will win the constructors' championship
+                Who everyone thinks will win the constructors’ championship
               </CardDescription>
             </CardHeader>
             <CardContent className='space-y-4'>
@@ -370,7 +374,7 @@ function TipCard({
             <UserAvatar
               name={user.name}
               id={user.id}
-              className='size-6 rounded-lg'
+              className='size-8 rounded-lg'
             />
             <p>{user.name}</p>
           </div>
