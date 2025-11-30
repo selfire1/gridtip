@@ -268,7 +268,7 @@ function EveryonesChampionshipTips({
               <CardTitle>Drivers’ Championship</CardTitle>
               <CardAction>15 points</CardAction>
               <CardDescription>
-                Who everyone thinks will win the drivers’ championship
+                Who thinks which driver will claim the Championship throphy
               </CardDescription>
             </CardHeader>
             <CardContent className='space-y-4'>
@@ -313,7 +313,8 @@ function EveryonesChampionshipTips({
               <CardAction>10 points</CardAction>
 
               <CardDescription>
-                Who everyone thinks will win the constructors’ championship
+                Which constructor do people predict to stand at the top of the
+                ladder
               </CardDescription>
             </CardHeader>
             <CardContent className='space-y-4'>
