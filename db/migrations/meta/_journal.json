@@ -29,6 +29,13 @@
       "when": 1761967156263,
       "tag": "0003_prediction_overwrite",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1764468874034,
+      "tag": "0004_old_silverclaw",
+      "breakpoints": true
     }
   ]
 }

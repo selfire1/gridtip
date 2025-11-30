@@ -31,6 +31,9 @@ export const groupsTable = sqliteTable('groups', {
   iconName: text({ enum: SUPPORTED_ICON_NAMES })
     .notNull()
     .default('lucide:users'),
+  championshipTipsRevalDate: integer('championship_tips_reval_date', {
+    mode: 'timestamp',
+  }),
 })
 
 export const groupRelations = relations(groupsTable, ({ many, one }) => ({
