@@ -12,8 +12,8 @@ interface FiltersProps {
   users: Array<{ id: string; name: string }>
   selectedRaceId: string | null
   selectedUserId: string | null
-  onRaceChange: (raceId: string | null) => void
-  onUserChange: (userId: string | null) => void
+  onRaceChange: (raceId: string | null | 'all') => void
+  onUserChange: (userId: string | null | 'all') => void
 }
 
 export function Filters({
@@ -56,7 +56,13 @@ export function Filters({
         <Combobox
           items={racesWithAll}
           value={selectedRaceId ?? 'all'}
-          onSelect={(value) => onRaceChange(value === 'all' ? null : value)}
+          onSelect={(value) => {
+            if (!value || value === 'all') {
+              onRaceChange(null)
+              return
+            }
+            onRaceChange(value)
+          }}
           getSearchValue={(race) => race.locality}
           placeholder='Search races...'
           emptyText='All races'
@@ -82,7 +88,13 @@ export function Filters({
         <Combobox
           items={usersWithAll}
           value={selectedUserId ?? 'all'}
-          onSelect={(value) => onUserChange(value === 'all' ? null : value)}
+          onSelect={(value) => {
+            if (!value || value === 'all') {
+              onUserChange(null)
+              return
+            }
+            onUserChange(value)
+          }}
           getSearchValue={(user) => user.name}
           placeholder='Search users...'
           emptyText='All users'
