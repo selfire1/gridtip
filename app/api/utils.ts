@@ -35,6 +35,7 @@ export async function validateToken() {
   )
   const isUserValid = providedUsername === storedUser
   if (!isPasswordValid || !isUserValid) {
+    console.log('Provided: ', providedUsername, providedPassword)
     return createResponse(401, 'Invalid credentials')
   }
   return {
