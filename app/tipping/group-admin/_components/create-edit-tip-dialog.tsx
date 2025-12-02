@@ -208,7 +208,6 @@ export default function CreateOrEditTipDialog({
                 isPending={isPending}
                 variant='default'
                 onClick={() => {
-                  console.log('clicked')
                   form.handleSubmit(onSubmit)
                 }}
               />
