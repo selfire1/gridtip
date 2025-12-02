@@ -225,7 +225,7 @@ function getSprintResults({
         predictedP1By,
         isP1Correct:
           place === 1 &&
-          results?.get(selectedRace!.id)?.gp?.get(1)?.id === driver.id,
+          results?.get(selectedRace!.id)?.sprint?.get(1)?.id === driver.id,
       }
     })
     .filter((el) => el.place === 1 || el.predictedP1By?.length)
