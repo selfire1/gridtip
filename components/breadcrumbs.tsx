@@ -53,7 +53,7 @@ export default function Breadcrumbs() {
   )
   function sentenceCase(str: string) {
     return str
-      .split('-')
+      .split(/[-_]/)
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ')
   }
