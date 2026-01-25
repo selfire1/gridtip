@@ -5,24 +5,36 @@ import {
   usePathname,
   useSearchParams,
 } from 'next/navigation'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import SpaImage from '@/public/img/spa.jpg'
-import Image from 'next/image'
 import { authClient } from '@/lib/auth-client'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useTransition } from 'react'
 import { LucideTrash } from 'lucide-react'
 import { QueryOrigin } from '@/constants'
 import { Spinner } from './ui/spinner'
 import { filterQuery } from 'ufo'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+} from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { Placeholder } from '@/app/(standalone)/auth/_lib/placeholder'
+import Link from 'next/link'
+import { Path } from '@/lib/utils/path'
+import z from 'zod'
 
 export function LoginForm({
   className,
+  placeholder,
   ...props
-}: React.ComponentProps<'div'>) {
+}: React.ComponentProps<'form'> & {
+  placeholder: Placeholder
+}) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -51,48 +63,122 @@ export function LoginForm({
   }, [])
 
   const description = getDescription(searchParams)
-  const [isLoading, setIsLoading] = useState(false)
+
+  const [isGooglePending, startGoogleTransition] = useTransition()
+  const [isLoginPending, startLoginTransition] = useTransition()
+  const isAnyPending = useMemo(
+    () => isGooglePending || isLoginPending,
+    [isGooglePending, isLoginPending],
+  )
 
   return (
-    <div className={cn('flex flex-col gap-6', className)} {...props}>
-      <Card className='overflow-hidden p-0'>
-        <CardContent className='grid p-0 md:grid-cols-2 md:min-h-96'>
-          <form
-            className='p-6 md:p-8 flex flex-col justify-center'
-            onSubmit={async (e) => {
-              e.preventDefault()
-              await signInWithGoogle(searchParams.get('redirect'))
-            }}
-          >
-            <div className='flex flex-col gap-6'>
-              <div className='flex flex-col items-center text-center'>
-                <h1 className='text-2xl font-bold'>Join the Grid</h1>
-                <p className='text-muted-foreground text-balance'>
-                  {description}
-                </p>
-              </div>
-              <Button type='submit' className='w-full' disabled={isLoading}>
-                {isLoading ? <Spinner /> : <GIcon />}
-                <span>Continue with Google</span>
-              </Button>
-            </div>
-          </form>
-          <div className='bg-muted relative hidden md:block'>
-            <Image
-              src={SpaImage}
-              sizes='100vw, (max-width: 640px) 50vw, (max-width: 768px) 400px, (max-width: 1024px) 1080px'
-              quality={80}
-              priority={true}
-              placeholder='blur'
-              loading='eager'
-              alt='Long exposure lights of race cars at night at the Spa-Francorchamps track'
-              className='absolute inset-0 h-full w-full object-cover dark:brightness-50'
-            />
+    <form
+      onSubmit={onSubmit}
+      className={cn('flex flex-col gap-6', className)}
+      {...props}
+    >
+      <FieldGroup>
+        <div className='flex flex-col items-center gap-1 text-center'>
+          <h1 className='text-2xl font-bold'>Login to your account</h1>
+          <p className='text-muted-foreground text-sm text-balance'>
+            {description}
+          </p>
+        </div>
+        <Field>
+          <FieldLabel htmlFor='email'>Email</FieldLabel>
+          <Input
+            id='email'
+            disabled={isAnyPending}
+            type='email'
+            name='email'
+            placeholder={placeholder.email}
+            required
+          />
+        </Field>
+        <Field>
+          <div className='flex items-center'>
+            <FieldLabel htmlFor='password'>Password</FieldLabel>
+            <Link
+              href={Path.ForgotPassword}
+              className='ml-auto text-sm underline-offset-4 hover:underline'
+            >
+              Forgot your password?
+            </Link>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+          <Input
+            disabled={isAnyPending}
+            id='password'
+            type='password'
+            name='password'
+            required
+            minLength={8}
+          />
+        </Field>
+        <Field>
+          <Button type='submit' disabled={isAnyPending}>
+            {isLoginPending && <Spinner />} Login
+          </Button>
+        </Field>
+        <FieldSeparator>Or continue with</FieldSeparator>
+        <Field>
+          <Button
+            variant='outline'
+            type='button'
+            disabled={isAnyPending}
+            onClick={() => signInWithGoogle(searchParams.get('redirect'))}
+          >
+            {isGooglePending ? <Spinner /> : <GIcon />}
+            Login with Google
+          </Button>
+          <FieldDescription className='text-center'>
+            Don’t have an account?{' '}
+            <Link href={Path.SignUp} className='underline underline-offset-4'>
+              Sign up
+            </Link>
+          </FieldDescription>
+        </Field>
+      </FieldGroup>
+    </form>
   )
+
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    startLoginTransition(async () => {
+      const schema = z.object({
+        email: z.email(),
+        password: z.string().trim().min(8),
+      })
+      event.preventDefault()
+      const target = event.target as HTMLFormElement
+      const formState = Object.fromEntries(new FormData(target))
+
+      const result = schema.safeParse(formState)
+      if (!result.success) {
+        console.warn(result.error.issues)
+        toast.error(result.error.issues[0].message)
+        return
+      }
+
+      const value = result.data
+      const signInContext = await authClient.signIn.email({
+        email: value.email,
+        password: value.password,
+        callbackURL: Path.Dashboard,
+      })
+      if (signInContext.error) {
+        const isInvalidCredentialsError =
+          signInContext.error.status === 403 ? 'unverified' : 'other'
+
+        if (isInvalidCredentialsError) {
+          toast.error('Invalid Credentials')
+          return
+        }
+        toast.error('Something went wrong', {
+          description: signInContext.error.message,
+        })
+        console.error(signInContext.error)
+      }
+    })
+  }
 
   function removeSearchParam(param: string) {
     const url = pathname
@@ -108,33 +194,33 @@ export function LoginForm({
   }
 
   async function signInWithGoogle(redirect: string | null) {
-    setIsLoading(true)
-    const data = await authClient.signIn.social({
-      provider: 'google',
-      callbackURL: redirect || '/tipping',
-    })
-    setIsLoading(false)
-    if (data.error) {
-      toast.error('Something went wrong', {
-        description:
-          'Please try signing in with Google again. If this error persists, please contact us.',
-        action: {
-          label: 'Contact',
-          onClick: () => {
-            router.push('/contact')
-          },
-        },
+    startGoogleTransition(async () => {
+      const data = await authClient.signIn.social({
+        provider: 'google',
+        callbackURL: redirect || '/tipping',
       })
-      return
-    }
+      if (data.error) {
+        toast.error('Something went wrong', {
+          description:
+            'Please try signing in with Google again. If this error persists, please contact us.',
+          action: {
+            label: 'Contact',
+            onClick: () => {
+              router.push('/contact')
+            },
+          },
+        })
+        return
+      }
+    })
   }
 
   function getDescription(params: ReadonlyURLSearchParams) {
     switch (params.get('origin')) {
       case QueryOrigin.Join:
-        return 'Please sign in or create an account first before joining this group.'
+        return 'Login or create an account first before joining this group.'
       default:
-        return 'Log in to start tipping, or create a new GridTip account with Google.'
+        return 'Enter your email below to login to your account'
     }
   }
 

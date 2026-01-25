@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useTipFormContext } from './edit-tip-context'
 import CreateOrEditTipDialog from './create-edit-tip-dialog'
-import Button from '@/components/button'
+import AppButton from '@/components/button'
 import { Button as ShadButton } from '@/components/ui/button'
 
 export default function RowAction({ row }: { row: PredictionRow }) {
@@ -42,7 +42,7 @@ export default function RowAction({ row }: { row: PredictionRow }) {
               overwriteTo: row.overwrite,
             }}
             button={
-              <Button
+              <AppButton
                 label='Edit tip'
                 icon={LucidePen}
                 variant='ghost'

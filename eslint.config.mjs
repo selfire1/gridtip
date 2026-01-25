@@ -9,14 +9,14 @@ const eslintConfig = [
     extends: ['next', 'prettier'],
     plugins: ['prettier'],
     rules: {
-      'prettier/prettier': [
+      '@typescript-eslint/no-unused-vars': [
         'warn',
         {
-          singleQuote: true,
-          semi: false,
-          jsxSingleQuote: true,
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
         },
       ],
+      'react/no-children-prop': 'off',
     },
   }),
 ]

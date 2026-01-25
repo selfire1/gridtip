@@ -1,4 +1,4 @@
-import { LoginForm } from '@/components/login-form'
+import { LoginForm } from '@/components/login-form-legacy'
 import { Metadata } from 'next'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Suspense } from 'react'

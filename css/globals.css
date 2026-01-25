@@ -395,8 +395,8 @@
 
 @layer utilities {
   .is-container {
-    --padding: 1rem;
-    --max-width: 1024px;
+    --padding: 2.5rem;
+    --max-width: 1480px;
 
     width: min(var(--max-width), 100% - (var(--padding) * 2));
     @apply mx-auto;
