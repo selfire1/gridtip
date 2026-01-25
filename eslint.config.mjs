@@ -1,4 +1,5 @@
 import { FlatCompat } from '@eslint/eslintrc'
+import tseslint from 'typescript-eslint'
 
 const compat = new FlatCompat({
   baseDirectory: import.meta.dirname,
@@ -9,6 +10,12 @@ const eslintConfig = [
     extends: ['next', 'prettier'],
     plugins: ['prettier'],
     rules: {
+      'react/no-children-prop': 'off',
+    },
+  }),
+  ...tseslint.configs.recommended,
+  {
+    rules: {
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {
@@ -16,9 +23,8 @@ const eslintConfig = [
           varsIgnorePattern: '^_',
         },
       ],
-      'react/no-children-prop': 'off',
     },
-  }),
+  },
 ]
 
 export default eslintConfig
