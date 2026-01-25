@@ -10,6 +10,7 @@ import { MemberStatus } from '@/types'
 import { db } from '@/db'
 import { groupMembersTable } from '@/db/schema/schema'
 import { eq } from 'drizzle-orm'
+import { Path } from './utils/path'
 
 export const verifySession = cache(async () => {
   const session = await auth.api.getSession({
@@ -17,7 +18,7 @@ export const verifySession = cache(async () => {
   })
 
   if (!session?.user.id) {
-    redirect(`/auth?origin=${QueryOrigin.NotAllowed}`)
+    redirect(`${Path.Login}?origin=${QueryOrigin.NotAllowed}`)
   }
 
   return { isAuth: true, userId: session.user.id, user: session.user }
