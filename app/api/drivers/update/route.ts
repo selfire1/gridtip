@@ -167,7 +167,7 @@ export const GET = async (_request: NextRequest) => {
           DriverTable: { Drivers: apiDrivers },
         },
       } = await fetchJolpica<DriverResponse>(
-        `/ergast/f1/2025/constructors/${constructor.id}/drivers/`,
+        `/ergast/f1/2026/constructors/${constructor.id}/drivers/`,
       )
       if (!apiDrivers?.length) {
         continue

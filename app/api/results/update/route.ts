@@ -121,7 +121,7 @@ export const GET = async (_request: NextRequest) => {
 
       while (total === null || offset < total) {
         const response = await fetchJolpica<SprintResultsResponse>(
-          `/ergast/f1/2025/sprint/`,
+          `/ergast/f1/2026/sprint/`,
           { params: { limit, offset } },
         )
         total = +response.MRData.total
@@ -147,13 +147,13 @@ export const GET = async (_request: NextRequest) => {
     }
 
     async function getResults(sprintResultsMap: SprintResultsMap) {
-      let results: Database.InsertResult[] = []
+      const results: Database.InsertResult[] = []
       let offset = 0
       let total: null | number = null
       const limit = 100
       while (total === null || offset < total) {
         const response = await fetchJolpica<ResultsResponse>(
-          `/ergast/f1/2025/results/`,
+          `/ergast/f1/2026/results/`,
           { params: { limit, offset } },
         )
         total = +response.MRData.total

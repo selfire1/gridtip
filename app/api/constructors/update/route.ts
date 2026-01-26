@@ -101,7 +101,7 @@ export const GET = async (_request: NextRequest) => {
 
   async function getJolpicaConstructors() {
     const response = await fetchJolpica<ConstructorsResponse>(
-      '/ergast/f1/2025/constructors/',
+      '/ergast/f1/2026/constructors/',
     )
     return response.MRData.ConstructorTable.Constructors
   }

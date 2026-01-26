@@ -106,7 +106,7 @@ export const GET = async (_request: NextRequest) => {
   }
 
   async function getJolpicaRaces() {
-    const response = await fetchJolpica<RaceResponse>('/ergast/f1/2025/races/')
+    const response = await fetchJolpica<RaceResponse>('/ergast/f1/2026/races/')
     const races = response.MRData.RaceTable?.Races
 
     return races?.map((race) => {
