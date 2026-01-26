@@ -2,7 +2,6 @@
 
 import { ChevronsUpDown, LogOut } from 'lucide-react'
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +19,7 @@ import {
 import { authClient } from '@/lib/auth-client'
 import { useRouter } from 'next/navigation'
 import UserAvatar from './user-avatar'
+import { Path } from '@/lib/utils/path'
 
 export function NavUser({
   user,
@@ -72,7 +72,8 @@ export function NavUser({
                 await authClient.signOut({
                   fetchOptions: {
                     onSuccess() {
-                      router.push('/auth')
+                      // TODO: use `useTransition`, remove `router.refresh()`
+                      router.push(Path.Login)
                       router.refresh()
                     },
                   },

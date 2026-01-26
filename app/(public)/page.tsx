@@ -5,6 +5,8 @@ import { auth } from '@/lib/auth'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+import { getMaybeSession } from '@/lib/dal'
+import { Path } from '@/lib/utils/path'
 
 export default function Home() {
   return (
@@ -26,9 +28,7 @@ export default function Home() {
 }
 
 async function GetStartedButton() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  })
+  const session = await getMaybeSession()
   const { to, label, title, src } = getData()
   return (
     <Button asChild>
@@ -43,14 +43,14 @@ async function GetStartedButton() {
   function getData() {
     if (!session?.user) {
       return {
-        to: '/auth',
+        to: Path.SignUp,
         label: 'Get started',
         title: 'Sign up or log in',
         src: null,
       }
     }
     return {
-      to: '/tipping',
+      to: Path.Dashboard,
       label: 'View dashboard',
       title: 'Dashboard',
       src: getImageHref(session.user),

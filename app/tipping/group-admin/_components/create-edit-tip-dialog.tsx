@@ -53,7 +53,7 @@ import {
 } from 'react-hook-form'
 import { createTip, updateTip } from '../_utils/create-tip-action'
 import { toast } from 'sonner'
-import Button from '@/components/button'
+import AppButton from '@/components/button'
 import { formSchema, Schema } from '../_utils/schema'
 import { useRouter } from 'next/navigation'
 import { SelectUser } from './select-user'
@@ -86,7 +86,12 @@ export default function CreateOrEditTipDialog({
   defaultValues,
   predictionEntryId,
   button = (
-    <Button variant='outline' size='sm' icon={LucidePlus} label='Create tip' />
+    <AppButton
+      variant='outline'
+      size='sm'
+      icon={LucidePlus}
+      label='Create tip'
+    />
   ),
 }: TipFormProps) {
   const form = useForm<Schema>({
@@ -196,13 +201,13 @@ export default function CreateOrEditTipDialog({
 
           <Field className='mt-4'>
             <div className='flex justify-between gap-2'>
-              <Button
+              <AppButton
                 label='Cancel'
                 type='button'
                 onClick={() => setOpen(false)}
                 variant='outline'
               />
-              <Button
+              <AppButton
                 label={copy.button[mode]}
                 type='submit'
                 isPending={isPending}
