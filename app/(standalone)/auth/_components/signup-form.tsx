@@ -1,18 +1,11 @@
 'use client'
 
-import {
-  ReadonlyURLSearchParams,
-  usePathname,
-  useSearchParams,
-} from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { authClient } from '@/lib/auth-client'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useTransition } from 'react'
-import { LucideTrash } from 'lucide-react'
-import { QueryOrigin } from '@/constants'
+import { useMemo, useTransition } from 'react'
 import { Spinner } from '@ui/spinner'
-import { filterQuery } from 'ufo'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
@@ -28,6 +21,8 @@ import { Placeholder } from '@/app/(standalone)/auth/_lib/placeholder'
 import Link from 'next/link'
 import { Path } from '@/lib/utils/path'
 import z from 'zod'
+import { ButtonText } from '@/components/button-text'
+import { GIcon } from './google-icon'
 
 export function SignupForm({
   className,
@@ -36,40 +31,14 @@ export function SignupForm({
 }: React.ComponentProps<'form'> & {
   placeholder: Placeholder
 }) {
-  const pathname = usePathname()
   const searchParams = useSearchParams()
   const router = useRouter()
 
-  useEffect(() => {
-    switch (searchParams.get('origin')) {
-      case QueryOrigin.NotAllowed: {
-        showSignInRequiredToast()
-        removeSearchParam('origin')
-        break
-      }
-
-      case QueryOrigin.Deleted: {
-        toast.success('Account deleted', {
-          description: 'We’re sorry to see you go 😥',
-          icon: <LucideTrash size={16} />,
-          duration: 4_000,
-        })
-        break
-      }
-
-      default:
-        break
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const description = getDescription(searchParams)
-
   const [isGooglePending, startGoogleTransition] = useTransition()
-  const [isLoginPending, startLoginTransition] = useTransition()
+  const [isSignupPending, startSignupTransition] = useTransition()
   const isAnyPending = useMemo(
-    () => isGooglePending || isLoginPending,
-    [isGooglePending, isLoginPending],
+    () => isGooglePending || isSignupPending,
+    [isGooglePending, isSignupPending],
   )
 
   return (
@@ -82,13 +51,27 @@ export function SignupForm({
         <div className='flex flex-col items-center gap-1 text-center'>
           <h1 className='text-2xl font-bold'>Join the Grid</h1>
           <p className='text-muted-foreground text-sm text-balance'>
-            {description}
+            Fill in the form below to create your account
           </p>
         </div>
+        <Field>
+          <FieldLabel htmlFor='name'>Your Name</FieldLabel>
+          <Input
+            id='name'
+            type='text'
+            placeholder={placeholder?.name}
+            disabled={isAnyPending}
+            autoComplete='name'
+            name='name'
+            required
+          />
+        </Field>
+
         <Field>
           <FieldLabel htmlFor='email'>Email</FieldLabel>
           <Input
             id='email'
+            autoComplete='email'
             disabled={isAnyPending}
             type='email'
             name='email'
@@ -99,12 +82,6 @@ export function SignupForm({
         <Field>
           <div className='flex items-center'>
             <FieldLabel htmlFor='password'>Password</FieldLabel>
-            <Link
-              href={Path.ForgotPassword}
-              className='ml-auto text-sm underline-offset-4 hover:underline'
-            >
-              Forgot your password?
-            </Link>
           </div>
           <Input
             disabled={isAnyPending}
@@ -114,10 +91,17 @@ export function SignupForm({
             required
             minLength={8}
           />
+          <FieldDescription>
+            Must be at least 8 characters long.
+          </FieldDescription>
         </Field>
         <Field>
           <Button type='submit' disabled={isAnyPending}>
-            {isLoginPending && <Spinner />} Login
+            <ButtonText
+              text='Create Account'
+              loading='Creating account…'
+              isPending={isSignupPending}
+            />
           </Button>
         </Field>
         <FieldSeparator>Or continue with</FieldSeparator>
@@ -129,12 +113,12 @@ export function SignupForm({
             onClick={() => signInWithGoogle(searchParams.get('redirect'))}
           >
             {isGooglePending ? <Spinner /> : <GIcon />}
-            Login with Google
+            Sign up with Google
           </Button>
-          <FieldDescription className='text-center'>
-            Don’t have an account?{' '}
-            <Link href={Path.SignUp} className='underline underline-offset-4'>
-              Sign up
+          <FieldDescription className='text-center pt-6'>
+            Already have an account?{' '}
+            <Link href={Path.Login} className='underline underline-offset-4'>
+              Sign in
             </Link>
           </FieldDescription>
         </Field>
@@ -143,8 +127,9 @@ export function SignupForm({
   )
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    startLoginTransition(async () => {
+    startSignupTransition(async () => {
       const schema = z.object({
+        name: z.string().trim().min(1),
         email: z.email(),
         password: z.string().trim().min(8),
       })
@@ -160,37 +145,31 @@ export function SignupForm({
       }
 
       const value = result.data
-      const signInContext = await authClient.signIn.email({
-        email: value.email,
-        password: value.password,
-        callbackURL: Path.Dashboard,
-      })
-      if (signInContext.error) {
-        const isInvalidCredentialsError =
-          signInContext.error.status === 403 ? 'unverified' : 'other'
-
-        if (isInvalidCredentialsError) {
-          toast.error('Invalid Credentials')
-          return
-        }
-        toast.error('Something went wrong', {
-          description: signInContext.error.message,
+      try {
+        const signupContext = await authClient.signUp.email({
+          name: value.name,
+          email: value.email,
+          password: value.password,
+          callbackURL: Path.Dashboard,
         })
-        console.error(signInContext.error)
+        if (signupContext.error) {
+          throw new Error(signupContext.error.message)
+        }
+        router.push('/auth/confirm-email')
+      } catch (error) {
+        console.error(error)
+        toast.error('Something went wrong', {
+          description:
+            ((error as Error).message ?? 'Please try again.') +
+            ' If this error persists, please contact us.',
+          action: {
+            label: 'Contact',
+            onClick: () => {
+              router.push('/contact')
+            },
+          },
+        })
       }
-    })
-  }
-
-  function removeSearchParam(param: string) {
-    const url = pathname
-    const urlWithParamRemoved = filterQuery(url, (key: string) => key !== param)
-    router.replace(urlWithParamRemoved)
-  }
-
-  function showSignInRequiredToast() {
-    toast.warning('Please sign in', {
-      description: 'You must be signed in to access this page',
-      duration: 6_000,
     })
   }
 
@@ -214,25 +193,5 @@ export function SignupForm({
         return
       }
     })
-  }
-
-  function getDescription(params: ReadonlyURLSearchParams) {
-    switch (params.get('origin')) {
-      case QueryOrigin.Join:
-        return 'Login or create an account first before joining this group.'
-      default:
-        return 'Enter your email below to login to your account'
-    }
-  }
-
-  function GIcon(): React.ReactNode {
-    return (
-      <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
-        <path
-          d='M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z'
-          fill='currentColor'
-        />
-      </svg>
-    )
   }
 }

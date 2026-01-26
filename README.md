@@ -2,7 +2,7 @@
 
 Tip the F1 season with your ~rivals~ friends.
 
-Live at [gridtip.joschua.io](https://gridtip.joschua.io).
+Live at [gridtipapp.com](https://gridtipapp.com).
 
 ## Stack
 

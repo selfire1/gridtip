@@ -10,11 +10,11 @@ export function getPlaceholder(): Placeholder {
     },
     {
       name: 'Franz Hermann',
-      email: 'nordschleife@nuerburg.de',
+      email: 'franzhermann@nuerburg.de',
     },
     {
       name: 'Lewis Hamilton',
-      email: 'still-we-rise@ferrari.forza',
+      email: 'lewis@ferrari.forza',
     },
     {
       name: 'Charles Leclerc',
@@ -22,35 +22,19 @@ export function getPlaceholder(): Placeholder {
     },
     {
       name: 'Lando Norris',
-      email: 'no-power@mclaren.papaya',
+      email: 'lando@mclaren.papaya',
     },
     {
       name: 'Fernando Alonso',
-      email: 'gp2-engine@aston.karma',
-    },
-    {
-      name: 'Ayrton Senna',
-      email: 'magic@senna.legend',
-    },
-    {
-      name: 'Michael Schumacher',
-      email: 'the-michael@ferrari.goat',
+      email: 'rookie@aston.co.uk',
     },
     {
       name: 'Kimi Raikkonen',
-      email: 'bwoah@leave.alone',
-    },
-    {
-      name: 'Sebastian Vettel',
-      email: 'here-comes@sebastian.vet',
+      email: 'raikkonen@bwoah.fi',
     },
     {
       name: 'Daniel Ricciardo',
       email: 'honey-badger@shoey.com',
-    },
-    {
-      name: 'Niki Lauda',
-      email: 'comeback-king@lauda.legend',
     },
     {
       name: 'George Russell',
@@ -58,11 +42,15 @@ export function getPlaceholder(): Placeholder {
     },
     {
       name: 'Oscar Piastri',
-      email: 'aussieaussieaussie@mclaren.papaya',
+      email: 'piastri@mclaren.papaya',
+    },
+    {
+      name: 'Carlos Sainz',
+      email: 'smooth@williamsf1.com',
     },
     {
       name: 'Alain Prost',
-      email: 'the-professor@fourtime.champ',
+      email: 'the-professor@f1.champ',
     },
     {
       name: 'Valtteri Bottas',
