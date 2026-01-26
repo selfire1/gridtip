@@ -56,6 +56,7 @@ export default function GroupFields({
         <Input
           id='cutoff'
           type='number'
+          min={0}
           value={cutoff.value}
           onChange={(e) => cutoff.setValue(e.target.value)}
         />

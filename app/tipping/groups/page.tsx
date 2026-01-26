@@ -31,9 +31,11 @@ import { MemberStatus } from '@/types'
 export default async function GroupsPage() {
   const { userId } = await verifySession()
 
+  const groupsMemberships = await getGroupsForUser(userId)
+
   return (
     <div className='grid sm:grid-cols-2 gap-8'>
-      <YourGroups className='col-span-2' />
+      {!!groupsMemberships.length && <YourGroups className='col-span-2' />}
       <CreateGroup />
       <JoinGroup />
     </div>
@@ -56,8 +58,6 @@ export default async function GroupsPage() {
   }
 
   async function YourGroups({ className }: { className?: string }) {
-    const groupsMemberships = await getGroupsForUser(userId)
-
     return (
       <Card {...{ className }}>
         <CardHeader>
@@ -133,25 +133,26 @@ export default async function GroupsPage() {
         </>
       )
     }
-    async function getGroupsForUser(userId: string) {
-      return await db.query.groupMembersTable.findMany({
-        columns: {
-          joinedAt: true,
-          userId: true,
-        },
-        where: eq(groupMembersTable.userId, userId),
-        with: {
-          group: {
-            columns: {
-              id: true,
-              adminUser: true,
-              name: true,
-              iconName: true,
-              cutoffInMinutes: true,
-            },
-          },
-        },
-      })
-    }
   }
+}
+
+async function getGroupsForUser(userId: string) {
+  return await db.query.groupMembersTable.findMany({
+    columns: {
+      joinedAt: true,
+      userId: true,
+    },
+    where: eq(groupMembersTable.userId, userId),
+    with: {
+      group: {
+        columns: {
+          id: true,
+          adminUser: true,
+          name: true,
+          iconName: true,
+          cutoffInMinutes: true,
+        },
+      },
+    },
+  })
 }

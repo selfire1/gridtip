@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation'
 import { IconFromName } from '@/components/icon-from-name'
 import { clearClientCookie, setClientCookie } from '@/lib/utils/group-cookie'
 import Link from 'next/link'
+import Logo from './logo'
 
 type GroupData = Pick<Database.Group, 'id' | 'name' | 'iconName'>
 
@@ -54,6 +55,10 @@ export function GroupSwitcher({
       return groups.filter((group) => group?.id !== selectedGroup?.id)
     }
   }, [selectedGroup, groups])
+
+  if (!groups.length) {
+    return <Logo className='p-2' href='/tipping' />
+  }
 
   if (!hasOtherGroups) {
     return (
