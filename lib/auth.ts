@@ -46,6 +46,13 @@ Click this link below to verify your email: <a href="${url}">${url}</a>`.trim(),
     deleteUser: {
       enabled: true,
     },
+    additionalFields: {
+      hasSeenOnboarding: {
+        type: 'boolean',
+        initialValue: false,
+        defaultValue: false,
+      },
+    },
   },
   socialProviders: {
     google: {
