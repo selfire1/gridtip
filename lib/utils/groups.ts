@@ -96,6 +96,7 @@ export async function getGroupMembers(groupId: string) {
           columns: {
             id: true,
             name: true,
+            profileImageUrl: true,
           },
         },
       },

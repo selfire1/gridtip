@@ -44,7 +44,7 @@ export async function validateToken() {
 
 export function createResponse(
   status: number,
-  jsonOrMessage: Record<string, any> | string,
+  jsonOrMessage: Record<string, unknown> | string,
 ) {
   if (status.toString().startsWith('4') || status.toString().startsWith('5')) {
     return NextResponse.json(
@@ -63,8 +63,8 @@ export function createResponse(
 
 export function areFieldsTheSame<
   TField extends string,
-  TNewItem extends Partial<Record<TField, any> & Record<string, any>>,
-  TStoredItem extends Record<TField, any> & Record<string, any>,
+  TNewItem extends Partial<Record<TField, unknown> & Record<string, unknown>>,
+  TStoredItem extends Record<TField, unknown> & Record<string, unknown>,
 >(
   fields: TField[],
 

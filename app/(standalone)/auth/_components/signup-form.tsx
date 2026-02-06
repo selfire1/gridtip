@@ -98,8 +98,8 @@ export function SignupForm({
         <Field>
           <Button type='submit' disabled={isAnyPending}>
             <ButtonText
-              text='Create Account'
-              loading='Creating account…'
+              label='Create Account'
+              pendingText='Creating account…'
               isPending={isSignupPending}
             />
           </Button>
@@ -150,7 +150,7 @@ export function SignupForm({
           name: value.name,
           email: value.email,
           password: value.password,
-          callbackURL: Path.Dashboard,
+          callbackURL: Path.Onboarding,
         })
         if (signupContext.error) {
           throw new Error(signupContext.error.message)
@@ -177,7 +177,7 @@ export function SignupForm({
     startGoogleTransition(async () => {
       const data = await authClient.signIn.social({
         provider: 'google',
-        callbackURL: redirect || '/tipping',
+        callbackURL: redirect || Path.Onboarding,
       })
       if (data.error) {
         toast.error('Something went wrong', {

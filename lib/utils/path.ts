@@ -3,4 +3,5 @@ export enum Path {
   SignUp = '/auth/sign-up',
   ForgotPassword = '/auth/forgot-password',
   Dashboard = '/tipping',
+  Onboarding = '/tipping/onboarding',
 }

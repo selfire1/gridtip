@@ -1,21 +1,23 @@
-import { getImageHref } from '@/lib/utils/user'
+import type { User } from '@/db/schema/schema'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 
-export default function UserAvatar(props: {
-  name: string
-  id: string
-  className?: string
-}) {
+export default function UserAvatar(
+  props: {
+    className?: string
+  } & Pick<User, 'name' | 'profileImageUrl'>,
+) {
   const fallbackString = props.name
     .split(' ')
     .join('')
     .slice(0, 2)
     .toUpperCase()
-  const avatar = getImageHref({ id: props.id })
   return (
     <>
       <Avatar className={props.className || 'rounded-lg'}>
-        <AvatarImage src={avatar} alt={props.name} />
+        <AvatarImage
+          src={props.profileImageUrl || undefined}
+          alt={props.name}
+        />
         <AvatarFallback className='rounded-lg'>{fallbackString}</AvatarFallback>
       </Avatar>
     </>

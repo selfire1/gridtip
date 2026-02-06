@@ -14,7 +14,7 @@ export async function createGroup(data: Schema) {
   const result = schema.safeParse(data)
   if (!result.success) {
     return {
-      ok: false,
+      ok: false as const,
       error: z.prettifyError(result.error),
       message: 'Invalid data',
     }
@@ -34,7 +34,7 @@ export async function createGroup(data: Schema) {
     group = createdGroup
   } catch (error) {
     return {
-      ok: false,
+      ok: false as const,
       error: (error as Error)?.message,
       message: 'Could not create group',
     }
@@ -49,17 +49,14 @@ export async function createGroup(data: Schema) {
     })
   } catch (error) {
     return {
-      ok: false,
+      ok: false as const,
       error: (error as Error)?.message,
       message: 'Could not join created group',
     }
   }
 
   return {
-    ok: true,
-    group: {
-      name: group.name,
-      id: group.id,
-    },
+    ok: true as const,
+    group,
   }
 }

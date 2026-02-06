@@ -14,7 +14,6 @@ import { ClassValue } from 'clsx'
 import { Group } from '@/db/schema/schema'
 
 import { db } from '@/db'
-import { getImageHref } from '@/lib/utils/user'
 import { LucideListX } from 'lucide-react'
 import Alert from '@/components/alert'
 import { Database } from '@/db/types'
@@ -121,7 +120,7 @@ export async function ResultsTable({ groupId }: { groupId: Group['id'] }) {
     ) {
       return []
     }
-    let memberToPreviousPositionMap = new Map<
+    const memberToPreviousPositionMap = new Map<
       Database.User['id'],
       { position: number; points: number }
     >()
@@ -148,7 +147,7 @@ export async function ResultsTable({ groupId }: { groupId: Group['id'] }) {
     const membersMap = localMembersOfGroup.reduce((map, user) => {
       map.set(user.id, {
         ...user,
-        image: getImageHref(user),
+        image: user.profileImageUrl,
         points: 0,
         delta: null,
         pointsDelta: null,
@@ -264,7 +263,7 @@ export async function ResultsTable({ groupId }: { groupId: Group['id'] }) {
         ? memberToPreviousPositionMap.get(entry.user.id)
         : null
 
-      let { points: pointsDelta, position: delta } = getDelta(
+      const { points: pointsDelta, position: delta } = getDelta(
         previousPosition,
         currentPosition,
         entry.points,

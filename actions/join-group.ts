@@ -1,5 +1,6 @@
 'use server'
 
+import { GLOBAL_GROUP_ID } from '@/constants/group'
 import { db } from '@/db'
 import { groupMembersTable } from '@/db/schema/schema'
 import { Database } from '@/db/types'
@@ -11,26 +12,30 @@ const schema = z.object({
   groupId: z.string(),
 })
 
+export async function joinGlobalGroup() {
+  return await joinGroup({ groupId: GLOBAL_GROUP_ID })
+}
+
 export async function joinGroup(data: z.infer<typeof schema>) {
   const result = schema.safeParse(data)
   if (!result.success) {
     return {
-      ok: false,
+      ok: false as const,
       message: 'Invalid group id',
     }
   }
 
   const { user } = await verifySession()
 
-  const group = await findGroup(data.groupId)
-  const members = await findMembers(data.groupId)
-
-  if (!group) {
+  const groupResult = await findGroup(data)
+  if (!groupResult.ok) {
     return {
-      ok: false,
-      message: 'Group not found',
+      ok: false as const,
+      message: groupResult.message,
     }
   }
+  const group = groupResult.data
+  const members = await findMembers(data.groupId)
 
   const isAlreadyMember = members.some(
     ({ userId: memberUserId }) => memberUserId === user.id,
@@ -38,7 +43,7 @@ export async function joinGroup(data: z.infer<typeof schema>) {
 
   if (isAlreadyMember) {
     return {
-      ok: false,
+      ok: false as const,
       message: 'You are already a member of this group',
     }
   }
@@ -50,13 +55,13 @@ export async function joinGroup(data: z.infer<typeof schema>) {
     })
     await setGroupCookie(group.id)
     return {
-      ok: true,
+      ok: true as const,
       message: 'Joined group',
       group,
     }
   } catch (error) {
     return {
-      ok: false,
+      ok: false as const,
       message: (error as Error)?.message,
     }
   }
@@ -84,16 +89,40 @@ export async function joinGroup(data: z.infer<typeof schema>) {
       },
     })
   }
+}
 
-  function findGroup(groupId: string) {
-    return db.query.groupsTable.findFirst({
-      columns: {
-        id: true,
-        name: true,
-      },
-      where(fields, { eq }) {
-        return eq(fields.id, groupId)
-      },
-    })
+export async function findGroup(data: z.infer<typeof schema>) {
+  const result = schema.safeParse(data)
+  if (!result.success) {
+    return {
+      ok: false as const,
+      message: 'Invalid group id',
+      data: null,
+    } as const
   }
+
+  const group = await db.query.groupsTable.findFirst({
+    columns: {
+      id: true,
+      name: true,
+      iconName: true,
+    },
+    where(fields, { eq }) {
+      return eq(fields.id, data.groupId)
+    },
+  })
+
+  if (!group) {
+    return {
+      ok: false as const,
+      message: 'Group not found',
+      data: null,
+    } as const
+  }
+
+  return {
+    ok: true as const,
+    message: '',
+    data: group,
+  } as const
 }

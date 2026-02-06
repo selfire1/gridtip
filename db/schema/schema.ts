@@ -41,10 +41,13 @@ export const groupRelations = relations(groupsTable, ({ many, one }) => ({
     fields: [groupsTable.adminUser],
     references: [user.id],
   }),
+  members: many(groupMembersTable),
 }))
 
 export const groupMembersTable = sqliteTable('group_members', {
   id: text('id').primaryKey().$defaultFn(createId),
+  userName: text(),
+  profileImage: text(),
   groupId: text('group_id')
     .notNull()
     .references(() => groupsTable.id, { onDelete: 'cascade' }),

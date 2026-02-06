@@ -50,3 +50,4 @@ server/db/seed.ts
 public/img/user
 
 scripts/_local
+.claude

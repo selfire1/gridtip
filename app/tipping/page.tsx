@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button'
-import { getImageHref } from '@/lib/utils/user'
 import {
   Accordion,
   AccordionContent,
@@ -56,7 +55,7 @@ import { getCountryFlag } from '@/lib/utils/country-flag'
 import { cn } from '@/lib/utils'
 
 export default async function DashboardPage() {
-  const { userId } = await verifySession()
+  const { userId, user } = await verifySession()
   const currentUserGroup = await getCurrentGroupId()
 
   const getCutoff = cache(getCutoffUncached)
@@ -174,7 +173,7 @@ export default async function DashboardPage() {
       Icon,
       users,
     }: {
-      users: Array<Pick<Database.User, 'id' | 'name'>>
+      users: Array<Pick<Database.User, 'id' | 'name' | 'profileImageUrl'>>
       title: string
       Icon: LucideIcon
     }) {
@@ -188,11 +187,7 @@ export default async function DashboardPage() {
             <div className='space-y-4 p-4  h-32 overflow-y-auto'>
               {users.map((user) => (
                 <div key={user.id} className='flex items-center gap-2'>
-                  <UserAvatar
-                    className='size-6 rounded-lg'
-                    name={user.name}
-                    id={user.id}
-                  />
+                  <UserAvatar className='size-6 rounded-lg' {...user} />
                   <p className='text-sm'>{user.name}</p>
                 </div>
               ))}
@@ -214,6 +209,7 @@ export default async function DashboardPage() {
               columns: {
                 id: true,
                 name: true,
+                profileImageUrl: true,
               },
             },
           },
@@ -764,11 +760,7 @@ export default async function DashboardPage() {
                 )}
                 key={user.id}
               >
-                <UserAvatar
-                  name={user.name}
-                  id={user.id}
-                  className='size-6 rounded-lg'
-                />
+                <UserAvatar {...user} className='size-6 rounded-lg' />
                 <p>{user.name}</p>
               </div>
             ))}
@@ -813,11 +805,7 @@ export default async function DashboardPage() {
           style={style}
         >
           <div className='flex items-center gap-2'>
-            <UserAvatar
-              name={user.name}
-              id={user.id}
-              className='size-6 rounded-lg'
-            />
+            <UserAvatar {...user} className='size-6 rounded-lg' />
             <p>{user.name}</p>
           </div>
           <div>
@@ -897,7 +885,7 @@ export default async function DashboardPage() {
                 columns: {
                   id: true,
                   name: true,
-                  image: true,
+                  profileImageUrl: true,
                 },
               },
             },
@@ -929,7 +917,7 @@ export default async function DashboardPage() {
           user: {
             name: string
             id: string
-            image: string
+            profileImageUrl: string
           }
           position: RacePredictionField
           value:
@@ -945,7 +933,7 @@ export default async function DashboardPage() {
           user: {
             name: entry.prediction.user.name,
             id: entry.prediction.user.id,
-            image: getImageHref(entry.prediction.user),
+            profileImageUrl: user.profileImageUrl,
           },
           position,
           value: entry.driver || entry.constructor,

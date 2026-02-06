@@ -1,8 +1,5 @@
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { getImageHref } from '@/lib/utils/user'
-import { auth } from '@/lib/auth'
-import { headers } from 'next/headers'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { getMaybeSession } from '@/lib/dal'
@@ -53,7 +50,7 @@ async function GetStartedButton() {
       to: Path.Dashboard,
       label: 'View dashboard',
       title: 'Dashboard',
-      src: getImageHref(session.user),
+      src: session.user.profileImageUrl,
     }
   }
 

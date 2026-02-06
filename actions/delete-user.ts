@@ -1,12 +1,10 @@
 'use server'
 
-import { QueryOrigin } from '@/constants'
 import { db } from '@/db'
 import { groupsTable } from '@/db/schema/schema'
 import { Database } from '@/db/types'
 import { auth } from '@/lib/auth'
 import { verifySession } from '@/lib/dal'
-import { getAuthLinkWithOrigin } from '@/lib/utils/auth-origin'
 import { eq } from 'drizzle-orm'
 import { headers } from 'next/headers'
 

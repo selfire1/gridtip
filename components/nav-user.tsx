@@ -20,15 +20,12 @@ import { authClient } from '@/lib/auth-client'
 import { useRouter } from 'next/navigation'
 import UserAvatar from './user-avatar'
 import { Path } from '@/lib/utils/path'
+import { User } from '@/db/schema/schema'
 
 export function NavUser({
   user,
 }: {
-  user: {
-    name: string
-    email: string
-    id: string
-  }
+  user: Pick<User, 'id' | 'name' | 'profileImageUrl' | 'email'>
 }) {
   const { isMobile } = useSidebar()
   const router = useRouter()

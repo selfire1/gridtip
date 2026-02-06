@@ -19,6 +19,7 @@ export const user = sqliteTable('user', {
   hasSeenOnboarding: integer('has_seen_onboarding', {
     mode: 'boolean',
   }).default(false),
+  profileImageUrl: text('profile_image_url'),
 })
 
 export const session = sqliteTable(

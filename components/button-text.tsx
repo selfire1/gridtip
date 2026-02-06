@@ -3,22 +3,22 @@
 import { Spinner } from '@ui/spinner'
 
 export function ButtonText({
-  text,
-  loading,
+  label,
+  pendingText: pendingText,
   isPending,
 }: {
-  text: React.ReactNode
-  loading: React.ReactNode
+  label: React.ReactNode
+  pendingText: React.ReactNode | string
   isPending: boolean
 }) {
   if (isPending) {
     return (
       <span className='flex items-center gap-2'>
         <Spinner />
-        {loading}
+        {pendingText}
       </span>
     )
   }
 
-  return text
+  return label
 }

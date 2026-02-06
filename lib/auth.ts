@@ -1,4 +1,5 @@
 import { betterAuth } from 'better-auth'
+import { createAuthMiddleware } from 'better-auth/api'
 import { hoursToSeconds } from 'date-fns'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { db } from '@/db'
@@ -52,7 +53,43 @@ Click this link below to verify your email: <a href="${url}">${url}</a>`.trim(),
         initialValue: false,
         defaultValue: false,
       },
+      profileImageUrl: {
+        type: 'string',
+      },
     },
+  },
+
+  hooks: {
+    after: createAuthMiddleware(async (ctx) => {
+      const isSocialCallback = ctx.path.startsWith('/callback/:id')
+      if (!isSocialCallback) {
+        return
+      }
+      const user = ctx.context.newSession
+      if (!user) {
+        return
+      }
+      const isGoogleImage = user.user.image?.includes('googleusercontent.com')
+      if (!isGoogleImage) {
+        return
+      }
+      const hasProfileImageSet = user.user.profileImageUrl
+      if (hasProfileImageSet) {
+        return
+      }
+      const migrateEndpoint = `${process.env.BETTER_AUTH_URL}/api/migrate-profile-image`
+      fetch(migrateEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.user.id,
+          googleImageUrl: user.user.image,
+          secret: process.env.UPDATES_PASSWORD,
+        }),
+      }).catch((error) => {
+        console.error('migration failed', error)
+      })
+    }),
   },
   socialProviders: {
     google: {

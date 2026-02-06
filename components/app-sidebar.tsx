@@ -10,7 +10,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from '@/components/ui/sidebar'
-import { getMemberStatus, verifyIsAdmin, verifySession } from '@/lib/dal'
+import { verifyIsAdmin, verifySession } from '@/lib/dal'
 import { getCurrentGroup, getGroupsForUser } from '@/lib/utils/groups'
 import { getNextRace } from '@/lib/utils/races'
 
@@ -46,13 +46,7 @@ export async function AppSidebar({
         />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser
-          user={{
-            name: user.name,
-            email: user.email,
-            id: user.id,
-          }}
-        />
+        <NavUser user={user} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

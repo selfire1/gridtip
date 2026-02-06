@@ -7,10 +7,10 @@ export default function FullScreenLayout({
 }) {
   return (
     <div className='min-h-svh flex flex-col isolate'>
-      <div className='fixed top-0 bg-gradient-to-b from-muted to-transparent inset-x-0'>
+      <div className='fixed top-0 bg-gradient-to-b from-muted to-transparent inset-x-0 z-10'>
         <AppHeader />
       </div>
-      {children}
+      <div className='pt-12'>{children}</div>
     </div>
   )
 }

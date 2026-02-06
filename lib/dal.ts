@@ -12,6 +12,7 @@ import { groupMembersTable } from '@/db/schema/schema'
 import { eq } from 'drizzle-orm'
 import { Path } from './utils/path'
 
+export type DalUser = Awaited<ReturnType<typeof verifySession>>['user']
 export const verifySession = cache(async () => {
   const session = await auth.api.getSession({
     headers: await headers(),

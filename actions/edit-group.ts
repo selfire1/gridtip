@@ -1,13 +1,12 @@
 'use server'
 
-import { getMemberStatus, verifyIsAdmin, verifySession } from '@/lib/dal'
+import { verifyIsAdmin, verifySession } from '@/lib/dal'
 import z from 'zod'
 import { db } from '@/db'
-import { groupMembersTable, groupsTable } from '@/db/schema/schema'
+import { groupsTable } from '@/db/schema/schema'
 import { Schema, schema } from '@/lib/schemas/create-group'
 import { Database } from '@/db/types'
 import { eq } from 'drizzle-orm'
-import { MemberStatus } from '@/types'
 
 export async function editGroup(groupId: Database.Group['id'], data: Schema) {
   const _session = await verifySession()
