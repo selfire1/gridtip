@@ -36,8 +36,8 @@ export default function CreateGroupForm() {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: state.createGroupScreenData?.name,
-      icon: state.createGroupScreenData?.icon,
+      name: state.createGroupScreenData?.name ?? '',
+      icon: state.createGroupScreenData?.icon ?? undefined,
     },
   })
 

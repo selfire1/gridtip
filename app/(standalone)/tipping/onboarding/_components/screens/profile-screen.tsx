@@ -92,7 +92,7 @@ function ProfileContent() {
       }
       return {
         name: 'Global Leaderboard',
-        // @ts-expect-error  special icon
+        // @ts-expect-error special icon
         iconName: 'lucide:globe',
         id: 'global',
       } satisfies JoinGroupData
@@ -105,7 +105,6 @@ function ProfileContent() {
         <GroupCardWrapper>
           {group.global && (
             <div>
-              <pre>{JSON.stringify(state.profileGlobalGroupData, null, 2)}</pre>
               <ProfileCard
                 title={group.global.name}
                 id={group.global.id}
@@ -175,20 +174,20 @@ function ProfileContent() {
       },
     }
   }
+}
 
-  function GroupCardWrapper({ children }: { children: React.ReactNode }) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Groups</CardTitle>
-          <CardDescription>
-            Customise your profile for each group.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className='space-y-4'>{children}</CardContent>
-      </Card>
-    )
-  }
+function GroupCardWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Groups</CardTitle>
+        <CardDescription>
+          Customise your profile for each group.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className='space-y-4'>{children}</CardContent>
+    </Card>
+  )
 }
 
 type ProfileCardProps = {
