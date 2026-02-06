@@ -46,7 +46,7 @@ export const groupRelations = relations(groupsTable, ({ many, one }) => ({
 
 export const groupMembersTable = sqliteTable('group_members', {
   id: text('id').primaryKey().$defaultFn(createId),
-  userName: text(),
+  userName: text().notNull(),
   profileImage: text(),
   groupId: text('group_id')
     .notNull()

@@ -28,7 +28,7 @@ export function NavUser({
   profile,
 }: {
   user: Pick<User, 'id' | 'name' | 'profileImageUrl' | 'email'>
-  profile: Profile
+  profile: Profile | undefined
 }) {
   const { isMobile } = useSidebar()
   const router = useRouter()
@@ -43,12 +43,14 @@ export function NavUser({
               className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
             >
               <UserAvatar
-                name={profile.name}
-                profileImageUrl={profile.image || null}
+                name={profile?.name || user.name}
+                profileImageUrl={profile?.image || user.profileImageUrl || null}
                 className='h-8 w-8 rounded-lg'
               />
               <div className='grid flex-1 text-left text-sm leading-tight'>
-                <span className='truncate font-medium'>{profile.name}</span>
+                <span className='truncate font-medium'>
+                  {profile?.name || user.name}
+                </span>
               </div>
               <ChevronsUpDown className='ml-auto size-4' />
             </SidebarMenuButton>

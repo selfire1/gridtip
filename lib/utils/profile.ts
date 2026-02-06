@@ -1,22 +1,16 @@
 import { Database } from '@/db/types'
 import { verifySession } from '../dal'
 import { db } from '@/db'
-import { unstable_cache } from 'next/cache'
-import { CacheTag } from '@/constants/cache'
 import { cache } from 'react'
 import { Profile } from '@/types'
 
-export async function getCurrentProfile(
-  group?: Pick<Database.Group, 'id'>,
-): Promise<Profile> {
-  const { user, userId } = await verifySession()
+export async function getGroupProfile(
+  group: Pick<Database.Group, 'id'> | undefined,
+) {
+  const { userId } = await verifySession()
   async function getProfile() {
-    const defaultProfile = {
-      image: user.profileImageUrl || user.image || undefined,
-      name: user.name,
-    }
     if (!group?.id) {
-      return defaultProfile
+      return
     }
     const groupMemberProfile = await db.query.groupMembersTable.findFirst({
       where(groupMembersTable, { eq, and }) {
@@ -26,11 +20,14 @@ export async function getCurrentProfile(
         )
       },
     })
+    if (!groupMemberProfile) {
+      return
+    }
 
     return {
       image: groupMemberProfile?.profileImage || undefined,
-      name: groupMemberProfile?.userName ?? '', // TODO: resolve
-    }
+      name: groupMemberProfile.userName, // TODO: resolve
+    } satisfies Profile
   }
 
   // const getProfileCached = unstable_cache(
