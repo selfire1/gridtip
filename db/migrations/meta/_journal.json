@@ -57,6 +57,13 @@
       "when": 1769833433616,
       "tag": "0007_profile_img",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1770354009316,
+      "tag": "0008_group_member_name_and_img",
+      "breakpoints": true
     }
   ]
 }

@@ -13,3 +13,8 @@ export type ServerResponse = {
   ok: boolean
   message: string
 } & Record<string, unknown>
+
+export type Profile = {
+  image?: string
+  name: string
+}

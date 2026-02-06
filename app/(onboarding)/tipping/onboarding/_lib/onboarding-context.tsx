@@ -12,7 +12,12 @@ import { Schema as CreateGroupSchema } from '@/lib/schemas/create-group'
 import { JoinGroupData } from '../_components/join-group-form'
 import { ProfileState } from '../_components/screens/profile-screen'
 import { DalUser } from '@/lib/dal'
-import { completeOnboardingAction, Log } from '@/actions/complete-onboarding'
+import {
+  joinOrCreateGroupAndUpdateProfileAction,
+  processGlobalGroupOnboardingAction,
+  completeProfileOnboardingAction,
+  type Log,
+} from '@/actions/complete-onboarding'
 
 type ComponentKey =
   | 'welcome-initial'
@@ -81,7 +86,21 @@ export function OnboardingProvider({
   }, [])
 
   const completeOnboarding = useCallback(async () => {
-    return await completeOnboardingAction(state)
+    const logs = (
+      await Promise.all([
+        runGroupOnboardingAction(state),
+        processGlobalGroupOnboardingAction({
+          shouldJoin: state.globalGroupScreenData?.isJoin ?? false,
+          profileName: state.profileGlobalGroupData?.name,
+          profileImage: state.profileGlobalGroupData?.imageFile,
+        }),
+        completeProfileOnboardingAction({
+          name: state.profileDefaultData?.name,
+          profileImage: state.profileDefaultData?.imageFile,
+        }),
+      ])
+    ).flat()
+    return logs
   }, [state])
 
   return (
@@ -99,4 +118,33 @@ export function useOnboarding() {
     throw new Error('useOnboarding must be used within a OnboardingProvider')
   }
   return context
+}
+
+async function runGroupOnboardingAction(state: OnboardingState) {
+  const action = state.welcomeScreenSelectedGroupStep
+  if (!action) {
+    return []
+  }
+
+  const input = getInput()
+  const logs = await joinOrCreateGroupAndUpdateProfileAction(input)
+  return logs
+
+  function getInput() {
+    if (action === 'create') {
+      return {
+        action: 'create' as const,
+        profileData: state.profileCreateGroupData,
+        groupData: state.createGroupScreenData,
+      }
+    }
+    return {
+      action: 'join' as const,
+      profileData: state.profileJoinGroupData,
+      groupData: {
+        id: state.joinGroupScreenData?.id,
+        name: state.joinGroupScreenData?.name,
+      },
+    }
+  }
 }

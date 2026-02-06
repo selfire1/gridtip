@@ -13,6 +13,7 @@ import {
 import { verifyIsAdmin, verifySession } from '@/lib/dal'
 import { getCurrentGroup, getGroupsForUser } from '@/lib/utils/groups'
 import { getNextRace } from '@/lib/utils/races'
+import { getCurrentProfile } from '@/lib/utils/profile'
 
 export async function AppSidebar({
   ...props
@@ -20,6 +21,7 @@ export async function AppSidebar({
   const { userId, user } = await verifySession()
   const groupsOfUser = await getGroupsForUser(userId)
   const cookieGroup = await getCurrentGroup(userId)
+  const profile = await getCurrentProfile(cookieGroup)
 
   const nextRace = await getNextRace()
 
@@ -46,7 +48,7 @@ export async function AppSidebar({
         />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user} />
+        <NavUser user={user} profile={profile} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

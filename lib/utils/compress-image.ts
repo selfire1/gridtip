@@ -7,7 +7,7 @@ export async function getCompressedFile(
   options?: Partial<Options>,
 ) {
   const defaults = {
-    maxSizeMB: 0.8,
+    maxSizeMB: 0.6,
     maxWidthOrHeight: 800,
     useWebWorker: true,
   } satisfies Options

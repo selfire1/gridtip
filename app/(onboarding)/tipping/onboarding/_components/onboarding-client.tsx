@@ -5,9 +5,9 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Gauge } from '@/components/ui/gauge'
 import {
+  LucideCheck,
   LucideChevronLeft,
   LucideChevronRight,
-  LucideList,
   LucideTriangleAlert,
 } from 'lucide-react'
 import React, { useCallback } from 'react'
@@ -141,13 +141,14 @@ export default function OnboardingClient() {
               size='lg'
               onClick={handleOnboardingComplete}
             >
-              {isPending && (
+              {isPending ? (
                 <>
                   <Spinner />
                   {loadingText}
                 </>
+              ) : (
+                'Start Tipping'
               )}
-              Start Tipping
               <LucideChevronRight />
             </Button>
           ) : undefined
@@ -174,9 +175,9 @@ export default function OnboardingClient() {
           toast.success(log.title, {
             description: log.description,
             icon: log.icon ? (
-              <IconFromName iconName={log.icon} />
+              <IconFromName size={14} iconName={log.icon} />
             ) : (
-              <LucideList />
+              <LucideCheck size={14} />
             ),
           })
         } else {

@@ -15,10 +15,14 @@ export default function GlobalGroupScreen() {
     <ScreenLayout
       isInitialLoad={false}
       title={
-        <span className='flex items-center gap-2 justify-center'>
-          <WreathSide side='left' />
+        <span className='flex flex-col sm:flex-row items-center gap-2 justify-center'>
+          <div className='flex items-center'>
+            <WreathSide side='left' className='shrink-0 sm:hidden' />
+            <WreathSide side='right' className='shrink-0 sm:hidden' />
+          </div>
+          <WreathSide side='left' className='shrink-0 hidden sm:block' />
           Global Leaderboard
-          <WreathSide side='right' />
+          <WreathSide side='right' className='shrink-0 hidden sm:block' />
         </span>
       }
       description={
@@ -34,7 +38,7 @@ export default function GlobalGroupScreen() {
         </div>
       }
       content={
-        <div className='flex items-center gap-4'>
+        <div className='flex flex-col-reverse sm:flex-row items-center gap-4'>
           <motion.div {...getAnimation({ delay: 0.2, isInitialLoad: false })}>
             <Button onClick={handleSkip} variant='outline'>
               Skip for now
@@ -83,13 +87,20 @@ export default function GlobalGroupScreen() {
 //   )
 // }
 
-function WreathSide({ side }: { side: 'right' | 'left' }) {
+function WreathSide({
+  side,
+  className,
+}: {
+  side: 'right' | 'left'
+  className?: string
+}) {
   if (side === 'right') {
     return (
       <svg
         xmlns='http://www.w3.org/2000/svg'
         width='32'
         height='32'
+        className={className}
         viewBox='0 0 24 24'
       >
         <path
@@ -106,6 +117,7 @@ function WreathSide({ side }: { side: 'right' | 'left' }) {
   return (
     <svg
       xmlns='http://www.w3.org/2000/svg'
+      className={className}
       width='32'
       height='32'
       viewBox='0 0 24 24'

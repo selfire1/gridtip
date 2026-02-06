@@ -21,11 +21,14 @@ import { useRouter } from 'next/navigation'
 import UserAvatar from './user-avatar'
 import { Path } from '@/lib/utils/path'
 import { User } from '@/db/schema/schema'
+import { Profile } from '@/types'
 
 export function NavUser({
   user,
+  profile,
 }: {
   user: Pick<User, 'id' | 'name' | 'profileImageUrl' | 'email'>
+  profile: Profile
 }) {
   const { isMobile } = useSidebar()
   const router = useRouter()
@@ -39,10 +42,13 @@ export function NavUser({
               size='lg'
               className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
             >
-              <UserAvatar {...user} className='h-8 w-8 rounded-lg' />
+              <UserAvatar
+                name={profile.name}
+                profileImageUrl={profile.image || null}
+                className='h-8 w-8 rounded-lg'
+              />
               <div className='grid flex-1 text-left text-sm leading-tight'>
-                <span className='truncate font-medium'>{user.name}</span>
-                <span className='truncate text-xs'>{user.email}</span>
+                <span className='truncate font-medium'>{profile.name}</span>
               </div>
               <ChevronsUpDown className='ml-auto size-4' />
             </SidebarMenuButton>

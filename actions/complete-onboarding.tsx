@@ -1,8 +1,7 @@
 'use server'
 
-import { GroupAction } from '@/app/(standalone)/tipping/onboarding/_components/onboarding-client'
-import { OnboardingState } from '@/app/(standalone)/tipping/onboarding/_lib/onboarding-context'
 import { createGroup } from './create-group'
+import { Schema as CreateGroupSchema } from '@/lib/schemas/create-group'
 import { joinGlobalGroup, joinGroup } from './join-group'
 import { verifySession } from '@/lib/dal'
 import { db } from '@/db'
@@ -10,6 +9,8 @@ import { user as userTable } from '@/db/schema/auth-schema'
 import { eq } from 'drizzle-orm/sql'
 import { groupMembersTable } from '@/db/schema/schema'
 import { uploadMaybeFile } from '@/lib/utils/uploadthing'
+import { Database } from '@/db/types'
+import { ProfileState } from '@/app/(onboarding)/tipping/onboarding/_components/screens/profile-screen'
 
 export type Log = {
   icon?: string
@@ -18,275 +19,204 @@ export type Log = {
   ok: boolean
 }
 
-export async function completeOnboardingAction(data: OnboardingState) {
-  const { user } = await verifySession()
-  const action = data.welcomeScreenSelectedGroupStep
-  const log = [] as Log[]
-  const actionResult = await processGroupAction(action, data)
-  if (actionResult.log) {
-    log.push(actionResult.log)
+export async function joinOrCreateGroupAndUpdateProfileAction(
+  input: (
+    | {
+        action: 'create'
+        groupData?: CreateGroupSchema
+      }
+    | {
+        action: 'join'
+        groupData?: { id: string | undefined; name: string | undefined }
+      }
+  ) & {
+    profileData: ProfileState | undefined
+  },
+) {
+  await verifySession()
+
+  const logs = [] as Log[]
+  const { log: groupLog, group } = await joinOrCreateGroup()
+  if (groupLog) {
+    logs.push(groupLog)
   }
-  const globalResult = await processGlobalAction(data.globalGroupScreenData)
-  if (globalResult.log) {
-    log.push(globalResult.log)
+  if (!group?.id) {
+    console.log('no group id')
+    return logs
   }
-  const profileResult = await processProfile({
-    default: data.profileDefaultData,
-    group: getProfileInfoFromGroup(),
-    global: globalResult.group
-      ? {
-          groupId: globalResult.group.id,
-          imageFile: data.profileGlobalGroupData?.imageFile,
-          name: data.profileGlobalGroupData?.name,
-        }
-      : undefined,
+  const profile = {
+    name: input.profileData?.name,
+    file: input.profileData?.imageFile,
+  }
+  console.log({
+    group: input.groupData?.name ?? 'none',
+    profile,
   })
-  log.push(...profileResult)
-  await db
-    .update(userTable)
-    .set({ hasSeenOnboarding: true })
-    .where(eq(userTable.id, user.id))
 
-  return log
+  const profileResultLogs = await updateProfile(group, {
+    name: input.profileData?.name,
+    file: input.profileData?.imageFile,
+  })
 
-  function getProfileInfoFromGroup() {
-    if (actionResult.action === 'create' && actionResult.group) {
-      const profile = data.profileCreateGroupData
+  return [...logs, ...profileResultLogs]
+
+  async function joinOrCreateGroup() {
+    if (input.action === 'create' && input.groupData) {
+      const result = await createGroup(input.groupData)
+      if (!result.ok) {
+        const log = {
+          ok: false as const,
+          title: `Did not create ${input.groupData.name || 'group'}`,
+          description: result.message,
+        } satisfies Log
+        return {
+          log,
+          group: null,
+        }
+      }
       return {
-        groupId: actionResult.group.id,
-        imageFile: profile?.imageFile,
-        name: profile?.name,
+        log: {
+          ok: true,
+          title: `Created ${input.groupData.name || 'your group'}`,
+          description: 'Invite some friends!',
+        },
+        group: result.group,
       }
     }
-    if (actionResult.action === 'join' && actionResult.group) {
-      const profile = data.profileJoinGroupData
+    if (input.action === 'join' && input.groupData?.id) {
+      const result = await joinGroup({ groupId: input.groupData.id })
+      if (!result.ok) {
+        const log = {
+          ok: false as const,
+          title: `Could not join ${input.groupData.name || 'group'}`,
+          description: result.message,
+        }
+        return { log, group: null }
+      }
       return {
-        groupId: actionResult.group.id,
-        imageFile: profile?.imageFile,
-        name: profile?.name,
+        log: {
+          ok: true,
+          title: `Joined ${input.groupData.name || 'group'}`,
+          description: 'Start tipping!',
+        },
+        group: result.group,
       }
     }
+    return { log: null, group: null }
   }
 }
 
-type ProfileData = { groupId: string; imageFile?: File; name?: string }
-async function processProfile({
-  default: defaultProfile,
-  group,
-  global,
-}: {
-  default?: OnboardingState['profileDefaultData']
-  group?: ProfileData
-  global?: ProfileData
-}) {
-  const defaultLogPromise = updateDefaultProfile(defaultProfile)
-  const profileLogs = (
-    await Promise.all(
-      [group, global].filter(Boolean).map((data) => {
-        if (!data) {
-          return null
-        }
-        return updateGroupMemberProfile(data)
-      }),
-    )
-  )
-    .flat()
-    .filter(Boolean) as Log[]
+type ProcessGlobalGroupOnboardingInput = {
+  shouldJoin: boolean
+  profileName?: string
+  profileImage?: File
+}
 
-  const defaultLog = await defaultLogPromise
-  const logs = [...defaultLog, ...profileLogs]
+export async function processGlobalGroupOnboardingAction(
+  input: ProcessGlobalGroupOnboardingInput,
+) {
+  const logs = [] as Log[]
+  if (!input.shouldJoin) {
+    return logs
+  }
+
+  await verifySession()
+
+  const joinGlobalResult = await joinGlobalGroup()
+  if (!joinGlobalResult.ok) {
+    logs.push({
+      ok: false,
+      title: 'Could not join global group',
+      description: 'Please try joining manually later',
+    })
+    return logs
+  }
+  logs.push({
+    icon: joinGlobalResult.group.iconName,
+    title: 'Joined Global Group',
+    description: 'Good luck!',
+    ok: true,
+  })
+  if (!input.profileImage && !input.profileName) {
+    return logs
+  }
+
+  const profileResultLogs = await updateProfile(joinGlobalResult.group, {
+    name: input.profileName,
+    file: input.profileImage,
+  })
+
+  console.log('Updated profile for global group')
+
+  return [...logs, ...profileResultLogs]
+}
+
+export async function completeProfileOnboardingAction(input: {
+  name?: string
+  profileImage?: File
+}) {
+  const { userId } = await verifySession()
+  const logs = [] as Log[]
+
+  const imageResult = await uploadMaybeFile(input.profileImage)
+  if (!imageResult.ok && input.profileImage) {
+    logs.push({ ok: false, title: 'Could not update default image' })
+  }
+
+  await db
+    .update(userTable)
+    .set({
+      profileImageUrl: imageResult.data?.ufsUrl || undefined,
+      name: input.name || undefined,
+      hasSeenOnboarding: true,
+    })
+    .where(eq(userTable.id, userId))
+
+  console.log('Updated default profile and completed onboarding')
+
   return logs
 }
 
-async function updateGroupMemberProfile(data: ProfileData) {
-  const log = [] as Log[]
+async function updateProfile(
+  group: Pick<Database.Group, 'name' | 'id'>,
+  profile: { name?: string; file?: File },
+) {
   const { userId } = await verifySession()
-
-  const imageResult = await uploadMaybeFile(data?.imageFile)
+  const logs = [] as Log[]
+  if (!profile.name && !profile.file) {
+    console.log('no input')
+    return logs
+  }
+  const imageResult = await uploadMaybeFile(profile.file)
   if (!imageResult.ok) {
-    log.push({
+    logs.push({
       ok: false,
-      title: 'Could not upload default profile image',
-      description: imageResult.message,
+      title: `${group.name}: Profile image error`,
+      description: 'Could not upload profile image',
     })
   }
-  console.log('Uploded image for group', data.groupId)
-  try {
-    const groupMembership = await db.query.groupMembersTable.findFirst({
-      where(table, { eq, and }) {
-        return and(eq(table.groupId, data.groupId), eq(table.userId, userId))
-      },
-      columns: {
-        id: true,
-      },
-    })
-    if (!groupMembership) {
-      console.warn('Could not find group membership')
-      log.push({
-        ok: false,
-        title: 'Could not find update profile',
-        description: 'Something went wrong joining this group.',
-      })
-    }
-    await db.update(groupMembersTable).set({
-      userName: data.name || undefined,
-      profileImage: imageResult.data?.ufsUrl || undefined,
-    })
-    console.log('Updated profile for group', data.groupId)
-  } catch (error) {
-    console.warn(error)
-    log.push({
+
+  const groupMembership = await db.query.groupMembersTable.findFirst({
+    where(table, { eq, and }) {
+      return and(eq(table.groupId, group.id), eq(table.userId, userId))
+    },
+    columns: { id: true },
+  })
+  if (!groupMembership) {
+    logs.push({
       ok: false,
       title: 'Could not update group profile',
-      description: (error as Error).message,
     })
-  } finally {
-    return log
+    return logs
   }
-}
-
-async function updateDefaultProfile(
-  data: OnboardingState['profileDefaultData'],
-) {
-  const log = [] as Log[]
-  const { userId } = await verifySession()
-
-  const imageResult = await uploadMaybeFile(data?.imageFile)
-  if (!imageResult.ok) {
-    log.push({
-      ok: false,
-      title: 'Could not upload default profile image',
-      description: imageResult.message,
+  await db
+    .update(groupMembersTable)
+    .set({
+      userName: profile.name || undefined,
+      profileImage: imageResult.data?.ufsUrl || undefined,
     })
-  }
+    .where(eq(groupMembersTable.id, groupMembership.id))
 
-  console.log('Uploded default profile image')
-
-  try {
-    await db
-      .update(userTable)
-      .set({
-        profileImageUrl: imageResult?.data?.ufsUrl || undefined,
-        name: data?.name || undefined,
-      })
-      .where(eq(userTable.id, userId))
-    console.log('Updated default profile')
-  } catch (error) {
-    console.error(error)
-    log.push({
-      ok: false,
-      title: 'Could not update default profile',
-      description: (error as Error).message,
-    })
-  } finally {
-    return log
-  }
-}
-
-async function processGlobalAction(
-  data: OnboardingState['globalGroupScreenData'],
-) {
-  if (!data?.isJoin) {
-    return { log: undefined }
-  }
-  try {
-    const result = await joinGlobalGroup()
-    if (!result.ok) {
-      throw new Error(result.message)
-    }
-    const log = {
-      icon: result.group.iconName,
-      title: 'Joined Global Group',
-      description: 'Good luck!',
-      ok: true as const,
-    }
-    return { log, group: result.group }
-  } catch (error) {
-    console.error(error)
-    return {
-      ok: false as const,
-      title: 'Could not join Global Group',
-      description: (error as Error).message ?? 'Something went wrong',
-    }
-  }
-}
-
-async function processGroupAction(
-  action: GroupAction | undefined,
-  data: OnboardingState,
-) {
-  if (action === 'create') {
-    const result = await processCreate(data.createGroupScreenData)
-    return {
-      ...result,
-      action: 'create' as const,
-    }
-  }
-  if (action === 'join') {
-    const result = await processJoin(data.joinGroupScreenData)
-    return {
-      ...result,
-      action: 'join' as const,
-    }
-  }
-  return {
-    log: undefined,
-    action: undefined,
-  }
-}
-
-async function processJoin(group: OnboardingState['joinGroupScreenData']) {
-  if (!group) {
-    return { group: null, log: null }
-  }
-  try {
-    const result = await joinGroup({ groupId: group.id })
-    if (!result.ok) {
-      throw new Error(result.message)
-    }
-    const log = {
-      icon: result.group.iconName,
-      title: `Joined ${result.group.name}`,
-      description: 'Start tipping!',
-      ok: true as const,
-    }
-    return { log, group: result.group }
-  } catch (error) {
-    console.error(error)
-    const log = {
-      title: `Could join ${group.name}`,
-      description: (error as Error).message ?? 'Something went wrong',
-      ok: false as const,
-    }
-    return { log, group: null }
-  }
-}
-
-async function processCreate(
-  groupData: OnboardingState['createGroupScreenData'],
-) {
-  if (!groupData) {
-    return { log: undefined, group: undefined }
-  }
-  try {
-    const result = await createGroup(groupData)
-    if (!result.ok) {
-      throw new Error(result.message)
-    }
-    const log = {
-      icon: result.group.iconName,
-      title: `Created ${result.group.name}`,
-      description: 'Invite your friends!',
-      ok: true as const,
-    }
-    return { log, group: result.group }
-  } catch (error) {
-    console.error(error)
-    const log = {
-      title: `Could not create group ${groupData.name}`,
-      description: (error as Error).message ?? 'Something went wrong',
-      ok: false as const,
-    }
-    return { log, group: undefined }
-  }
+  console.log('Updated profile for group', group.id)
+  return logs
 }

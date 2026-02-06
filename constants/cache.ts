@@ -7,4 +7,5 @@ export enum CacheTag {
   Drivers = 'drivers',
   Races = 'races',
   Predictions = 'predictions',
+  UserProfile = 'user-profile',
 }

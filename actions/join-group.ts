@@ -19,6 +19,7 @@ export async function joinGlobalGroup() {
 export async function joinGroup(data: z.infer<typeof schema>) {
   const result = schema.safeParse(data)
   if (!result.success) {
+    console.warn('Invalid join group data', data)
     return {
       ok: false as const,
       message: 'Invalid group id',
@@ -94,6 +95,7 @@ export async function joinGroup(data: z.infer<typeof schema>) {
 export async function findGroup(data: z.infer<typeof schema>) {
   const result = schema.safeParse(data)
   if (!result.success) {
+    console.warn('Invalid find group data', data)
     return {
       ok: false as const,
       message: 'Invalid group id',

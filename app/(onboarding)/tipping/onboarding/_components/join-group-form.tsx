@@ -155,13 +155,13 @@ export default function JoinGroupForm() {
                 title={groupState.message}
               />
             )}
-            {groupState?.state === 'success' ||
-              (groupState?.state === 'joined' && (
-                <GroupDetailsCard
-                  group={groupState.data || state.joinGroupScreenData}
-                  state={groupState.state}
-                />
-              ))}
+            {(groupState?.state === 'success' ||
+              groupState?.state === 'joined') && (
+              <GroupDetailsCard
+                group={groupState.data || state.joinGroupScreenData}
+                state={groupState.state}
+              />
+            )}
           </div>
         </Card>
       </form>

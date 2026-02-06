@@ -259,7 +259,7 @@ function ProfileCard({
         <Field>
           <FieldLabel htmlFor={`name-${title}`}>Name</FieldLabel>
           <Input
-            autoComplete='name'
+            autoComplete='off'
             id={`name-${title}`}
             name='name'
             value={name}
