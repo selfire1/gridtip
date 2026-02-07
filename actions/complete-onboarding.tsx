@@ -7,10 +7,9 @@ import { verifySession } from '@/lib/dal'
 import { db } from '@/db'
 import { user as userTable } from '@/db/schema/auth-schema'
 import { eq } from 'drizzle-orm/sql'
-import { groupMembersTable } from '@/db/schema/schema'
 import { uploadMaybeFile } from '@/lib/utils/uploadthing'
-import { Database } from '@/db/types'
 import { ProfileState } from '@/app/(onboarding)/tipping/onboarding/_components/screens/profile-screen'
+import { updateProfile } from './update-profile'
 
 export type Log = {
   icon?: string

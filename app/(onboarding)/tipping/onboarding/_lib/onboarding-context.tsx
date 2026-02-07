@@ -18,6 +18,7 @@ import {
   completeProfileOnboardingAction,
   type Log,
 } from '@/actions/complete-onboarding'
+import { toast } from 'sonner'
 
 type ComponentKey =
   | 'welcome-initial'
@@ -86,22 +87,33 @@ export function OnboardingProvider({
   }, [])
 
   const completeOnboarding = useCallback(async () => {
-    const logs = (
-      await Promise.all([
-        runGroupOnboardingAction(state),
-        joinGlobalGroupIfDesiredAndUpdateImage({
-          shouldJoin: state.globalGroupScreenData?.isJoin ?? false,
-          profileName: state.profileGlobalGroupData?.name,
-          profileImageFile: state.profileGlobalGroupData?.imageFile,
-          profileImagePreview: state.profileGlobalGroupData?.imagePreview,
-        }),
-        completeProfileOnboardingAction({
-          name: state.profileDefaultData?.name,
-          profileImage: state.profileDefaultData?.imageFile,
-        }),
-      ])
-    ).flat()
-    return logs
+    const logs: Log[] = []
+    try {
+      const groupLogs = await createOrJoinPrimaryGroup(state)
+      logs.push(...groupLogs)
+
+      const globalLogs = await joinGlobalGroupIfDesiredAndUpdateImage({
+        shouldJoin: state.globalGroupScreenData?.isJoin ?? false,
+        profileName: state.profileGlobalGroupData?.name,
+        profileImageFile: state.profileGlobalGroupData?.imageFile,
+        profileImagePreview: state.profileGlobalGroupData?.imagePreview,
+      })
+      logs.push(...globalLogs)
+
+      const profileLogs = await completeProfileOnboardingAction({
+        name: state.profileDefaultData?.name,
+        profileImage: state.profileDefaultData?.imageFile,
+      })
+      logs.push(...profileLogs)
+
+      return logs
+    } catch (error) {
+      toast.error('Onboarding failed', {
+        description: 'Please get in touch with us.',
+      })
+      console.error('Onboarding failed:', error)
+      return []
+    }
   }, [state])
 
   return (
@@ -121,7 +133,7 @@ export function useOnboarding() {
   return context
 }
 
-async function runGroupOnboardingAction(state: OnboardingState) {
+async function createOrJoinPrimaryGroup(state: OnboardingState) {
   const action = state.welcomeScreenSelectedGroupStep
   if (!action) {
     return []

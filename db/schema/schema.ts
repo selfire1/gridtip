@@ -44,25 +44,29 @@ export const groupRelations = relations(groupsTable, ({ many, one }) => ({
   members: many(groupMembersTable),
 }))
 
-export const groupMembersTable = sqliteTable('group_members', {
-  id: text('id').primaryKey().$defaultFn(createId),
-  userName: text().notNull(),
-  profileImage: text(),
-  groupId: text('group_id')
-    .notNull()
-    .references(() => groupsTable.id, { onDelete: 'cascade' }),
-  userId: text('user_id')
-    .notNull()
-    .references(() => user.id, { onDelete: 'cascade' }),
-  // role: text("role").notNull(), TODO: admin, member
-  joinedAt: integer({ mode: 'timestamp' })
-    .default(sql`(unixepoch())`)
-    .notNull(),
-})
+export const groupMembersTable = sqliteTable(
+  'group_members',
+  {
+    id: text('id').primaryKey().$defaultFn(createId),
+    userName: text().notNull(),
+    profileImage: text(),
+    groupId: text('group_id')
+      .notNull()
+      .references(() => groupsTable.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    // role: text("role").notNull(), TODO: admin, member
+    joinedAt: integer({ mode: 'timestamp' })
+      .default(sql`(unixepoch())`)
+      .notNull(),
+  },
+  (table) => [unique().on(table.groupId, table.userId)],
+)
 
 export const groupMembersRelations = relations(
   groupMembersTable,
-  ({ one, many }) => ({
+  ({ one }) => ({
     group: one(groupsTable, {
       fields: [groupMembersTable.groupId],
       references: [groupsTable.id],

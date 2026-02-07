@@ -63,9 +63,11 @@ export default function OnboardingClient() {
       ? 'Creating group…'
       : 'Joining group…',
     'Refuelling tank…',
-    'Tightening wheel…',
+    'Tightening wheels…',
     'Checking brakes…',
     'Sweeping gravel…',
+    'Rereading regulations…',
+    'Enabling DRS…',
   ]
 
   const renderStep = React.useMemo(() => {
