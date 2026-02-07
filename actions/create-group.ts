@@ -5,13 +5,13 @@ import z from 'zod'
 import { db } from '@/db'
 import { groupMembersTable, groupsTable } from '@/db/schema/schema'
 import { Database } from '@/db/types'
-import { Schema, schema } from '@/lib/schemas/create-group'
+import { CreateGroupData, CreateGroupSchema } from '@/lib/schemas/create-group'
 import { setGroupCookie } from '@/lib/utils/group-cookie-server'
 
-export async function createGroup(data: Schema) {
+export async function createGroup(data: CreateGroupData) {
   const { user } = await verifySession()
 
-  const result = schema.safeParse(data)
+  const result = CreateGroupSchema.safeParse(data)
   if (!result.success) {
     return {
       ok: false as const,
@@ -46,6 +46,7 @@ export async function createGroup(data: Schema) {
     await db.insert(groupMembersTable).values({
       groupId: group.id,
       userId: user.id,
+      userName: data.userName,
     })
   } catch (error) {
     return {

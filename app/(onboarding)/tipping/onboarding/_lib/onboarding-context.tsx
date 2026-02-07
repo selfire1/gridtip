@@ -8,13 +8,13 @@ import {
   useState,
 } from 'react'
 import { GroupAction } from '../_components/onboarding-client'
-import { Schema as CreateGroupSchema } from '@/lib/schemas/create-group'
+import { CreateGroupData as CreateGroupSchema } from '@/lib/schemas/create-group'
 import { JoinGroupData } from '../_components/join-group-form'
 import { ProfileState } from '../_components/screens/profile-screen'
-import { DalUser } from '@/lib/dal'
+import type { DalUser } from '@/lib/dal'
 import {
-  joinOrCreateGroupAndUpdateProfileAction,
-  processGlobalGroupOnboardingAction,
+  joinOrCreateGroupAndUpdateImage,
+  joinGlobalGroupIfDesiredAndUpdateImage,
   completeProfileOnboardingAction,
   type Log,
 } from '@/actions/complete-onboarding'
@@ -89,10 +89,11 @@ export function OnboardingProvider({
     const logs = (
       await Promise.all([
         runGroupOnboardingAction(state),
-        processGlobalGroupOnboardingAction({
+        joinGlobalGroupIfDesiredAndUpdateImage({
           shouldJoin: state.globalGroupScreenData?.isJoin ?? false,
           profileName: state.profileGlobalGroupData?.name,
-          profileImage: state.profileGlobalGroupData?.imageFile,
+          profileImageFile: state.profileGlobalGroupData?.imageFile,
+          profileImagePreview: state.profileGlobalGroupData?.imagePreview,
         }),
         completeProfileOnboardingAction({
           name: state.profileDefaultData?.name,
@@ -127,7 +128,7 @@ async function runGroupOnboardingAction(state: OnboardingState) {
   }
 
   const input = getInput()
-  const logs = await joinOrCreateGroupAndUpdateProfileAction(input)
+  const logs = await joinOrCreateGroupAndUpdateImage(input)
   return logs
 
   function getInput() {

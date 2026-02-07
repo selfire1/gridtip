@@ -1,6 +1,7 @@
 import {
   LucideCheckCircle,
   LucideCheckSquare,
+  LucideChevronRight,
   LucideHammer,
   LucideListOrdered,
   LucideSquareArrowRight,
@@ -18,4 +19,5 @@ export const Icon = {
   Constructor: LucideHammer,
   CorrectTip: LucideCheckCircle,
   IncorrectTip: LucideXCircle,
+  Continue: LucideChevronRight,
 }

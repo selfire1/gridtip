@@ -23,7 +23,7 @@ import {
 import { Database } from '@/db/types'
 import { MemberStatus } from '@/types'
 import GroupFields, { GroupFieldsProps } from '@/components/group-fields'
-import { validateSchema } from '@/lib/schemas/create-group'
+import { validateGroupDetailSchema } from '@/lib/schemas/create-group'
 import { editGroup } from '@/actions/edit-group'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
@@ -164,7 +164,7 @@ function EditGroupDialogContent({
     setFormErrors(undefined)
 
     const values = { name, icon: selectedIcon, cutoff }
-    const isOk = validateSchema(values, setFormErrors)
+    const isOk = validateGroupDetailSchema(values, setFormErrors)
     if (!isOk) {
       return
     }

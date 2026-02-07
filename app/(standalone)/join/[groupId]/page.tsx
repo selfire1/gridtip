@@ -19,9 +19,10 @@ import { Database } from '@/db/types'
 import { db } from '@/db'
 import { IconFromName } from '@/components/icon-from-name'
 import { getMaybeSession } from '@/lib/dal'
+import type { DalUser } from '@/lib/dal'
 import { getAuthLinkWithOrigin } from '@/lib/utils/auth-origin'
 import { QueryOrigin } from '@/constants'
-import JoinGroupClient from './_components/join-group'
+import JoinGroupForm from './_components/join-group-form'
 
 export const metadata: Metadata = {
   title: 'Join Group',
@@ -52,17 +53,17 @@ export default async function JoinGroup({
     : false
 
   return (
-    <div className='flex flex-col gap-6'>
-      <Card className='overflow-hidden p-0'>
-        <CardContent className='grid p-0 md:grid-cols-2 md:min-h-96'>
-          <div className='p-6 md:p-8 flex flex-col justify-center'>
-            <div className='space-y-6 text-center max-w-prose mx-auto'>
+    <div className='flex min-h-screen max-sm:pt-12 bg-linear-to-b from-muted to-background items-center justify-center gap-6 w-full'>
+      <Card className='overflow-hidden w-full is-container py-0'>
+        <CardContent className='grid px-0 md:grid-cols-2 md:min-h-96'>
+          <div className='p-6 space-y-6 md:p-8 flex flex-col justify-center'>
+            <div className='space-y-2 text-center max-w-prose mx-auto'>
               <div className='space-y-2'>
                 <div className='flex flex-col items-center gap-1'>
                   <IconFromName
                     className='bg-muted rounded-lg p-2'
                     iconName={group.iconName}
-                    size={32}
+                    size={36}
                   />
                   <h1 className='text-2xl font-bold'>{group.name}</h1>
                 </div>
@@ -70,15 +71,14 @@ export default async function JoinGroup({
 
               <p className='text-muted-foreground text-balance'>
                 {isUserAlreadyMemberOfGroup
-                  ? 'You are already a member of this group'
-                  : 'You have been invited to start tipping with this group.'}
+                  ? 'You are already a member of this group.'
+                  : 'Join this group to tip with the members.'}
               </p>
-
-              <JoinGroupButton
-                isUserAlreadyMember={isUserAlreadyMemberOfGroup}
-                isLoggedIn={!!session?.user.id}
-              />
             </div>
+            <JoinGroupContent
+              isUserAlreadyMember={isUserAlreadyMemberOfGroup}
+              user={session?.user}
+            />
           </div>
           <div className='bg-muted relative hidden md:block'>
             <Image
@@ -97,9 +97,9 @@ export default async function JoinGroup({
     </div>
   )
 
-  function JoinGroupButton(props: {
+  function JoinGroupContent(props: {
     isUserAlreadyMember: boolean
-    isLoggedIn: boolean
+    user: DalUser | undefined
   }) {
     if (props.isUserAlreadyMember) {
       return (
@@ -109,7 +109,7 @@ export default async function JoinGroup({
       )
     }
 
-    if (!props.isLoggedIn) {
+    if (!props.user) {
       const href = withQuery(getAuthLinkWithOrigin(QueryOrigin.Join), {
         redirect: `/join/${groupId}`,
       })
@@ -119,7 +119,7 @@ export default async function JoinGroup({
         </Button>
       )
     }
-    return <JoinGroupClient groupId={groupId} />
+    return <JoinGroupForm user={props.user} groupId={groupId} />
   }
 
   async function getIsMemberOfGroup(info: {

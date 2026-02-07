@@ -7,17 +7,14 @@ import { Database } from '@/db/types'
 import { verifySession } from '@/lib/dal'
 import { setGroupCookie } from '@/lib/utils/group-cookie-server'
 import z from 'zod'
+import { JoinGroupData, JoinGroupSchema } from './join-group-schema'
 
-const schema = z.object({
-  groupId: z.string(),
-})
-
-export async function joinGlobalGroup() {
-  return await joinGroup({ groupId: GLOBAL_GROUP_ID })
+export async function joinGlobalGroup({ userName }: { userName: string }) {
+  return await joinGroup({ groupId: GLOBAL_GROUP_ID, userName })
 }
 
-export async function joinGroup(data: z.infer<typeof schema>) {
-  const result = schema.safeParse(data)
+export async function joinGroup(data: JoinGroupData) {
+  const result = JoinGroupSchema.safeParse(data)
   if (!result.success) {
     console.warn('Invalid join group data', data)
     return {
@@ -53,6 +50,7 @@ export async function joinGroup(data: z.infer<typeof schema>) {
     await joinGroup({
       userId: user.id,
       groupId: group.id,
+      userName: data.userName,
     })
     await setGroupCookie(group.id)
     return {
@@ -70,13 +68,16 @@ export async function joinGroup(data: z.infer<typeof schema>) {
   function joinGroup({
     userId,
     groupId,
+    userName,
   }: {
     userId: Database.User['id']
     groupId: Database.Group['id']
+    userName: Database.GroupMember['userName']
   }) {
     return db.insert(groupMembersTable).values({
       userId: userId,
       groupId: groupId,
+      userName,
     })
   }
 
@@ -92,8 +93,11 @@ export async function joinGroup(data: z.infer<typeof schema>) {
   }
 }
 
-export async function findGroup(data: z.infer<typeof schema>) {
-  const result = schema.safeParse(data)
+const FindGroupSchema = JoinGroupSchema.pick({
+  groupId: true,
+})
+export async function findGroup(data: z.infer<typeof FindGroupSchema>) {
+  const result = FindGroupSchema.safeParse(data)
   if (!result.success) {
     console.warn('Invalid find group data', data)
     return {

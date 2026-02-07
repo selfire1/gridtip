@@ -37,6 +37,11 @@ export function GroupSwitcher({
   const [isPending, startTransition] = React.useTransition()
   const [selectedGroup, setGroupToState] = React.useState(currentlySelected)
 
+  // sync local state with prop changes
+  React.useEffect(() => {
+    setGroupToState(currentlySelected)
+  }, [currentlySelected])
+
   // set initial cookie
   React.useEffect(() => {
     if (selectedGroup) {

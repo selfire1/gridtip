@@ -29,14 +29,14 @@ import EditGroup from './_components/edit-group'
 import { MemberStatus } from '@/types'
 
 export default async function GroupsPage() {
-  const { userId } = await verifySession()
+  const { userId, user } = await verifySession()
 
   const groupsMemberships = await getGroupsForUser(userId)
 
   return (
     <div className='grid sm:grid-cols-2 gap-8'>
       {!!groupsMemberships.length && <YourGroups className='col-span-2' />}
-      <CreateGroup />
+      <CreateGroup user={user} />
       <JoinGroup />
     </div>
   )

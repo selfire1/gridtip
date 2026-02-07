@@ -2,7 +2,10 @@
 
 import { cn } from '@/lib/utils'
 import { IconFromName } from './icon-from-name'
-import type { Schema } from '@/lib/schemas/create-group'
+import type {
+  CreateGroupData,
+  CreateGroupDetailsOnlyData,
+} from '@/lib/schemas/create-group'
 import {
   Field,
   FieldDescription,
@@ -25,7 +28,7 @@ export type GroupFieldsProps = {
   name: FieldConfig
   icon: FieldConfig
   cutoff: FieldConfig
-  errors?: Record<keyof Schema, FieldErrors>
+  errors?: Record<keyof CreateGroupDetailsOnlyData, FieldErrors>
 }
 
 export default function GroupFields({
@@ -49,10 +52,6 @@ export default function GroupFields({
       </Field>
       <Field data-invalid={errors?.cutoff}>
         <FieldLabel htmlFor='cutoff'>Tipping cutoff</FieldLabel>
-        <FieldDescription>
-          How many minutes before qualifying for the race starts should tipping
-          be closed?
-        </FieldDescription>
         <Input
           id='cutoff'
           type='number'
@@ -66,7 +65,7 @@ export default function GroupFields({
       <Field data-invalid={errors?.icon}>
         <FieldLabel>Icon</FieldLabel>
         <div
-          className='flex flex-wrap gap-2 max-h-48 overflow-y-auto'
+          className='flex flex-wrap gap-2 max-h-32 overflow-y-auto'
           style={{ ['--card-width' as string]: '3rem' }}
         >
           {SUPPORTED_ICON_NAMES.map((iconOption) => (

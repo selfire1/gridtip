@@ -10,26 +10,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-  FieldLegend,
-  FieldSet,
-} from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
-import { Avatar, AvatarImage } from '@/components/ui/avatar'
-import { LucideEye, LucideImageOff, LucideX } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { LucideEye } from 'lucide-react'
 import { OnboardingState, useOnboarding } from '../../_lib/onboarding-context'
 import { JoinGroupData } from '../join-group-form'
 import { IconFromName } from '@/components/icon-from-name'
-import { ALLOWED_TYPES } from '@/lib/utils/file-limits'
-import { getFileDataURL } from '@/lib/utils/file-data-url'
-import { getCompressedFile } from '@/lib/utils/compress-image'
-import { cn } from '@/lib/utils'
-import { Spinner } from '@/components/ui/spinner'
+import ProfileFields from '@/components/profile-fields'
 
 export type ProfileState = {
   name: string
@@ -211,26 +196,6 @@ function ProfileCard({
   onNameChange,
   onImageChange,
 }: ProfileCardProps) {
-  const [isProcessingImage, startTransition] = React.useTransition()
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) {
-      return
-    }
-    startTransition(async () => {
-      try {
-        const compressedFile = await getCompressedFile(file)
-        const dataUrl = await getFileDataURL(compressedFile)
-        onImageChange(dataUrl, compressedFile)
-      } catch (error) {
-        console.error(error)
-        const dataUrl = await getFileDataURL(file)
-        onImageChange(dataUrl, file)
-      }
-    })
-  }
-
   return (
     <Card>
       <CardHeader>
@@ -256,74 +221,9 @@ function ProfileCard({
         </CardDescription>
       </CardHeader>
       <CardContent className='space-y-8'>
-        <Field>
-          <FieldLabel htmlFor={`name-${title}`}>Name</FieldLabel>
-          <Input
-            autoComplete='off'
-            id={`name-${title}`}
-            name='name'
-            value={name}
-            onChange={(e) => onNameChange(e.target.value)}
-          />
-        </Field>
-        <FieldSet>
-          <FieldLegend>Image</FieldLegend>
-          <FieldGroup className='flex sm:flex-row'>
-            <Field className='sm:w-auto'>
-              <span className='sr-only'>Image Preview</span>
-              <div className='relative isolate !size-12'>
-                <Avatar className={cn('size-12 border border-muted bg-muted')}>
-                  <AvatarImage
-                    className={cn(
-                      isProcessingImage && 'opacity-0',
-                      'transition-opacity',
-                    )}
-                    src={image}
-                    alt=''
-                  />
-                </Avatar>
-                {isProcessingImage && (
-                  <div className='absolute inset-0 flex items-center justify-center'>
-                    <Spinner />
-                  </div>
-                )}
-
-                {!image && !isProcessingImage ? (
-                  <div className='absolute inset-0 flex items-center justify-center'>
-                    <LucideImageOff />
-                  </div>
-                ) : (
-                  <Button
-                    variant='ghost'
-                    disabled={!image}
-                    type='button'
-                    className='absolute -top-2 -right-2 z-10 rounded-full bg-default shadow-sm bg-red-100 hover:bg-red-200 dark:bg-red-900 hover:dark:bg-red-800 transition-colors'
-                    size='icon-xs'
-                    aria-label='Remove image'
-                    title='Remove image'
-                    onClick={() => onImageChange(undefined, undefined)}
-                  >
-                    <LucideX />
-                  </Button>
-                )}
-              </div>
-            </Field>
-            <Field className='w-full'>
-              <FieldLabel className='sr-only' htmlFor={`image-${title}`}>
-                Replace Image
-              </FieldLabel>
-              <Input
-                onChange={handleImageChange}
-                disabled={isProcessingImage}
-                id={`image-${title}`}
-                accept={ALLOWED_TYPES.join(',')}
-                name='image'
-                type='file'
-              />
-              <FieldDescription>Select a picture to upload.</FieldDescription>
-            </Field>
-          </FieldGroup>
-        </FieldSet>
+        <ProfileFields
+          {...{ id: title, onNameChange, onImageChange, name, image }}
+        />
       </CardContent>
     </Card>
   )

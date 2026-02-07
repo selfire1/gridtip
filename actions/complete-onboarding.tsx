@@ -1,7 +1,7 @@
 'use server'
 
 import { createGroup } from './create-group'
-import { Schema as CreateGroupSchema } from '@/lib/schemas/create-group'
+import { CreateGroupData as CreateGroupSchema } from '@/lib/schemas/create-group'
 import { joinGlobalGroup, joinGroup } from './join-group'
 import { verifySession } from '@/lib/dal'
 import { db } from '@/db'
@@ -19,7 +19,7 @@ export type Log = {
   ok: boolean
 }
 
-export async function joinOrCreateGroupAndUpdateProfileAction(
+export async function joinOrCreateGroupAndUpdateImage(
   input: (
     | {
         action: 'create'
@@ -53,9 +53,13 @@ export async function joinOrCreateGroupAndUpdateProfileAction(
     profile,
   })
 
+  // TODO: this check here is not ideal. there is tight coupling. We need to find a better way to track this state reliably
+  const hasUserNotRemovedDefaultImage = !!(
+    input.profileData?.imagePreview && !input.profileData.imageFile
+  )
   const profileResultLogs = await updateProfile(group, {
-    name: input.profileData?.name,
     file: input.profileData?.imageFile,
+    useDefaultImage: hasUserNotRemovedDefaultImage,
   })
 
   return [...logs, ...profileResultLogs]
@@ -84,7 +88,18 @@ export async function joinOrCreateGroupAndUpdateProfileAction(
       }
     }
     if (input.action === 'join' && input.groupData?.id) {
-      const result = await joinGroup({ groupId: input.groupData.id })
+      if (!input.profileData) {
+        const log = {
+          ok: false as const,
+          title: `Could not join ${input.groupData.name || 'group'}`,
+          description: 'No profile data',
+        }
+        return { log, group: null }
+      }
+      const result = await joinGroup({
+        groupId: input.groupData.id,
+        userName: input.profileData.name,
+      })
       if (!result.ok) {
         const log = {
           ok: false as const,
@@ -106,23 +121,30 @@ export async function joinOrCreateGroupAndUpdateProfileAction(
   }
 }
 
-type ProcessGlobalGroupOnboardingInput = {
+export async function joinGlobalGroupIfDesiredAndUpdateImage(input: {
   shouldJoin: boolean
   profileName?: string
-  profileImage?: File
-}
-
-export async function processGlobalGroupOnboardingAction(
-  input: ProcessGlobalGroupOnboardingInput,
-) {
+  profileImageFile?: File
+  profileImagePreview: string | undefined
+}) {
   const logs = [] as Log[]
   if (!input.shouldJoin) {
     return logs
   }
 
   await verifySession()
+  if (!input.profileName) {
+    logs.push({
+      ok: false as const,
+      title: 'Could not join global group',
+      description: 'No username set',
+    })
+    return logs
+  }
 
-  const joinGlobalResult = await joinGlobalGroup()
+  const joinGlobalResult = await joinGlobalGroup({
+    userName: input.profileName,
+  })
   if (!joinGlobalResult.ok) {
     logs.push({
       ok: false,
@@ -137,13 +159,16 @@ export async function processGlobalGroupOnboardingAction(
     description: 'Good luck!',
     ok: true,
   })
-  if (!input.profileImage && !input.profileName) {
+  if (!input.profileImageFile && !input.profileName) {
     return logs
   }
 
+  const hasUserNotRemovedDefaultImage = !!(
+    input.profileImagePreview && !input.profileImageFile
+  )
   const profileResultLogs = await updateProfile(joinGlobalResult.group, {
-    name: input.profileName,
-    file: input.profileImage,
+    file: input.profileImageFile,
+    useDefaultImage: hasUserNotRemovedDefaultImage,
   })
 
   console.log('Updated profile for global group')
@@ -174,49 +199,5 @@ export async function completeProfileOnboardingAction(input: {
 
   console.log('Updated default profile and completed onboarding')
 
-  return logs
-}
-
-async function updateProfile(
-  group: Pick<Database.Group, 'name' | 'id'>,
-  profile: { name?: string; file?: File },
-) {
-  const { userId } = await verifySession()
-  const logs = [] as Log[]
-  if (!profile.name && !profile.file) {
-    console.log('no input')
-    return logs
-  }
-  const imageResult = await uploadMaybeFile(profile.file)
-  if (!imageResult.ok) {
-    logs.push({
-      ok: false,
-      title: `${group.name}: Profile image error`,
-      description: 'Could not upload profile image',
-    })
-  }
-
-  const groupMembership = await db.query.groupMembersTable.findFirst({
-    where(table, { eq, and }) {
-      return and(eq(table.groupId, group.id), eq(table.userId, userId))
-    },
-    columns: { id: true },
-  })
-  if (!groupMembership) {
-    logs.push({
-      ok: false,
-      title: 'Could not update group profile',
-    })
-    return logs
-  }
-  await db
-    .update(groupMembersTable)
-    .set({
-      userName: profile.name || undefined,
-      profileImage: imageResult.data?.ufsUrl || undefined,
-    })
-    .where(eq(groupMembersTable.id, groupMembership.id))
-
-  console.log('Updated profile for group', group.id)
   return logs
 }

@@ -13,7 +13,7 @@ import {
 import { verifyIsAdmin, verifySession } from '@/lib/dal'
 import { getCurrentGroup, getGroupsForUser } from '@/lib/utils/groups'
 import { getNextRace } from '@/lib/utils/races'
-import { getGroupProfile } from '@/lib/utils/profile'
+import { getGroupProfile } from '@/lib/utils/group-profile'
 
 export async function AppSidebar({
   ...props
@@ -48,7 +48,7 @@ export async function AppSidebar({
         />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user} profile={profile} />
+        <NavUser user={user} groupProfile={profile} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

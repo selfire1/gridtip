@@ -22,16 +22,19 @@ import UserAvatar from './user-avatar'
 import { Path } from '@/lib/utils/path'
 import { User } from '@/db/schema/schema'
 import { Profile } from '@/types'
+import { getDefaultProfile } from '@/lib/utils/default-profile'
 
 export function NavUser({
   user,
-  profile,
+  groupProfile,
 }: {
   user: Pick<User, 'id' | 'name' | 'profileImageUrl' | 'email'>
-  profile: Profile | undefined
+  groupProfile: Profile | undefined
 }) {
   const { isMobile } = useSidebar()
   const router = useRouter()
+
+  const defaultUser = getDefaultProfile({ ...user, image: null })
 
   return (
     <SidebarMenu>
@@ -42,16 +45,14 @@ export function NavUser({
               size='lg'
               className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
             >
-              <UserAvatar
-                name={profile?.name || user.name}
-                profileImageUrl={profile?.image || user.profileImageUrl || null}
-                className='h-8 w-8 rounded-lg'
-              />
-              <div className='grid flex-1 text-left text-sm leading-tight'>
-                <span className='truncate font-medium'>
-                  {profile?.name || user.name}
-                </span>
-              </div>
+              {!groupProfile ? (
+                <ProfileRow name={defaultUser.name} image={defaultUser.image} />
+              ) : (
+                <ProfileRow
+                  name={groupProfile.name}
+                  image={groupProfile?.image}
+                />
+              )}
               <ChevronsUpDown className='ml-auto size-4' />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
@@ -94,5 +95,26 @@ export function NavUser({
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
+  )
+}
+
+function ProfileRow({
+  name,
+  image,
+}: {
+  name: string
+  image: string | undefined
+}) {
+  return (
+    <>
+      <UserAvatar
+        name={name}
+        profileImageUrl={image || null}
+        className='h-8 w-8 rounded-lg'
+      />
+      <div className='grid flex-1 text-left text-sm leading-tight'>
+        <span className='truncate font-medium'>{name}</span>
+      </div>
+    </>
   )
 }

@@ -11,7 +11,12 @@ export async function getCompressedFile(
     maxWidthOrHeight: 800,
     useWebWorker: true,
   } satisfies Options
+
   const resolvedOptions = defu(options, defaults)
-  const compressedFile = await imageCompression(imageFile, resolvedOptions)
+  const blob = await imageCompression(imageFile, resolvedOptions)
+  const compressedFile = new File([blob], imageFile.name, {
+    type: imageFile.type,
+  })
+
   return compressedFile
 }

@@ -6,7 +6,7 @@ const utapi = new UTApi()
 
 export async function uploadMaybeFile(file: File | undefined) {
   if (!file) {
-    return { ok: true as const, message: 'No file', data: null }
+    return { ok: true as const, message: 'No file' as const, data: null }
   }
   return await uploadImageFile(file)
 }
@@ -16,7 +16,7 @@ export async function uploadImageFile(file: File) {
     return {
       ok: false as const,
       message:
-        'Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.',
+        'Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.' as const,
       data: null,
     }
   }

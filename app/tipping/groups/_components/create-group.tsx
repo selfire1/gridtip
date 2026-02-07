@@ -19,61 +19,72 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { FieldErrors } from '@/components/ui/field'
 import { LucideArrowUpRight } from 'lucide-react'
 import { useEffect, useRef, useState, useTransition } from 'react'
-import z from 'zod'
-import { Spinner } from '@/components/ui/spinner'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { schema, validateSchema } from '@/lib/schemas/create-group'
-import { createGroup } from '@/actions/create-group'
+import {
+  CreateGroupData,
+  CreateGroupDetailsOnlyData,
+  CreateGroupSchema,
+  validateGroupDetailSchema,
+} from '@/lib/schemas/create-group'
 import GroupFields, { GroupFieldsProps } from '@/components/group-fields'
 import { IconName, SUPPORTED_ICON_NAMES } from '@/constants/icon-names'
+import { Database } from '@/db/types'
+import { Icon } from '@/components/icon'
+import { cn } from '@/lib/utils'
+import ProfileFields from '@/components/profile-fields'
+import { getDefaultProfile } from '@/lib/utils/default-profile'
+import { DalUser } from '@/lib/dal'
+import { motion } from 'motion/react'
+import { FieldDescription, FieldLegend, FieldSet } from '@/components/ui/field'
+import z from 'zod'
+import { ButtonText } from '@/components/button-text'
+import { createGroup } from '@/actions/create-group'
+import { updateProfile } from '@/actions/update-profile'
 
-export default function CreateGroup({ className }: { className?: string }) {
+const ProfileSchema = z.object({
+  name: z.string().trim().min(1, 'Required').max(60, 'Too long'),
+  imagePreview: z.string().optional(),
+  imageFile: z.instanceof(File).optional(),
+})
+type ProfileData = z.infer<typeof ProfileSchema>
+
+export default function CreateGroup({ user }: { user: DalUser }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Create group</CardTitle>
+        <CardTitle>Create Group</CardTitle>
         <CardDescription>
           Start a new group to tip with your{' '}
           <span className='line-through'>rivals</span> friends.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <CreateGroupDialog />
+        <CreateGroupDialog user={user} />
       </CardContent>
     </Card>
   )
 }
 
-function CreateGroupDialog() {
+type GroupDetailsData = Omit<CreateGroupData, 'userName'>
+function CreateGroupDialog({ user }: { user: DalUser }) {
   const [open, setOpen] = useState(false)
-
-  const [name, setName] = useState<string>('')
-  const [cutoff, setCutoff] = useState<number>(0)
-  const [selectedIcon, setSelectedIcon] = useState<IconName>(
-    SUPPORTED_ICON_NAMES[0],
+  const [groupDetails, setGroupDetails] = useState<GroupDetailsData>()
+  const [activeSlide, setActiveSlide] = useState<'details' | 'profile'>(
+    'details',
   )
-
-  const [formErrors, setFormErrors] = useState<GroupFieldsProps['errors']>()
-
-  const formRef = useRef<HTMLFormElement>(null)
-
-  const [isPending, startTransition] = useTransition()
+  const router = useRouter()
 
   useEffect(() => {
     if (!open) {
       setTimeout(() => {
-        setName('')
-        setSelectedIcon(SUPPORTED_ICON_NAMES[0])
-        setFormErrors(undefined)
+        setGroupDetails(undefined)
+        setActiveSlide('details')
       }, 400)
     }
   }, [open])
-
-  const router = useRouter()
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -90,93 +101,274 @@ function CreateGroupDialog() {
             Start a new group to invite people to predict with you.
           </DialogDescription>
         </DialogHeader>
-        <form
-          ref={formRef}
-          onSubmit={(e) => {
-            console.log('submitted')
-            e.preventDefault()
-            handleSubmit()
-          }}
-        >
-          <GroupFields
-            name={{
-              name: 'name',
-              value: name,
-              setValue: setName,
-              description: 'The name is visible to people you invite.',
+        {activeSlide === 'details' ? (
+          <GroupDetailsPage
+            isOpen={open}
+            onSubmit={(values) => {
+              setGroupDetails(values)
+              setActiveSlide('profile')
             }}
-            icon={{
-              name: 'icon',
-              value: selectedIcon,
-              setValue: setSelectedIcon,
-              description: 'You can change the icon later.',
-            }}
-            cutoff={{
-              name: 'cutoff',
-              value: cutoff,
-              setValue: setCutoff,
-            }}
-            errors={formErrors}
           />
-        </form>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant='outline'>Cancel</Button>
-          </DialogClose>
-          <Button
-            // isPending
-            disabled={isPending}
-            type='submit'
-            onClick={() => formRef.current?.requestSubmit()}
-          >
-            {isPending ? <Spinner /> : null}
-            Create
-          </Button>
-        </DialogFooter>
+        ) : (
+          <ProfileDetailsPage
+            user={user}
+            group={groupDetails!}
+            onSubmit={handleSubmit}
+          />
+        )}
       </DialogContent>
     </Dialog>
   )
 
-  function handleSubmit() {
-    setFormErrors(undefined)
-
-    const values = { name, icon: selectedIcon, cutoff }
-
-    const isOk = validateSchema(values, setFormErrors)
-    if (!isOk) {
+  async function handleSubmit(data: ProfileData) {
+    const validation = CreateGroupSchema.safeParse({
+      ...groupDetails,
+      userName: data.name,
+    })
+    if (!validation.success) {
+      toast.error('Invalid data. Please check fields.', {
+        description: z.prettifyError(validation.error),
+      })
       return
     }
 
-    startTransition(async () => {
-      const response = await createGroup(values)
-      if (!response.ok) {
-        toast.error(response.message, {
-          description: response.error,
-        })
-        return
+    let group: Pick<Database.Group, 'name' | 'id'> | undefined = undefined
+    try {
+      const groupResult = await createGroup(validation.data)
+      if (!groupResult.ok) {
+        throw new Error(groupResult.message)
       }
-      if (!response.group) {
-        // this should be caught by earlier conditions
-        return
+      group = groupResult.group
+    } catch (error) {
+      console.error(error)
+      toast.error('Could not create group', {
+        description: (error as Error)?.message,
+      })
+      return
+    }
+    try {
+      if (!group) {
+        throw new Error('Group not found')
       }
-      setOpen(false)
-      toast.success(
-        <p>
-          Created <span className='font-semibold'>{response.group.name}</span>
-        </p>,
 
-        {
-          action: {
-            label: 'Copy invite link',
-            onClick: () => {
-              navigator.clipboard.writeText(
-                `${window.location.origin}/join/${response.group.id}`,
-              )
-            },
-          },
-        },
-      )
-      router.refresh()
-    })
+      const logs = await updateProfile(group, {
+        file: data.imageFile,
+        useDefaultImage: data.imagePreview === user.profileImageUrl,
+      })
+      const isNotOkay = logs.find((log) => !log.ok)
+      if (isNotOkay) {
+        throw new Error(isNotOkay.title)
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error('Could not update your profile', {
+        description: (error as Error)?.message,
+      })
+      return
+    }
+    showSuccessToast(group!)
+    setOpen(false)
+    router.refresh()
   }
+}
+
+function GroupDetailsPage({
+  isOpen,
+  onSubmit,
+}: {
+  isOpen: boolean
+  onSubmit: (data: CreateGroupDetailsOnlyData) => void
+}) {
+  const [name, setName] = useState<string>('')
+  const [cutoff, setCutoff] = useState<number>(0)
+  const [selectedIcon, setSelectedIcon] = useState<IconName>(
+    SUPPORTED_ICON_NAMES[0],
+  )
+
+  useEffect(() => {
+    if (!open) {
+      setTimeout(() => {
+        setName('')
+        setSelectedIcon(SUPPORTED_ICON_NAMES[0])
+        setFormErrors(undefined)
+      }, 400)
+    }
+  }, [isOpen])
+
+  const [formErrors, setFormErrors] = useState<GroupFieldsProps['errors']>()
+
+  const formRef = useRef<HTMLFormElement>(null)
+  return (
+    <>
+      <form
+        ref={formRef}
+        className='h-[30rem] overflow-y-auto'
+        onSubmit={(e) => {
+          console.log('submitted')
+          e.preventDefault()
+          handleSubmit()
+        }}
+      >
+        <GroupFields
+          name={{
+            name: 'name',
+            value: name,
+            setValue: setName,
+            description: 'The name is visible to people you invite.',
+          }}
+          icon={{
+            name: 'icon',
+            value: selectedIcon,
+            setValue: setSelectedIcon,
+            description: 'You can change the icon later.',
+          }}
+          cutoff={{
+            name: 'cutoff',
+            value: cutoff,
+            setValue: setCutoff,
+            description:
+              'How many minutes before qualifying for the race starts should tipping be closed?',
+          }}
+          errors={formErrors}
+        />
+      </form>
+      <Dots index={0} />
+      <DialogFooter>
+        <DialogClose asChild>
+          <Button variant='outline'>Cancel</Button>
+        </DialogClose>
+        <Button type='submit' onClick={() => formRef.current?.requestSubmit()}>
+          Continue
+          <Icon.Continue />
+        </Button>
+      </DialogFooter>
+    </>
+  )
+
+  function handleSubmit() {
+    setFormErrors(undefined)
+    const values = { name, icon: selectedIcon, cutoff }
+    const isOk = validateGroupDetailSchema(values, setFormErrors)
+    if (!isOk) {
+      return
+    }
+    onSubmit(values)
+  }
+}
+
+function ProfileDetailsPage({
+  user,
+  group,
+  onSubmit,
+}: {
+  user: DalUser
+  group: Pick<Database.Group, 'name'>
+  onSubmit: (data: ProfileData) => Promise<void>
+}) {
+  const profile = getDefaultProfile(user)
+  const [name, setName] = useState(profile.name)
+  const [image, setImage] = useState<{ preview?: string; file?: File }>({
+    preview: profile.image,
+    file: undefined,
+  })
+
+  const [isPending, startTransition] = useTransition()
+
+  return (
+    <>
+      <motion.div
+        className='h-[30rem] space-y-6 pt-4'
+        initial={{
+          x: 8,
+          opacity: 0,
+        }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ ease: 'easeOut', duration: 0.2 }}
+      >
+        <FieldSet>
+          <FieldLegend>Your Group Profile</FieldLegend>
+          <FieldDescription>
+            Customise your appearance in{' '}
+            <span className='font-medium'>{group.name}</span>.
+          </FieldDescription>
+          <ProfileFields
+            id='create'
+            {...{
+              name,
+              image: image.preview,
+              onNameChange: setName,
+              onImageChange: (preview, file) => setImage({ preview, file }),
+            }}
+          />
+        </FieldSet>
+      </motion.div>
+      <Dots index={1} />
+      <DialogFooter>
+        <DialogClose asChild>
+          <Button disabled={isPending} variant='outline'>
+            Cancel
+          </Button>
+        </DialogClose>
+        <Button disabled={isPending} type='submit' onClick={handleSubmit}>
+          <ButtonText
+            label='Create Group'
+            pendingText='Creating…'
+            isPending={isPending}
+          />
+        </Button>
+      </DialogFooter>
+    </>
+  )
+
+  function handleSubmit() {
+    console.log({ image })
+    const validation = ProfileSchema.safeParse({
+      name,
+      imagePreview: image.preview,
+      imageFile: image.file,
+    })
+    if (!validation.success) {
+      toast.error('Invalid data. Please check fields.', {
+        description: z.prettifyError(validation.error),
+      })
+      return
+    }
+
+    startTransition(async () => await onSubmit(validation.data))
+  }
+}
+
+function Dots({ index }: { index: 0 | 1 }) {
+  return (
+    <div className='flex items-center gap-1.5 justify-center'>
+      {[0, 1].map((i) => (
+        <div
+          key={i}
+          className={cn(
+            'size-2 rounded-full transition-colors',
+            i === index ? 'bg-primary' : 'bg-primary/15',
+          )}
+        />
+      ))}
+    </div>
+  )
+}
+
+function showSuccessToast(group: Pick<Database.Group, 'name' | 'id'>) {
+  toast.success(
+    <p>
+      Created <span className='font-semibold'>{group.name}</span>
+    </p>,
+
+    {
+      action: {
+        label: 'Copy invite link',
+        onClick: () => {
+          navigator.clipboard.writeText(
+            `${window.location.origin}/join/${group.id}`,
+          )
+        },
+      },
+    },
+  )
 }

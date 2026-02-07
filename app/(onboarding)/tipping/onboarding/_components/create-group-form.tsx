@@ -25,10 +25,10 @@ import { cn } from '@/lib/utils'
 import { Button } from '@ui/button'
 import { LucideChevronRight } from 'lucide-react'
 import React from 'react'
-import { schema } from '@/lib/schemas/create-group'
+import { CreateGroupSchema } from '@/lib/schemas/create-group'
 import { useOnboarding } from '../_lib/onboarding-context'
 
-const formSchema = schema.omit({ cutoff: true })
+const formSchema = CreateGroupSchema.omit({ cutoff: true })
 type FormSchema = z.infer<typeof formSchema>
 
 export default function CreateGroupForm() {
