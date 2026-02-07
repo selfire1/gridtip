@@ -43,7 +43,7 @@ It’s one point each for a correct tip of:
 On sprint weekends, there is a bonus sixth point available for the driver who finished **first** (P1) in the Sprint Race.
 
 ### Results evaluation
-Driver positions are evaluated as per the final [official results](https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2025-2071). 
+Driver positions are evaluated as per the final [official results](https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2026-2071). 
 
 Examples of what that could look like:
 - Russell finishes the race first but receives a time penalty that drops him to P2 in the official results. Result: Tips for Russell as P1 are incorrect.
