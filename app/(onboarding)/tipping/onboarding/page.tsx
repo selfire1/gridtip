@@ -15,18 +15,17 @@ export const metadata: Metadata = {
 
 export default async function OnboardingPage() {
   const { user } = await verifySession()
-  // if (user.hasSeenOnboarding) {
-  //   redirect(Path.Dashboard)
-  // }
-  // FIXME: Enable
-  // const userGroups = await getGroupsForUser(user.id)
-  // if (userGroups.length > 0) {
-  //   await db
-  //     .update(userTable)
-  //     .set({ hasSeenOnboarding: true })
-  //     .where(eq(userTable.id, user.id))
-  //   redirect(Path.Dashboard)
-  // }
+  if (user.hasSeenOnboarding) {
+    redirect(Path.Dashboard)
+  }
+  const userGroups = await getGroupsForUser(user.id)
+  if (userGroups.length > 0) {
+    await db
+      .update(userTable)
+      .set({ hasSeenOnboarding: true })
+      .where(eq(userTable.id, user.id))
+    redirect(Path.Dashboard)
+  }
   return (
     <OnboardingProvider user={user}>
       <OnboardingClient />
