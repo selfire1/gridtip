@@ -20,8 +20,9 @@ import {
 import UserAvatar from '@/components/user-avatar'
 import Constructor from '@/components/constructor'
 import { cn } from '@/lib/utils'
-import { getConstructorCssVariable } from '@/lib/utils/index'
 import React from 'react'
+import { getConstructorCssVariable } from '@/lib/utils/constructor-css'
+import { Database } from '@/db/types'
 
 export default async function ChampionshipPage() {
   const { userId } = await verifySession()
@@ -130,16 +131,23 @@ export default async function ChampionshipPage() {
           eq(prediction.groupId, groupId),
           eq(prediction.isForChampionship, true),
         ),
-      columns: {
-        id: true,
-      },
       with: {
         user: {
           columns: {
             id: true,
-            name: true,
           },
         },
+      },
+      columns: {
+        id: true,
+      },
+    })
+    const members = await db.query.groupMembersTable.findMany({
+      where: (group, { eq }) => eq(group.groupId, groupId),
+      columns: {
+        userId: true,
+        profileImage: true,
+        userName: true,
       },
     })
 
@@ -183,8 +191,14 @@ export default async function ChampionshipPage() {
         (e) => e.position === 'championshipConstructor',
       )
 
+      const member = members.find(
+        (member) => member.userId === prediction.user.id,
+      )
+      if (!member) {
+        console.error('Could not find member', prediction.user.id)
+      }
       return {
-        user: prediction.user,
+        member,
         driver: driverEntry?.driver,
         constructor: constructorEntry?.constructor,
       }
@@ -192,14 +206,18 @@ export default async function ChampionshipPage() {
   }
 }
 
+type TipGroupMember = Pick<
+  Database.GroupMember,
+  'profileImage' | 'userName' | 'userId'
+>
 type ChampionshipTip = {
-  user: { id: string; name: string }
+  member: TipGroupMember | undefined
   driver:
     | {
         id: string
         givenName: string
         familyName: string
-        permanentNumber: string
+        permanentNumber: string | null
         constructorId: string
       }
     | null
@@ -226,15 +244,15 @@ function EveryonesChampionshipTips({
       (acc, tip) => {
         const existing = acc.find((item) => item.driver.id === tip.driver!.id)
         if (existing) {
-          existing.users.push(tip.user)
+          existing.members.push(tip.member)
         } else {
-          acc.push({ driver: tip.driver!, users: [tip.user] })
+          acc.push({ driver: tip.driver!, members: [tip.member] })
         }
         return acc
       },
       [] as Array<{
         driver: NonNullable<(typeof tips)[number]['driver']>
-        users: (typeof tips)[number]['user'][]
+        members: (typeof tips)[number]['member'][]
       }>,
     )
 
@@ -246,15 +264,15 @@ function EveryonesChampionshipTips({
           (item) => item.constructor.id === tip.constructor!.id,
         )
         if (existing) {
-          existing.users.push(tip.user)
+          existing.members.push(tip.member)
         } else {
-          acc.push({ constructor: tip.constructor!, users: [tip.user] })
+          acc.push({ constructor: tip.constructor!, members: [tip.member] })
         }
         return acc
       },
       [] as Array<{
         constructor: NonNullable<(typeof tips)[number]['constructor']>
-        users: (typeof tips)[number]['user'][]
+        members: (typeof tips)[number]['member'][]
       }>,
     )
 
@@ -277,10 +295,10 @@ function EveryonesChampionshipTips({
                   No driver tips yet
                 </p>
               ) : (
-                driverTips.map(({ driver, users }) => (
+                driverTips.map(({ driver, members: users }) => (
                   <TipCard
                     key={driver.id}
-                    users={users}
+                    members={users}
                     currentUserId={currentUserId}
                   >
                     <div
@@ -295,10 +313,10 @@ function EveryonesChampionshipTips({
                       <p
                         className='text-3xl font-bold font-mono absolute right-2 inset-y-0 flex items-center justify-center text-transparent bg-clip-text'
                         style={{
-                          backgroundImage: `linear-gradient(to bottom, ${getConstructorCssVariable(driver.constructorId, 0.3)}, ${getConstructorCssVariable(driver.constructorId, 0.1)})`,
+                          backgroundImage: `linear-gradient(to bottom, ${getConstructorCssVariable(driver.constructorId, { opacity: 0.3 })}, ${getConstructorCssVariable(driver.constructorId, { opacity: 0.1 })})`,
                         }}
                       >
-                        {driver.permanentNumber}
+                        {driver.permanentNumber ?? ''}
                       </p>
                     </div>
                   </TipCard>
@@ -323,16 +341,16 @@ function EveryonesChampionshipTips({
                   No constructor tips yet
                 </p>
               ) : (
-                constructorTips.map(({ constructor, users }) => (
+                constructorTips.map(({ constructor, members: users }) => (
                   <TipCard
                     key={constructor.id}
-                    users={users}
+                    members={users}
                     currentUserId={currentUserId}
                   >
                     <div
                       className='p-3 border-b'
                       style={{
-                        backgroundColor: `${getConstructorCssVariable(constructor.id, 0.05)}`,
+                        backgroundColor: `${getConstructorCssVariable(constructor.id, { opacity: 0.05 })}`,
                       }}
                     >
                       <Constructor
@@ -352,11 +370,11 @@ function EveryonesChampionshipTips({
 }
 
 function TipCard({
-  users,
+  members: members,
   currentUserId,
   children,
 }: {
-  users: Array<{ id: string; name: string }>
+  members: (TipGroupMember | undefined)[]
   currentUserId: string
   children: React.ReactNode
 }) {
@@ -364,30 +382,37 @@ function TipCard({
     <div className='bg-background/50 overflow-hidden rounded-lg border'>
       {children}
       <div className='space-y-3 p-3'>
-        {users.map((user) => (
-          <div
-            className={cn(
-              'flex items-center gap-2',
-              user.id === currentUserId && 'font-semibold',
-            )}
-            key={user.id}
-          >
-            <UserAvatar
-              name={user.name}
-              id={user.id}
-              className='size-8 rounded-lg'
-            />
-            <p>{user.name}</p>
-          </div>
-        ))}
+        {members.map((member) => {
+          if (!member) {
+            return
+          }
+          return (
+            <div
+              className={cn(
+                'flex items-center gap-2',
+                member.userId === currentUserId && 'font-semibold',
+              )}
+              key={member.userId}
+            >
+              <UserAvatar
+                name={member.userName}
+                profileImageUrl={member.profileImage}
+                className='size-8 rounded-lg'
+              />
+              <p>{member.userName}</p>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
 }
 
 function getDriverStyle(constructorId: string): React.CSSProperties {
-  const colourStart = getConstructorCssVariable(constructorId, 0.01)
-  const colourEnd = getConstructorCssVariable(constructorId, 0.1)
+  const colourStart = getConstructorCssVariable(constructorId, {
+    opacity: 0.01,
+  })
+  const colourEnd = getConstructorCssVariable(constructorId, { opacity: 0.1 })
   return {
     backgroundImage: `linear-gradient(to left, ${colourStart}, ${colourEnd})`,
   }

@@ -1,34 +1,34 @@
 :root {
-  --clr-team-alpine: #00a1e8;
-  --clr-team-alpine--accessible: #005081;
+  --clr-team-alpine: 0, 161, 232;
+  --clr-team-alpine--accessible: 0, 80, 129;
 
-  --clr-team-aston_martin: #229971;
-  --clr-team-aston_martin--accessible: #00482c;
+  --clr-team-aston_martin: 34, 153, 113;
+  --clr-team-aston_martin--accessible: 0, 72, 44;
 
-  --clr-team-audi: #f50537;
-  --clr-team-audi--accessible: #6b0015;
+  --clr-team-audi: 245, 5, 55;
+  --clr-team-audi--accessible: 107, 0, 21;
 
-  --clr-team-cadiallac: #909090;
-  --clr-team-cadiallac--accessible: #444444;
+  --clr-team-cadillac: 144, 144, 144;
+  --clr-team-cadillac--accessible: 68, 68, 68;
 
-  --clr-team-ferrari: #ed1131;
-  --clr-team-ferrari--accessible: #710006;
+  --clr-team-ferrari: 237, 17, 49;
+  --clr-team-ferrari--accessible: 113, 0, 6;
 
-  --clr-team-haas: #9c9fa2;
-  --clr-team-haas--accessible: #4d5052;
+  --clr-team-haas: 156, 159, 162;
+  --clr-team-haas--accessible: 77, 80, 82;
 
-  --clr-team-mclaren: #f47600;
-  --clr-team-mclaren--accessible: #863400;
+  --clr-team-mclaren: 244, 118, 0;
+  --clr-team-mclaren--accessible: 134, 52, 0;
 
-  --clr-team-mercedes: #00d7b6;
-  --clr-team-mercedes--accessible: #007560;
+  --clr-team-mercedes: 0, 215, 182;
+  --clr-team-mercedes--accessible: 0, 117, 96;
 
-  --clr-team-rb: #6c98ff;
-  --clr-team-rb--accessible: #2345ab;
+  --clr-team-rb: 108, 152, 255;
+  --clr-team-rb--accessible: 35, 69, 171;
 
-  --clr-team-red_bull: #4781d7;
-  --clr-team-red_bull--accessible: #003282;
+  --clr-team-red_bull: 71, 129, 215;
+  --clr-team-red_bull--accessible: 0, 50, 130;
 
-  --clr-team-williams: #1868db;
-  --clr-team-williams--accessible: #000681;
+  --clr-team-williams: 24, 104, 219;
+  --clr-team-williams--accessible: 0, 6, 129;
 }

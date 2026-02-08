@@ -7,10 +7,10 @@ export default function UserAvatar(
   } & Pick<User, 'name' | 'profileImageUrl'>,
 ) {
   const fallbackString = props.name
-    .split(' ')
-    .join('')
-    .slice(0, 2)
-    .toUpperCase()
+    ?.split(' ')
+    ?.join('')
+    ?.slice(0, 2)
+    ?.toUpperCase()
   return (
     <>
       <Avatar className={props.className || 'rounded-lg'}>

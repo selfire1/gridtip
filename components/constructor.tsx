@@ -29,7 +29,7 @@ export default function Constructor({
         height={24}
         alt=''
         className={classNameImg}
-        src={`/img/constructors/${constructor.id}.avif`}
+        src={`/img/constructors/${constructor.id}.webp`}
       />
       <span>{constructor.name}</span>
       {isSelected && <LucideCheck className='ml-auto' />}

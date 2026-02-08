@@ -64,6 +64,13 @@
       "when": 1770354009316,
       "tag": "0008_group_member_name_and_img",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1770506492264,
+      "tag": "0009_loose_lester",
+      "breakpoints": true
     }
   ]
 }

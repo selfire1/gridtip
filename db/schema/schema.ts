@@ -61,7 +61,9 @@ export const groupMembersTable = sqliteTable(
       .default(sql`(unixepoch())`)
       .notNull(),
   },
-  (table) => [unique().on(table.groupId, table.userId)],
+  (table) => [
+    unique('group_members_groupId_userId_uq').on(table.groupId, table.userId),
+  ],
 )
 
 export const groupMembersRelations = relations(
@@ -97,7 +99,7 @@ export const racesTable = sqliteTable('races', {
 
 export const driversTable = sqliteTable('drivers', {
   id: text('id').primaryKey().notNull(),
-  permanentNumber: text('permanent_number').notNull(),
+  permanentNumber: text('permanent_number'),
   fullName: text('full_name').notNull(),
   givenName: text('given_name').notNull(),
   familyName: text('family_name').notNull(),
@@ -127,6 +129,7 @@ export const predictionsTable = sqliteTable(
   'predictions',
   {
     id: text('id').primaryKey().$defaultFn(createId),
+    // TODO: memberId makes more sense
     userId: text('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),

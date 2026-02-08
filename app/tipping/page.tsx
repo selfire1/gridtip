@@ -36,7 +36,6 @@ import {
 import { and, eq, inArray } from 'drizzle-orm'
 import { LucideArrowRight, LucideClock, LucideIcon } from 'lucide-react'
 import React, { cache, ReactNode } from 'react'
-import { getConstructorCssVariable } from '@/lib/utils/index'
 import UserAvatar from '@/components/user-avatar'
 import clsx from 'clsx'
 import Constructor from '@/components/constructor'
@@ -53,6 +52,7 @@ import { Badge } from '@/components/ui/badge'
 import { Icon } from '@/components/icon'
 import { getCountryFlag } from '@/lib/utils/country-flag'
 import { cn } from '@/lib/utils'
+import { getConstructorCssVariable } from '@/lib/utils/constructor-css'
 
 export default async function DashboardPage() {
   const { userId, user } = await verifySession()
@@ -743,7 +743,7 @@ export default async function DashboardPage() {
                     {tip.familyName}
                   </p>
                   <p className='text-3xl font-bold font-mono absolute right-2 inset-y-0 flex items-center justify-center bg-gradient-to-b from-(--team-colour)/30 to-(--team-colour)/10 text-transparent bg-clip-text'>
-                    {tip.permanentNumber}
+                    {tip.permanentNumber ?? ''}
                   </p>
                 </div>
               ) : (
@@ -813,7 +813,7 @@ export default async function DashboardPage() {
               <div>
                 <p className='relative z-10 pr-2'>{tip.familyName}</p>
                 <p className='text-3xl font-bold font-mono absolute right-1 inset-y-0 flex items-center justify-center bg-gradient-to-b from-(--team-colour)/20 to-(--team-colour)/10 text-transparent bg-clip-text'>
-                  {tip.permanentNumber}
+                  {tip.permanentNumber ?? ''}
                 </p>
               </div>
             ) : (
@@ -846,11 +846,12 @@ export default async function DashboardPage() {
       } as const
 
       const gradient = GRADIENT_CONFIG[isCurrentUser ? 'current' : 'default']
-      const colourStart = getConstructorCssVariable(
-        constructorId,
-        gradient.start,
-      )
-      const colourEnd = getConstructorCssVariable(constructorId, gradient.end)
+      const colourStart = getConstructorCssVariable(constructorId, {
+        opacity: gradient.start,
+      })
+      const colourEnd = getConstructorCssVariable(constructorId, {
+        opacity: gradient.end,
+      })
       const style = {
         backgroundImage: `linear-gradient(to ${seenDriverMap.get(driverId) === 'first' ? 'left' : 'right'}, ${colourStart} , ${colourEnd})`,
       }
