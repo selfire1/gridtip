@@ -3,6 +3,8 @@ import { verifySession } from '../dal'
 import { db } from '@/db'
 import { cache } from 'react'
 import { Profile } from '@/types'
+import { unstable_cache } from 'next/cache'
+import { CacheTag } from '@/constants/cache'
 
 export async function getGroupProfile(
   group: Pick<Database.Group, 'id'> | undefined,
@@ -26,18 +28,18 @@ export async function getGroupProfile(
 
     return {
       image: groupMemberProfile?.profileImage || undefined,
-      name: groupMemberProfile.userName, // TODO: resolve
+      name: groupMemberProfile.userName,
     } satisfies Profile
   }
 
-  // const getProfileCached = unstable_cache(
-  //   getProfile,
-  //   [userId, group?.id ?? 'none'],
-  //   {
-  //     tags: [CacheTag.UserProfile],
-  //   },
-  // ) FIXME: add cache back in
+  const getProfileCached = unstable_cache(
+    getProfile,
+    [userId, group?.id ?? 'none'],
+    {
+      tags: [CacheTag.MyGroupProfile],
+    },
+  )
 
-  const getProfileDedup = cache(getProfile)
+  const getProfileDedup = cache(getProfileCached)
   return await getProfileDedup()
 }
