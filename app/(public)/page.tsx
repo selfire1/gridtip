@@ -5,6 +5,8 @@ import HeroTwo from '@/public/img/hero-two.jpg'
 
 import Sarah from '@/public/people/sarah.png'
 import Marcus from '@/public/people/marcus.png'
+import Gina from '@/public/people/gina.png'
+import Jake from '@/public/people/jake.png'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -29,11 +31,13 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { LeaderBoard } from '../tipping/leaderboard/_components/leaderboard'
+import { ImageUpscale } from 'lucide-react'
 
 const groupTypes = [
   'friend group',
   'mates',
   'church',
+  'school',
   'coworkers',
   'family',
   'community',
@@ -271,7 +275,6 @@ function HeroImage() {
   const elevation = {
     one: 'z-[10] shadow opacity-90',
     two: 'z-[20] shadow-md opacity-95',
-    three: 'z-[30] shadow-lg',
   }
 
   const imageClasses = cn(
@@ -314,7 +317,7 @@ function HeroImage() {
               pointsDelta: 4,
               member: {
                 id: '1',
-                userName: 'Franz',
+                userName: 'Marcus',
                 profileImage: null,
               },
             },
@@ -326,24 +329,41 @@ function HeroImage() {
         src={Sarah}
         alt='Asian-Australian woman with shoulder-length black hair, wearing stylish glasses, with a professional but casual style'
         className={{
-          root: cn(
-            elevation.three,
-            'shadow-none absolute -right-[5%] top-[30%]',
-          ),
-          image: elevation.three,
+          root: cn('shadow-none absolute -right-[5%] top-[30%]'),
         }}
         text='manifesting an Oscar win'
       />
       <ChatAvatar
         className={{
-          root: cn(elevation.three, 'shadow-none absolute left-[5%] top-[45%]'),
-          image: cn(elevation.three, '-rotate-4'),
+          root: cn('shadow-none absolute left-[5%] top-[45%]'),
           bubble: '-rotate-2 -mb-4 -mr-8',
         }}
         offset={15}
         src={Marcus}
         alt='Man with beard wearing a Red Bull Racing cap with hearts floating before him'
         text={'max’s qualy…\n simply lovely!'}
+      />
+      <ChatAvatar
+        className={{
+          root: cn('shadow-none absolute left-[35%] top-[5%]'),
+          image: cn('rotate-3'),
+          bubble: 'rotate-3 -mb-4 mr-8',
+        }}
+        offset={65}
+        src={Gina}
+        alt='Young woman with blonde hair, surprised'
+        text='insane first turn!'
+      />
+      <ChatAvatar
+        className={{
+          root: cn('shadow-none absolute left-[35%] bottom-[15%]'),
+          image: cn('rotate-4'),
+          bubble: '-rotate-3 -mb-4 mr-8',
+        }}
+        offset={65}
+        src={Jake}
+        alt='Young man with curly brown hair, stubble, looking skeptical'
+        text='sketchy tips this round…'
       />
       <Image
         src={HeroTwo}
@@ -459,7 +479,7 @@ function SpeechBubble({
       <div
         style={{ '--offset': `${offset}%` } as React.CSSProperties}
         className={cn(
-          'rounded-md px-3 py-2 bg-gradient-to-b from-background/80 to-blue-50/80 font-medium text-foreground/90 relative backdrop-blur-md',
+          'rounded-md px-3 py-2 bg-gradient-to-b from-background/90 to-blue-50/90 font-medium text-foreground/90 relative backdrop-blur-md overflow-hidden',
         )}
       >
         <div className='space-y-1'>
@@ -469,7 +489,7 @@ function SpeechBubble({
         </div>
       </div>
       <div
-        className='speech-bubble-tail bg-blue-50/80 backdrop-blur-md'
+        className='speech-bubble-tail bg-blue-50/90 backdrop-blur-md'
         style={{ '--offset': `${offset}%` } as React.CSSProperties}
       />
     </div>
@@ -494,15 +514,15 @@ function ChatAvatar({
 }) {
   return (
     <div className={cn(className?.root)}>
-      <div className='relative isolate flex flex-col items-center'>
+      <div className='relative flex flex-col items-center'>
         <SpeechBubble
-          className={cn('-mb-4', className?.bubble)}
+          className={cn('-mb-4', className?.bubble, 'z-[50]')}
           offset={offset}
           text={text}
         />
         <div
           className={cn(
-            'rounded-full overflow-hidden aspect-square size-[8rem] relative',
+            'rounded-full overflow-hidden aspect-square size-[8rem] relative z-[30]',
             className?.image,
           )}
         >
