@@ -429,20 +429,36 @@ main[data-slot='sidebar-inset']:has(.is-bg-muted) {
 }
 
 @layer components {
-  .speech-bubble {
-    --bubble-offset: var(--offset, 25%);
-    background-color: inherit;
-    border-color: inherit;
-    @apply relative rounded-md px-3 py-2;
-  }
-  .speech-bubble::before {
-    @apply backdrop-blur-md;
-    content: '';
+  .speech-bubble-tail {
+    --tail-offset: var(--offset, 25%);
     position: absolute;
-    left: var(--bubble-offset);
+    left: var(--tail-offset);
     top: 100%;
-    border: 10px solid transparent;
-    border-top-color: inherit;
-    z-index: 10;
+    width: 20px;
+    height: 10px;
+    background-color: inherit;
+    clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
+  }
+
+  .speech-bubble-clip {
+    width: 150px;
+    height: 110px;
+    background: #b03030;
+    color: #fff;
+    /* Rectangle with a small triangular tail carved at bottom-left */
+    clip-path: polygon(
+      0% 0%,
+      100% 0%,
+      100% 70%,
+      38% 70%,
+      30% 100%,
+      27% 70%,
+      0% 70%
+    );
+    /* Optional: rounding for the main box (tail stays sharp in most browsers) */
+    border-radius: 12px;
+
+    /* Optional: add contrast around the shape */
+    filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.25));
   }
 }

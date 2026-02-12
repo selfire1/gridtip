@@ -331,7 +331,6 @@ function HeroImage() {
             'shadow-none absolute -right-[5%] top-[30%]',
           ),
           image: elevation.three,
-          bubble: '-rotate-2 mr-4',
         }}
         text='manifesting an Oscar win'
       />
@@ -456,19 +455,23 @@ function SpeechBubble({
   className?: string
 }) {
   return (
-    <div
-      style={{ '--offset': `${offset}%` }}
-      className={cn(
-        'top-0 rounded-md px-3 py-2 bg-gradient-to-b from-background/80 to-blue-50/80 backdrop-blur-md border-blue-50/80 drop-shadow-xl z-[40] font-medium text-foreground/90',
-        'speech-bubble',
-        className,
-      )}
-    >
-      <div className='space-y-1'>
-        {text.split('\n').map((line) => (
-          <p key={line}>{line}</p>
-        ))}
+    <div className={cn(className, 'relative z-[40]')}>
+      <div
+        style={{ '--offset': `${offset}%` } as React.CSSProperties}
+        className={cn(
+          'rounded-md px-3 py-2 bg-gradient-to-b from-background/80 to-blue-50/80 font-medium text-foreground/90 relative backdrop-blur-md',
+        )}
+      >
+        <div className='space-y-1'>
+          {text.split('\n').map((line) => (
+            <p key={line}>{line}</p>
+          ))}
+        </div>
       </div>
+      <div
+        className='speech-bubble-tail bg-blue-50/80 backdrop-blur-md'
+        style={{ '--offset': `${offset}%` } as React.CSSProperties}
+      />
     </div>
   )
 }
