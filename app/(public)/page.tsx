@@ -1,62 +1,80 @@
 'use client'
 
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import HeroOne from '@/public/img/hero-one.jpg'
+import HeroTwo from '@/public/img/hero-two.jpg'
+
+import Sarah from '@/public/people/sarah.png'
+import Marcus from '@/public/people/marcus.png'
+
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
+import Image, { StaticImageData } from 'next/image'
+import { cn } from '@/lib/utils'
+import { SelectConstructor } from '@/components/select-constructor'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { LeaderBoard } from '../tipping/leaderboard/_components/leaderboard'
+
+const groupTypes = [
+  'friend group',
+  'mates',
+  'church',
+  'coworkers',
+  'family',
+  'community',
+  'group chat',
+  'pub mates',
+]
+
+function AnimatedGroupType() {
+  const [index, setIndex] = useState(0)
+  const [isFlipping, setIsFlipping] = useState(false)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsFlipping(true)
+      setTimeout(() => {
+        setIndex((prev) => (prev + 1) % groupTypes.length)
+        setIsFlipping(false)
+      }, 300)
+    }, 2500)
+
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <span
+      className={`inline-block transition-all duration-300 ${
+        isFlipping
+          ? 'opacity-0 -translate-y-2 scale-95'
+          : 'opacity-100 translate-y-0 scale-100'
+      }`}
+    >
+      {groupTypes[index]}
+    </span>
+  )
+}
 
 export default function Home() {
   return (
     <div className='space-y-32 py-16 md:space-y-40 md:py-20'>
       {/* Hero Section */}
-      <section className='is-container'>
-        <div className='grid gap-12 lg:grid-cols-2 lg:gap-16 items-center'>
-          <div className='space-y-6'>
-            <h1 className='text-4xl font-bold tracking-tight lg:text-5xl xl:text-6xl'>
-              Lorem Ipsum Dolor Sit
-            </h1>
-            <p className='text-lg text-muted-foreground'>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </p>
-            <div className='flex gap-4'>
-              <Button size='lg' asChild>
-                <Link href='/auth'>Get Started</Link>
-              </Button>
-              <Button size='lg' variant='outline' asChild>
-                <Link href='#'>Learn More</Link>
-              </Button>
-            </div>
-          </div>
-          <div className='bg-gray-300 rounded-3xl aspect-video w-full' />
-        </div>
-      </section>
-
-      {/* Social Proof Section */}
-      <section className='is-container'>
-        <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
-          {testimonials.map((testimonial, index) => (
-            <Card key={index} className='p-6'>
-              <blockquote className='text-lg mb-4'>
-                "{testimonial.quote}"
-              </blockquote>
-              <div className='flex items-center gap-3'>
-                <Avatar>
-                  <AvatarFallback className='bg-gray-300' />
-                </Avatar>
-                <span className='font-medium'>{testimonial.name}</span>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </section>
-
+      <Hero />
       {/* How It Works Section */}
       <section className='is-container'>
         <h2 className='text-3xl font-bold text-center mb-12'>How It Works</h2>
@@ -91,11 +109,11 @@ export default function Home() {
       <section className='bg-primary/5 border-y'>
         <div className='is-container py-16 text-center space-y-6'>
           <h2 className='text-3xl font-bold lg:text-4xl'>
-            Ready to Get Started?
+            Create a group for your <AnimatedGroupType />
           </h2>
           <p className='text-lg text-muted-foreground max-w-2xl mx-auto'>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-            eiusmod tempor incididunt ut labore.
+            Become the star of your group by setting up a friendly tipping comp.
+            It’s free!
           </p>
           <Button size='lg' asChild>
             <Link href='/auth'>Start Now</Link>
@@ -153,46 +171,352 @@ const testimonials = [
 
 const steps = [
   {
-    title: 'Lorem Ipsum Dolor',
+    title: 'Claim a group for your friends',
     description:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+      'Create a platform where you and your friends can make predictions. Setting one up is faster than a Ferrari pit stop.',
   },
   {
-    title: 'Consectetur Adipiscing',
+    title: 'Pick your tips',
     description:
-      'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+      'Predict key results for each race. Did Max clinch pole? Will a rookie upset the order? And can Stroll be counted on to finish at the back? Seeing how your tips turn out makes every race more exciting.',
   },
   {
-    title: 'Sed Do Eiusmod',
+    title: 'Climb the leaderboard',
     description:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+      'Gather points throughout the weekend. That friend who reckons they’re an F1 expert? Let the results speak for themselves.',
   },
 ]
 
 const faqs = [
   {
-    question: 'Lorem ipsum dolor sit amet?',
-    answer:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+    question: 'Do I need to pay for this?',
+    answer: `Nope! GridTip is free for the 2026 season.`,
   },
   {
-    question: 'Consectetur adipiscing elit sed do?',
-    answer:
-      'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+    question: 'What do I tip?',
+    answer: `For each race, points are up for grabs for Pole Position (the driver who qualifies P1), the positions P1, P10 and Last in the Grand Prix, and whichever constructor scores the most points that weekend. On sprint weekends, you can score a bonus point for Sprint P1.
+
+        If you get in early, you can score bonus point for predicting the Drivers’ and Constructors’ Championships`,
   },
   {
-    question: 'Duis aute irure dolor in reprehenderit?',
+    question: 'How many points can I score?',
     answer:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+      'On a regular weekend, you can score five points (Pole, P1, P10, Last and constructor with most points). On sprint weekends, there is an extra point up for grabs. Correctly predicting the constrcutors’s gives you 10 points, and they driver’s 15 points.',
   },
   {
-    question: 'Excepteur sint occaecat cupidatat?',
+    question:
+      'How can I earn extra bragging rights by proving my F1 tipping skills?',
     answer:
-      'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      'You can sign up to GridTip’s global group where you compete across groups. Claiming the crown will immortalise you in the GridTip hall of fame.',
   },
   {
-    question: 'Sed ut perspiciatis unde omnis?',
+    question: 'Are there prizes?',
     answer:
-      'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.',
+      'There are no predefined prizes. You can decide on them in your group. Some ideas: A chamapgne shower, shouting a dinner or taking the winner to a cart track!',
+  },
+  {
+    question: 'Is there an app?',
+    answer:
+      'You can add the GridTip website to your homescreen, iPhone: https://support.apple.com/en-au/guide/iphone/iphea86e5236/ios, Android: https://support.google.com/chrome/answer/15085120?hl=en&co=GENIE.Platform%3DAndroid',
+  },
+  {
+    question: 'Who built this?',
+    answer:
+      'Hi! 🙋‍♂️ I’m Joschua. I started GridTip as a friendly competition among my friends, and I’m hoping it can infuse your friend group with the same lively discussions at it did mine.',
   },
 ]
+
+function Hero() {
+  return (
+    <section className='is-container'>
+      <div className='grid gap-12 lg:grid-cols-2 lg:gap-16 items-center'>
+        <div className='space-y-6'>
+          <h1 className='text-4xl font-bold tracking-tight lg:text-5xl xl:text-6xl text-pretty'>
+            The F1 season is better with your friends
+          </h1>
+          <div className='text-lg text-muted-foreground space-y-2'>
+            <p>What makes the sport you love even better? Your friends!</p>
+            <p>
+              GridTip is a social tipping competition which infuses the season
+              with fun and rivalries. So start a group, make your predictions
+              and see how you compare!
+            </p>
+          </div>
+          <div className='flex gap-4'>
+            <Button size='lg' asChild>
+              <Link href='/auth'>Get Started</Link>
+            </Button>
+            <Button size='lg' variant='outline' asChild>
+              <Link href='#'>Learn More</Link>
+            </Button>
+          </div>
+        </div>
+        <HeroImage />
+      </div>
+    </section>
+  )
+}
+
+const showcaseSchema = z.object({
+  constructorWithMostPoints: z
+    .object({
+      id: z.string(),
+    })
+    .optional(),
+})
+
+type ShowcaseSchema = z.infer<typeof showcaseSchema>
+
+function HeroImage() {
+  const elevation = {
+    one: 'z-[10] shadow opacity-90',
+    two: 'z-[20] shadow-md opacity-95',
+    three: 'z-[30] shadow-lg',
+  }
+
+  const imageClasses = cn(
+    'absolute rounded overflow-hidden aspect-[2/3] object-cover h-[20rem] w-auto brightness-90 dark:brightness-50',
+    elevation.one,
+  )
+  return (
+    <div className='isolate w-full h-full aspect-square relative'>
+      <div className='absolute inset-0 bg-muted'></div>
+      <Image
+        src={HeroOne}
+        sizes='100vw, (max-width: 640px) 50vw, (max-width: 768px) 400px, (max-width: 1024px) 920px'
+        quality={80}
+        priority={true}
+        placeholder='blur'
+        loading='eager'
+        alt='todo'
+        className={cn(imageClasses, 'top-0 left-0 rotate-3 origin-left')}
+      />
+      <div
+        className={cn(
+          'absolute left-[70%] top-[10%] backdrop-blur bg-background/80 p-4 border rounded rotate-2 w-48',
+          elevation.two,
+        )}
+      >
+        <DummyConstructorForm />
+      </div>
+      <div
+        className={cn(
+          'absolute left-[10%] top-[80%] bg-background/80 p-4 border rounded -rotate-6 w-90 backdrop-blur',
+          elevation.two,
+        )}
+      >
+        <LeaderBoard
+          leaderboard={[
+            {
+              place: 1,
+              delta: 3,
+              points: 10,
+              pointsDelta: 4,
+              member: {
+                id: '1',
+                userName: 'Franz',
+                profileImage: null,
+              },
+            },
+          ]}
+        />
+      </div>
+      <ChatAvatar
+        offset={65}
+        src={Sarah}
+        alt='Asian-Australian woman with shoulder-length black hair, wearing stylish glasses, with a professional but casual style'
+        className={{
+          root: cn(
+            elevation.three,
+            'shadow-none absolute -right-[5%] top-[30%]',
+          ),
+          image: elevation.three,
+          bubble: '-rotate-2 mr-4',
+        }}
+        text='manifesting an Oscar win'
+      />
+      <ChatAvatar
+        className={{
+          root: cn(elevation.three, 'shadow-none absolute left-[5%] top-[45%]'),
+          image: cn(elevation.three, '-rotate-4'),
+          bubble: '-rotate-2 -mb-4 -mr-8',
+        }}
+        offset={15}
+        src={Marcus}
+        alt='Man with beard wearing a Red Bull Racing cap with hearts floating before him'
+        text={'max’s qualy…\n simply lovely!'}
+      />
+      <Image
+        src={HeroTwo}
+        sizes='100vw, (max-width: 640px) 50vw, (max-width: 768px) 400px, (max-width: 1024px) 920px'
+        quality={80}
+        priority={true}
+        placeholder='blur'
+        loading='eager'
+        alt='todo'
+        className={cn(imageClasses, 'bottom-0 right-0 -rotate-3')}
+      />
+    </div>
+  )
+}
+
+function DummyConstructorForm() {
+  const form = useForm<ShowcaseSchema>({
+    resolver: zodResolver(showcaseSchema),
+    defaultValues: {
+      constructorWithMostPoints: {
+        id: 'ferrari',
+      },
+    },
+  })
+
+  return (
+    <Form {...form}>
+      <form onSubmit={(e) => e.preventDefault()}>
+        <FormField
+          control={form.control}
+          name='constructorWithMostPoints'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Most constructor points</FormLabel>
+              <SelectConstructor
+                value={field.value}
+                onSelect={(constructor) =>
+                  form.setValue('constructorWithMostPoints', constructor, {
+                    shouldDirty: true,
+                  })
+                }
+                constructors={getHardcodedConstructors()}
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </form>
+    </Form>
+  )
+}
+
+function getHardcodedConstructors() {
+  return [
+    {
+      id: 'alpine',
+      name: 'Alpine F1 Team',
+    },
+    {
+      id: 'aston_martin',
+      name: 'Aston Martin',
+    },
+    {
+      id: 'audi',
+      name: 'Audi',
+    },
+    {
+      id: 'cadillac',
+      name: 'Cadillac F1 Team',
+    },
+    {
+      id: 'ferrari',
+      name: 'Ferrari',
+    },
+    {
+      id: 'haas',
+      name: 'Haas F1 Team',
+    },
+    {
+      id: 'mclaren',
+      name: 'McLaren',
+    },
+    {
+      id: 'mercedes',
+      name: 'Mercedes',
+    },
+    {
+      id: 'rb',
+      name: 'RB F1 Team',
+    },
+    {
+      id: 'red_bull',
+      name: 'Red Bull',
+    },
+    {
+      id: 'williams',
+      name: 'Williams',
+    },
+  ]
+}
+
+function SpeechBubble({
+  text,
+  offset,
+  className,
+}: {
+  text: string
+  offset: number
+  className?: string
+}) {
+  return (
+    <div
+      style={{ '--offset': `${offset}%` }}
+      className={cn(
+        'top-0 rounded-md px-3 py-2 bg-gradient-to-b from-background/80 to-blue-50/80 backdrop-blur-md border-blue-50/80 drop-shadow-xl z-[40] font-medium text-foreground/90',
+        'speech-bubble',
+        className,
+      )}
+    >
+      <div className='space-y-1'>
+        {text.split('\n').map((line) => (
+          <p key={line}>{line}</p>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ChatAvatar({
+  className,
+  text,
+  src,
+  offset,
+}: {
+  className?: {
+    root?: string
+    image?: string
+    bubble?: string
+  }
+  src: StaticImageData
+  alt: string
+  text: string
+  offset: number
+}) {
+  return (
+    <div className={cn(className?.root)}>
+      <div className='relative isolate flex flex-col items-center'>
+        <SpeechBubble
+          className={cn('-mb-4', className?.bubble)}
+          offset={offset}
+          text={text}
+        />
+        <div
+          className={cn(
+            'rounded-full overflow-hidden aspect-square size-[8rem] relative',
+            className?.image,
+          )}
+        >
+          <Image
+            height={150}
+            width={150}
+            src={src}
+            className='scale-[101%] w-full h-full'
+            sizes='100vw, (max-width: 640px) 50vw, (max-width: 768px) 400px, (max-width: 1024px) 920px'
+            quality={80}
+            priority={true}
+            placeholder='blur'
+            loading='eager'
+            alt='todo'
+          />
+        </div>
+      </div>
+    </div>
+  )
+}

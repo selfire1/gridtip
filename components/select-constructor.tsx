@@ -121,12 +121,14 @@ function TriggerButton({
           className='justify-between'
           disabled={disabled}
         >
-          {selected ? (
-            <ConstructorOption constructor={selected} isSelected={false} />
-          ) : (
-            <EmptyState />
-          )}
-          <ChevronsUpDown className='opacity-50' />
+          <div className='flex-1'>
+            {selected ? (
+              <ConstructorOption constructor={selected} isSelected={false} />
+            ) : (
+              <EmptyState />
+            )}
+          </div>
+          <ChevronsUpDown className='opacity-50 shrink-0' />
         </Button>
       </FormControl>
     </Trigger>

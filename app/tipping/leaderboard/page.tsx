@@ -1,7 +1,7 @@
 import { verifySession } from '@/lib/dal'
 import { getCurrentGroupId } from '@/lib/utils/groups'
 import { Metadata } from 'next'
-import { ResultsTable } from './_components/ResultsTable'
+import { LeaderboardWrapper } from './_components/leaderboard-wrapper'
 import PastRacesServer from './_components/PastRacesServer'
 import { Separator } from '@/components/ui/separator'
 import EmptyGroup from '@/components/empty-group'
@@ -22,7 +22,7 @@ export default async function LeaderboardPage() {
     <>
       <section>
         <h1 className='sr-only'>Leaderboard</h1>
-        <ResultsTable groupId={groupId} />
+        <LeaderboardWrapper groupId={groupId} />
       </section>
       <div className='-mx-4'>
         <Separator className='my-12' />

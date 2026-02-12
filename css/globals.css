@@ -427,3 +427,22 @@ main[data-slot='sidebar-inset']:has(.is-bg-muted) {
     @apply text-green-600 dark:text-green-200;
   }
 }
+
+@layer components {
+  .speech-bubble {
+    --bubble-offset: var(--offset, 25%);
+    background-color: inherit;
+    border-color: inherit;
+    @apply relative rounded-md px-3 py-2;
+  }
+  .speech-bubble::before {
+    @apply backdrop-blur-md;
+    content: '';
+    position: absolute;
+    left: var(--bubble-offset);
+    top: 100%;
+    border: 10px solid transparent;
+    border-top-color: inherit;
+    z-index: 10;
+  }
+}

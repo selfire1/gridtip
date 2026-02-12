@@ -13,8 +13,10 @@ export default async function DefaultLayout({
 
   return (
     <div>
-      <header className='sticky top-0 z-50 bg-gradient-to-b from-background to-transparent'>
-        <AppHeader renderRight={!session?.user && <AuthButtons />} />
+      <header className='sticky top-0 z-50'>
+        <div className='bg-gradient-to-b from-background from-40% to-transparent '>
+          <AppHeader renderRight={!session?.user && <AuthButtons />} />
+        </div>
       </header>
       <main className='min-h-screen'>{children}</main>
       <footer>

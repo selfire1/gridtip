@@ -31,7 +31,7 @@ export default function Constructor({
         className={classNameImg}
         src={`/img/constructors/${constructor.id}.webp`}
       />
-      <span>{constructor.name}</span>
+      <span className='truncate'>{constructor.name}</span>
       {isSelected && <LucideCheck className='ml-auto' />}
     </div>
   )
