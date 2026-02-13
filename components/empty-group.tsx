@@ -1,4 +1,3 @@
-import Alert from '@/components/alert'
 import {
   Empty,
   EmptyContent,

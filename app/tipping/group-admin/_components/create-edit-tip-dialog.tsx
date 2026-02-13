@@ -37,13 +37,7 @@ import {
 } from '@/lib/utils/prediction-fields'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { isFuture } from 'date-fns'
-import {
-  LucideCheckCircle,
-  LucideInfo,
-  LucidePlus,
-  LucideTriangleAlert,
-  LucideXCircle,
-} from 'lucide-react'
+import { LucideInfo, LucidePlus, LucideTriangleAlert } from 'lucide-react'
 import React from 'react'
 import {
   Controller,
@@ -244,7 +238,7 @@ export default function CreateOrEditTipDialog({
     ] satisfies ({
       value: (typeof TIP_OVERWRITE_OPTIONS)[number] | 'normal'
       label: string
-    } & Record<string, any>)[]
+    } & Record<string, unknown>)[]
 
     return options
   }

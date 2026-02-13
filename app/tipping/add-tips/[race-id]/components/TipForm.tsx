@@ -22,7 +22,6 @@ import { submitTipSchema } from '../actions/schema'
 import { ConstructorProps } from '@/components/constructor'
 import { DriverOptionProps as DriverOption } from '@/components/driver-option'
 import { SelectConstructor } from '@/components/select-constructor'
-import { RacePredictionField } from '@/constants'
 import { getFormFields } from '@/lib/utils/tip-fields'
 
 const formSchema = submitTipSchema.partial()

@@ -79,6 +79,7 @@ function getResultsMaps(
     sprint: createMap(getSprintResults),
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function createMap<TFunction extends (info: GetTipsInfo) => any>(
     mapFunction: TFunction,
   ) {

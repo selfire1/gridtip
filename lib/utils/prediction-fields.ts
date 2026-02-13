@@ -1,6 +1,5 @@
 import {
   CUTOFF_REFERENCE_KEY,
-  PredictionField,
   RACE_PREDICTION_FIELDS,
   RacePredictionField,
 } from '@/constants'

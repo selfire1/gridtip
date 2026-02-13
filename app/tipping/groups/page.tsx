@@ -1,10 +1,8 @@
 import { IconFromName } from '@/components/icon-from-name'
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'

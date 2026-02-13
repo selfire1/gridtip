@@ -642,39 +642,6 @@ export default async function DashboardPage() {
       )
     }
 
-    function TipsAccordionOther() {
-      return (
-        <CardContent>
-          <Accordion
-            type='single'
-            collapsible={true}
-            defaultValue={positionTips[0].position}
-          >
-            {positionTips.map(({ position, tips }) => {
-              return (
-                <React.Fragment key={position}>
-                  <AccordionItem value={position}>
-                    <AccordionTrigger>{getLabel(position)}</AccordionTrigger>
-                    <AccordionContent className='space-y-2'>
-                      {tips.map((tip) => {
-                        return (
-                          <TipRow
-                            key={tip.id}
-                            user={tip.user}
-                            tip={tip.value}
-                          />
-                        )
-                      })}
-                    </AccordionContent>
-                  </AccordionItem>
-                </React.Fragment>
-              )
-            })}
-          </Accordion>
-        </CardContent>
-      )
-    }
-
     function getTipsOnPosition() {
       return RACE_PREDICTION_FIELDS.reduce(
         (acc, position) => {
@@ -764,61 +731,6 @@ export default async function DashboardPage() {
                 <p>{user.name}</p>
               </div>
             ))}
-          </div>
-        </div>
-      )
-    }
-
-    function TipRow({
-      tip,
-      user,
-    }: {
-      user: (typeof predictionEntries)[number]['prediction']['user']
-      tip:
-        | (typeof predictionEntries)[number]['constructor']
-        | (typeof predictionEntries)[number]['driver']
-    }) {
-      if (!tip) {
-        return
-      }
-      const isDriver = 'constructorId' in tip
-      const isCurrentUser = user.id === userId
-      const cssVariable = {
-        ['--team-colour' as string]: getConstructorCssVariable(
-          isDriver ? tip.constructorId : tip.id,
-        ),
-      }
-      const style = isDriver
-        ? {
-            ...getStyleForDriver(tip.id, tip.constructorId, false),
-            ...cssVariable,
-          }
-        : cssVariable
-
-      return (
-        <div
-          className={clsx(
-            'flex items-center justify-between p-2 rounded-lg border relative isolate overflow-hidden',
-            isCurrentUser && 'border-foreground/25',
-            !isDriver && `bg-(--team-colour)/5`,
-          )}
-          style={style}
-        >
-          <div className='flex items-center gap-2'>
-            <UserAvatar {...user} className='size-6 rounded-lg' />
-            <p>{user.name}</p>
-          </div>
-          <div>
-            {isDriver ? (
-              <div>
-                <p className='relative z-10 pr-2'>{tip.familyName}</p>
-                <p className='text-3xl font-bold font-mono absolute right-1 inset-y-0 flex items-center justify-center bg-gradient-to-b from-(--team-colour)/20 to-(--team-colour)/10 text-transparent bg-clip-text'>
-                  {tip.permanentNumber ?? ''}
-                </p>
-              </div>
-            ) : (
-              <Constructor constructor={tip} />
-            )}
           </div>
         </div>
       )

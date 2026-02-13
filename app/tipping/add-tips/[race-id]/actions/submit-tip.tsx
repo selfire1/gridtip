@@ -19,7 +19,7 @@ import { serverSubmitTipSchema as schema } from './schema'
 import { revalidateTag } from 'next/cache'
 import { CacheTag } from '@/constants/cache'
 
-export async function submitChanges(input: Record<string, any>) {
+export async function submitChanges(input: Record<string, unknown>) {
   type Schema = z.infer<typeof schema>
 
   const { userId } = await verifySession()

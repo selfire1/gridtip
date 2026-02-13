@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckSquare, LucideList, Settings2 } from 'lucide-react'
+import { LucideList, Settings2 } from 'lucide-react'
 
 import { ChevronRight } from 'lucide-react'
 
@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/collapsible'
 import {
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,

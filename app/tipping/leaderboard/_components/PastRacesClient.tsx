@@ -33,7 +33,6 @@ import {
 } from '@/components/ui/collapsible'
 import { Separator } from '@/components/ui/separator'
 import { useIsMobile } from '@/hooks/use-mobile'
-import { Database } from '@/db/types'
 import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
 import Constructor from '@/components/constructor'

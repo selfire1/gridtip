@@ -2,12 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { Database } from '@/db/types'
-import {
-  LucideCheck,
-  LucideClipboard,
-  LucideClipboardCheck,
-  LucideLink,
-} from 'lucide-react'
+import { LucideCheck, LucideClipboardCheck, LucideLink } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 

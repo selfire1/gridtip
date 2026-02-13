@@ -56,7 +56,7 @@ export default function ChampionshipForm({
     },
   ] as const
 
-  const [isPending, startTransition] = useTransition()
+  const [isPending] = useTransition()
 
   return (
     <Form {...form}>

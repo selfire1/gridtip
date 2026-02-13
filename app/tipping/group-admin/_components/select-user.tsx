@@ -1,5 +1,4 @@
 import { Combobox } from '@/components/combobox'
-import { FormField } from '@/components/ui/form'
 import UserAvatar from '@/components/user-avatar'
 import { Database } from '@/db/types'
 

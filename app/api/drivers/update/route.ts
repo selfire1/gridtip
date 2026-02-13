@@ -44,6 +44,7 @@ export const GET = async (_request: NextRequest) => {
     received: jolpicaDrivers.length,
   })
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function getIsThereDifferenceInDrivers(
     newItems: Awaited<ReturnType<typeof getJolpicaDrivers>>,
   ) {

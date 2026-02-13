@@ -5,8 +5,6 @@ import { getAnimation } from '../onboarding-client'
 import ScreenLayout from '../screen-layout'
 import { motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
-import { joinGlobalGroup } from '@/actions/join-group'
-import { toast } from 'sonner'
 import { useOnboarding } from '../../_lib/onboarding-context'
 
 export default function GlobalGroupScreen() {

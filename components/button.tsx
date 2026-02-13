@@ -8,7 +8,7 @@ type MyButtonProps = {
   icon?: LucideIcon
 }
 export default function AppButton(props: ShadButtonProps & MyButtonProps) {
-  const { isPending, label, children, icon: Icon, ...shadProps } = props
+  const { isPending, label, icon: Icon, ...shadProps } = props
   return (
     <ShadButton {...shadProps} disabled={isPending}>
       {isPending && <Spinner />}

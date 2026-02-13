@@ -2,10 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import { IconFromName } from './icon-from-name'
-import type {
-  CreateGroupData,
-  CreateGroupDetailsOnlyData,
-} from '@/lib/schemas/create-group'
+import type { CreateGroupDetailsOnlyData } from '@/lib/schemas/create-group'
 import {
   Field,
   FieldDescription,

@@ -54,7 +54,7 @@ export async function createTip(data: Schema): Promise<ServerResponse> {
     data: Schema,
     groupId: Database.GroupId,
   ) {
-    const { userId, raceId, position, valueId } = data
+    const { userId, raceId, position } = data
 
     const predictionId = predictionIdInput ?? (await createPrediction()).id
     await createPredictionEntry(predictionId)

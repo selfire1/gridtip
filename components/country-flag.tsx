@@ -1,6 +1,5 @@
 import { cn } from '@/lib/utils'
 import { getCountryFlag } from '@/lib/utils/country-flag'
-import clsx from 'clsx'
 import Image from 'next/image'
 
 export default function CountryFlag({

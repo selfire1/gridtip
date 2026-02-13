@@ -15,7 +15,6 @@ import { updateChampionshipRevealDate } from '@/actions/update-championship-reve
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { Spinner } from '@/components/ui/spinner'
-import { Database } from '@/db/types'
 
 interface ChampionshipRevealDateProps {
   groupId: string
