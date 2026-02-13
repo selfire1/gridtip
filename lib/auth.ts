@@ -55,6 +55,7 @@ Click this link below to verify your email: <a href="${url}">${url}</a>`.trim(),
       },
       profileImageUrl: {
         type: 'string',
+        required: false,
       },
     },
   },

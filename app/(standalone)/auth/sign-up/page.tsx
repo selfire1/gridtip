@@ -5,6 +5,8 @@ import { getPlaceholder } from '../_lib/placeholder'
 import { SignupForm } from '../_components/signup-form'
 import AuthLayout from '../_components/auth-layout'
 import { Metadata } from 'next'
+import { Suspense } from 'react'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export const metadata: Metadata = {
   title: 'Sign up',
@@ -13,7 +15,11 @@ export const metadata: Metadata = {
 export default function SignUpPage() {
   return (
     <AuthLayout
-      slotPrimary={<SignupForm placeholder={getPlaceholder()} />}
+      slotPrimary={
+        <Suspense fallback={<Skeleton className='h-full w-full' />}>
+          <SignupForm placeholder={getPlaceholder()} />
+        </Suspense>
+      }
       slotSecondary={
         <Image
           src={HeroImage}

@@ -53,6 +53,7 @@ import { useRouter } from 'next/navigation'
 import { SelectUser } from './select-user'
 import { TIP_OVERWRITE_OPTIONS } from '@/db/schema/schema'
 import { Icon } from '@/components/icon'
+import { PredictionMember } from '../types/prediction-member'
 
 type RaceOption = Pick<
   Database.Race,
@@ -60,7 +61,7 @@ type RaceOption = Pick<
 >
 
 export type TipFormData = {
-  users: Pick<Database.User, 'id' | 'name'>[]
+  users: PredictionMember[]
   drivers: DriverOptionProps[]
   constructors: ConstructorProps[]
   races: RaceOption[]
@@ -108,6 +109,7 @@ export default function CreateOrEditTipDialog({
       form.reset()
       setMessage(undefined)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
   const [availablePositions, setAvailablePositions] = React.useState<

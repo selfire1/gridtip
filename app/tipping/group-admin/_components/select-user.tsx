@@ -1,6 +1,7 @@
 import { Combobox } from '@/components/combobox'
 import UserAvatar from '@/components/user-avatar'
 import { Database } from '@/db/types'
+import { PredictionMember } from '../types/prediction-member'
 
 export function SelectUser({
   users,
@@ -8,7 +9,7 @@ export function SelectUser({
   onSelect,
   disabled = false,
 }: {
-  users: Pick<Database.User, 'id' | 'name'>[]
+  users: PredictionMember[]
   value: Database.UserId
   onSelect: (value: Database.UserId | undefined) => void
   disabled?: boolean
@@ -24,7 +25,11 @@ export function SelectUser({
       disabled={disabled}
       renderItem={(user) => (
         <div className='flex items-center gap-2'>
-          <UserAvatar name={user.name} id={user.id} className='size-6' />
+          <UserAvatar
+            name={user.name}
+            profileImageUrl={user.imageSrc}
+            className='size-6'
+          />
           <p>{user.name}</p>
         </div>
       )}

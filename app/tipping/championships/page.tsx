@@ -3,6 +3,7 @@ import {
   getCurrentGroup,
   getCurrentGroupId,
   getDriverOptions,
+  getGroupMembership,
 } from '@/lib/utils/groups'
 import ChampionshipForm, { Schema } from './components/championship-form'
 import { verifySession } from '@/lib/dal'
@@ -23,21 +24,50 @@ import { cn } from '@/lib/utils'
 import React from 'react'
 import { getConstructorCssVariable } from '@/lib/utils/constructor-css'
 import { Database } from '@/db/types'
+import EmptyGroup from '@/components/empty-group'
 
 export default async function ChampionshipPage() {
   const { userId } = await verifySession()
-  const groupId = await getCurrentGroupId()
 
-  const drivers = await getDriverOptions()
-  const constructors = await getConstructorOptions()
+  const [firstRace, groupId, drivers, constructors] = await Promise.all([
+    db.query.racesTable.findFirst({
+      orderBy: (race, { desc }) => desc(race.qualifyingDate),
+      columns: {
+        qualifyingDate: true,
+      },
+    }),
 
-  const defaults = await getDefaultValues()
+    getCurrentGroupId(),
+    getDriverOptions(),
+    getConstructorOptions(),
+  ])
 
-  const isAfterDeadline = true
+  if (!groupId) {
+    return <EmptyGroup />
+  }
 
-  const group = groupId ? await getCurrentGroup(userId) : null
+  const membership = await getGroupMembership({
+    userId,
+    groupId,
+  })
+
+  if (!membership) {
+    return <EmptyGroup />
+  }
+
+  const defaults = await getDefaultValues(membership.id)
+
+  const group = await getCurrentGroup(userId)
+  if (!group) {
+    return <EmptyGroup />
+  }
+
+  const isAfterDeadline = !firstRace?.qualifyingDate
+    ? false
+    : isPast(firstRace.qualifyingDate)
+
   const showEveryonesTips =
-    group?.championshipTipsRevalDate && isPast(group.championshipTipsRevalDate)
+    group.championshipTipsRevalDate && isPast(group.championshipTipsRevalDate)
 
   const everyonesTips = showEveryonesTips
     ? await getEveryonesTips(groupId!)
@@ -72,8 +102,10 @@ export default async function ChampionshipPage() {
     </div>
   )
 
-  async function getDefaultValues(): Promise<DeepPartial<Schema>> {
-    const tips = await getDefaultValuesArray()
+  async function getDefaultValues(
+    memberId: string,
+  ): Promise<DeepPartial<Schema>> {
+    const tips = await getDefaultValuesArray({ memberId })
     const driverTip = tips.find((tip) => tip.position === 'championshipDriver')
     const constructorTip = tips.find(
       (tip) => tip.position === 'championshipConstructor',
@@ -88,7 +120,7 @@ export default async function ChampionshipPage() {
     }
   }
 
-  async function getDefaultValuesArray() {
+  async function getDefaultValuesArray({ memberId }: { memberId: string }) {
     if (!groupId) {
       return []
     }
@@ -96,7 +128,7 @@ export default async function ChampionshipPage() {
       where: (prediction, { eq, and }) =>
         and(
           eq(prediction.groupId, groupId),
-          eq(prediction.userId, userId),
+          eq(prediction.memberId, memberId),
           eq(prediction.isForChampionship, true),
         ),
     })
@@ -132,9 +164,11 @@ export default async function ChampionshipPage() {
           eq(prediction.isForChampionship, true),
         ),
       with: {
-        user: {
+        member: {
           columns: {
             id: true,
+            userName: true,
+            profileImage: true,
           },
         },
       },
@@ -148,6 +182,7 @@ export default async function ChampionshipPage() {
         userId: true,
         profileImage: true,
         userName: true,
+        id: true,
       },
     })
 
@@ -182,7 +217,7 @@ export default async function ChampionshipPage() {
 
     return predictions.map((prediction) => {
       const userEntries = entries.filter(
-        (e) => e.predictionId === prediction.id,
+        (entry) => entry.predictionId === prediction.id,
       )
       const driverEntry = userEntries.find(
         (e) => e.position === 'championshipDriver',
@@ -192,10 +227,10 @@ export default async function ChampionshipPage() {
       )
 
       const member = members.find(
-        (member) => member.userId === prediction.user.id,
+        (member) => member.id === prediction.member.id,
       )
       if (!member) {
-        console.error('Could not find member', prediction.user.id)
+        console.error('Could not find member', prediction.member.id)
       }
       return {
         member,

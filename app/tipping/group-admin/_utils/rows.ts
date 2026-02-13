@@ -4,14 +4,12 @@ import { RacePredictionField } from '@/constants'
 import { Database } from '@/db/types'
 import { isPredictionForRace } from '@/lib/utils/prediction-fields'
 import { AllPredictions } from '@/lib/utils/race-results'
+import { PredictionMember } from '../types/prediction-member'
 
 export type PredictionRow = {
   id: string
-  userName: string
-  user: {
-    id: string
-    name: string
-  }
+  memberName: string
+  member: PredictionMember
   value: DriverOptionProps | ConstructorProps
   raceDate: string
   race: {
@@ -41,7 +39,7 @@ export function formatPredictionsToRows(
     .filter((entry) => isPredictionForRace(entry.position))
     .map((entry) => {
       const {
-        prediction: { user },
+        prediction: { member },
       } = entry
 
       const race = maps.race.get(entry.prediction.raceId!)!
@@ -55,10 +53,11 @@ export function formatPredictionsToRows(
           label: race.locality,
           country: race.country,
         },
-        userName: user.name,
-        user: {
-          id: user.id,
-          name: user.name,
+        memberName: member.userName,
+        member: {
+          id: member.id,
+          name: member.userName,
+          imageSrc: member.profileImage,
         },
         value: getValue()!,
         position: entry.position as RacePredictionField,

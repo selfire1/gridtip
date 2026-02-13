@@ -25,13 +25,17 @@ export const columns: ColumnDef<PredictionRow>[] = [
     cell({
       row: {
         original: {
-          user: { name, id },
+          member: { name, imageSrc },
         },
       },
     }) {
       return (
         <div className='flex items-center gap-1'>
-          <UserAvatar name={name} id={id} className='size-4' />
+          <UserAvatar
+            name={name}
+            profileImageUrl={imageSrc}
+            className='size-4'
+          />
           <p>{name}</p>
         </div>
       )

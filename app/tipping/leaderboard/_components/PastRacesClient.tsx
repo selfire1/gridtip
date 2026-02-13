@@ -5,7 +5,7 @@ import {
   Constructors,
   RacePredictionMaps,
   RacesWithResults,
-  UserMapEntry,
+  MemberMapEntry,
 } from './PastRacesServer'
 import { Button } from '@/components/ui/button'
 import {
@@ -144,23 +144,23 @@ export default function PastRacesClient({
                 {/* Results */}
                 <TableCell className='grid grid-cols-3'>
                   <div>
-                    <UserResults
+                    <MemberResults
                       positionText='P1'
-                      userInfo={row.predictedP1By}
+                      memberInfo={row.predictedP1By}
                       isCorrect={row.isP1Correct}
                     />
                   </div>
                   <div>
-                    <UserResults
+                    <MemberResults
                       positionText='P10'
-                      userInfo={row.predictedP10By}
+                      memberInfo={row.predictedP10By}
                       isCorrect={row.isP10Correct}
                     />
                   </div>
                   <div>
-                    <UserResults
+                    <MemberResults
                       positionText='Last'
-                      userInfo={row.predictedLast}
+                      memberInfo={row.predictedLast}
                       isCorrect={row.isLastCorrect}
                     />
                   </div>
@@ -186,9 +186,9 @@ export default function PastRacesClient({
                 {/* Results */}
                 <TableCell>
                   <div>
-                    <UserResults
+                    <MemberResults
                       positionText='Pole'
-                      userInfo={row.predictedBy}
+                      memberInfo={row.predictedBy}
                       isCorrect={row.isCorrect}
                       maxUsersOverwrite={6}
                     />
@@ -222,8 +222,8 @@ export default function PastRacesClient({
                 {/* Results */}
                 <TableCell>
                   <div>
-                    <UserResults
-                      userInfo={row.users}
+                    <MemberResults
+                      memberInfo={row.users}
                       isCorrect={row.isCorrect}
                       maxUsersOverwrite={8}
                     />
@@ -249,9 +249,9 @@ export default function PastRacesClient({
 
                 <TableCell>
                   <div>
-                    <UserResults
+                    <MemberResults
                       positionText='P1'
-                      userInfo={row.predictedP1By}
+                      memberInfo={row.predictedP1By}
                       isCorrect={row.isP1Correct}
                     />
                   </div>
@@ -305,33 +305,33 @@ export default function PastRacesClient({
     )
   }
 
-  function UserResults({
-    userInfo: userInfo,
+  function MemberResults({
+    memberInfo,
     positionText,
     isCorrect,
     maxUsersOverwrite,
   }: {
-    userInfo?: UserMapEntry[]
+    memberInfo?: MemberMapEntry[]
     positionText?: string
     isCorrect: boolean
     maxUsersOverwrite?: number
   }) {
-    if (!userInfo?.length) {
+    if (!memberInfo?.length) {
       return
     }
     const localMaxUsers = maxUsersOverwrite ?? maxUsers
     return (
       <Collapsible>
         <CollapsibleTrigger className='flex items-center'>
-          <TriggerRow users={userInfo} />
+          <TriggerRow users={memberInfo} />
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <Content users={userInfo} />
+          <Content users={memberInfo} />
         </CollapsibleContent>
       </Collapsible>
     )
 
-    function Content(props: { users: NonNullable<typeof userInfo> }) {
+    function Content(props: { users: NonNullable<typeof memberInfo> }) {
       return (
         <>
           <Separator className='my-3' />
@@ -344,15 +344,16 @@ export default function PastRacesClient({
                 return (
                   <li
                     className='py-2 first:pt-0 last:pb-0 border-b last:border-b-0 flex items-center gap-1'
-                    key={userInfo.user.id}
+                    key={userInfo.member.id}
                   >
                     <UserAvatar
-                      key={userInfo.user.id}
-                      {...userInfo.user}
+                      key={userInfo.member.id}
+                      profileImageUrl={userInfo.member.profileImage}
+                      name={userInfo.member.userName}
                       className='hidden sm:block size-6 lg:size-8 rounded-lg'
                     />
                     <span className='text-xs lg:text-sm text-muted-foreground'>
-                      {userInfo.user.name}
+                      {userInfo.member.userName}
                     </span>
                   </li>
                 )
@@ -363,7 +364,7 @@ export default function PastRacesClient({
       )
     }
 
-    function TriggerRow(props: { users: NonNullable<typeof userInfo> }) {
+    function TriggerRow(props: { users: NonNullable<typeof memberInfo> }) {
       return (
         <span className='flex items-center gap-1'>
           {positionText && (
@@ -383,11 +384,12 @@ export default function PastRacesClient({
               '*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2',
             )}
           >
-            {userInfo?.slice(0, localMaxUsers).map((userInfo) => {
+            {memberInfo?.slice(0, localMaxUsers).map((userInfo) => {
               return (
                 <UserAvatar
-                  key={userInfo.user.id}
-                  {...userInfo.user}
+                  key={userInfo.member.id}
+                  profileImageUrl={userInfo.member.profileImage}
+                  name={userInfo.member.userName}
                   className={cn(
                     'size-6 lg:size-8 rounded-full ',
                     getIsGrayscale() && 'data-[slot=avatar]:grayscale',

@@ -151,6 +151,7 @@ export function SignupForm({
           email: value.email,
           password: value.password,
           callbackURL: Path.Onboarding,
+          profileImageUrl: undefined,
         })
         if (signupContext.error) {
           throw new Error(signupContext.error.message)

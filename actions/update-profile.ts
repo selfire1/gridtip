@@ -10,7 +10,7 @@ import { eq } from 'drizzle-orm'
 
 export async function updateProfile(
   group: Pick<Database.Group, 'name' | 'id'>,
-  profile: { name?: string; file?: File | Blob; useDefaultImage: boolean },
+  profile: { name?: string; file?: File; useDefaultImage: boolean },
 ) {
   const { userId, user } = await verifySession()
   console.log({ profile })

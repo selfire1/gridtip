@@ -4,7 +4,8 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 export default function UserAvatar(
   props: {
     className?: string
-  } & Pick<User, 'name' | 'profileImageUrl'>,
+    profileImageUrl: string | undefined | null
+  } & Pick<User, 'name'>,
 ) {
   const fallbackString = props.name
     ?.split(' ')

@@ -152,7 +152,7 @@ async function getPredictionsOfRaces(groupId: string, ids: string[]) {
   const predictionEntries = await db
     .select({
       id: predictionEntriesTable.id,
-      userId: predictionsTable.userId,
+      memberId: predictionsTable.memberId,
       raceId: predictionsTable.raceId,
       position: predictionEntriesTable.position,
       driverId: predictionEntriesTable.driverId,
@@ -236,11 +236,11 @@ async function uncachedGetAllPredictions(groupId: Database.Group['id']) {
           createdAt: true,
         },
         with: {
-          user: {
+          member: {
             columns: {
               id: true,
-              name: true,
-              image: true,
+              userName: true,
+              profileImage: true,
             },
           },
         },

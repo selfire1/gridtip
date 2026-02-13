@@ -36,7 +36,7 @@ export const groupsTable = sqliteTable('groups', {
   }),
 })
 
-export const groupRelations = relations(groupsTable, ({ one }) => ({
+export const groupRelations = relations(groupsTable, ({ one, many }) => ({
   adminUser: one(user, {
     fields: [groupsTable.adminUser],
     references: [user.id],
@@ -129,10 +129,9 @@ export const predictionsTable = sqliteTable(
   'predictions',
   {
     id: text('id').primaryKey().$defaultFn(createId),
-    // TODO: memberId makes more sense
-    userId: text('user_id')
+    memberId: text()
       .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }),
+      .references(() => groupMembersTable.id, { onDelete: 'cascade' }),
     groupId: text('group_id')
       .notNull()
       .references(() => groupsTable.id, { onDelete: 'cascade' }),
@@ -145,30 +144,27 @@ export const predictionsTable = sqliteTable(
       .notNull(),
   },
   (table) => [
-    index('predictions_user_id_idx').on(table.userId),
+    index('predictions_member_id_idx').on(table.memberId),
     index('predictions_group_id_idx').on(table.groupId),
     index('predictions_is_for_championship_idx').on(table.isForChampionship),
     index('predictions_race_id_idx').on(table.raceId),
   ],
 )
 
-export const predictionRelations = relations(
-  predictionsTable,
-  ({ one }) => ({
-    user: one(user, {
-      fields: [predictionsTable.userId],
-      references: [user.id],
-    }),
-    group: one(groupsTable, {
-      fields: [predictionsTable.groupId],
-      references: [groupsTable.id],
-    }),
-    race: one(racesTable, {
-      fields: [predictionsTable.raceId],
-      references: [racesTable.id],
-    }),
+export const predictionRelations = relations(predictionsTable, ({ one }) => ({
+  member: one(groupMembersTable, {
+    fields: [predictionsTable.memberId],
+    references: [groupMembersTable.id],
   }),
-)
+  group: one(groupsTable, {
+    fields: [predictionsTable.groupId],
+    references: [groupsTable.id],
+  }),
+  race: one(racesTable, {
+    fields: [predictionsTable.raceId],
+    references: [racesTable.id],
+  }),
+}))
 
 export const predictionEntriesTable = sqliteTable(
   'prediction_entries',
@@ -276,6 +272,7 @@ export type Group = typeof groupsTable.$inferSelect
 export type GroupId = Group['id']
 
 export type GroupMember = typeof groupMembersTable.$inferSelect
+export type GroupMemberId = GroupMember['id']
 
 export type Race = typeof racesTable.$inferSelect
 export type RaceId = Race['id']

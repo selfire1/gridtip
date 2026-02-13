@@ -6,13 +6,14 @@ import { columns } from './columns'
 import { Filters } from './filters'
 import { PredictionRow } from '../_utils/rows'
 import { Database } from '@/db/types'
+import { PredictionMember } from '../types/prediction-member'
 
 interface PredictionsTableWrapperProps {
   rows: PredictionRow[]
   races: Array<
     Pick<Database.Race, 'id' | 'locality' | 'country' | 'grandPrixDate'>
   >
-  users: Array<{ id: string; name: string }>
+  users: PredictionMember[]
 }
 
 export function PredictionsTableWrapper({
@@ -26,7 +27,9 @@ export function PredictionsTableWrapper({
   const filteredRows = useMemo(() => {
     return rows.filter((row) => {
       const matchesRace = selectedRaceId ? row.race.id === selectedRaceId : true
-      const matchesUser = selectedUserId ? row.user.id === selectedUserId : true
+      const matchesUser = selectedUserId
+        ? row.member.id === selectedUserId
+        : true
       return matchesRace && matchesUser
     })
   }, [rows, selectedRaceId, selectedUserId])

@@ -19,6 +19,7 @@ import CreateOrEditTipDialog, {
 import TipFormProvider from './_components/edit-tip-context'
 import React from 'react'
 import { ChampionshipRevealDate } from './_components/championship-reveal-date'
+import { PredictionMember } from './types/prediction-member'
 
 export default async function GroupSettings() {
   const { userId } = await verifySession()
@@ -34,7 +35,7 @@ export default async function GroupSettings() {
     redirect('/tipping')
   }
 
-  const [predictions, constructors, drivers, races, members] =
+  const [predictions, constructors, drivers, races, rawMembers] =
     await Promise.all([
       createGetAllPredictions(group.id)(),
       getConstructorOptions(),
@@ -42,6 +43,12 @@ export default async function GroupSettings() {
       getRaces(),
       getGroupMembers(group.id),
     ])
+
+  const members = rawMembers.map((member) => ({
+    name: member.name,
+    id: member.id,
+    imageSrc: member.profileImageUrl,
+  })) satisfies PredictionMember[]
 
   const constructorMap = new Map(
     constructors.map((constructor) => [constructor.id, constructor]),

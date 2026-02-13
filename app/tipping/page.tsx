@@ -21,7 +21,7 @@ import {
   predictionsTable,
 } from '@/db/schema/schema'
 import { verifySession } from '@/lib/dal'
-import { getCurrentGroupId } from '@/lib/utils/groups'
+import { getCurrentGroupId, getGroupMembership } from '@/lib/utils/groups'
 import {
   subDays,
   subMinutes,
@@ -59,10 +59,13 @@ export default async function DashboardPage() {
   const currentUserGroup = await getCurrentGroupId()
 
   const getCutoff = cache(getCutoffUncached)
-  const hasGroups = await getIsUserInGroups(userId)
-  const ongoingRaceWithOffset = await getOngoingRace(userId, { plusDay: 1 })
-  const ongoingRaceStrict = await getOngoingRace(userId, { plusDay: 0 })
-  const nextRace = await getNextRace(userId)
+  const [hasGroups, ongoingRaceWithOffset, ongoingRaceStrict, nextRace] =
+    await Promise.all([
+      getIsUserInGroups(userId),
+      getOngoingRace(userId, { plusDay: 1 }),
+      getOngoingRace(userId, { plusDay: 0 }),
+      getNextRace(userId),
+    ])
   const previousRace = await getPreviousRace(nextRace?.round)
 
   const shouldShowPrevious = !ongoingRaceStrict && previousRace
@@ -90,6 +93,12 @@ export default async function DashboardPage() {
     groupId: string
     group: NonNullable<Awaited<ReturnType<typeof getCurrentGroupInfo>>>
   }) {
+    const membership = await getGroupMembership({ groupId, userId })
+
+    if (!membership) {
+      return <CardJoinGroup />
+    }
+
     const showChampionshipCard =
       group.championshipTipsRevalDate &&
       isPast(group.championshipTipsRevalDate) &&
@@ -113,7 +122,11 @@ export default async function DashboardPage() {
         )}
         {shouldShouldShowOngoingCards && (
           <>
-            <CardTipNext race={nextRace} groupId={groupId} />
+            <CardTipNext
+              memberId={membership.id}
+              race={nextRace}
+              groupId={groupId}
+            />
             <CardTipStatus groupId={groupId} race={nextRace} />
           </>
         )}
@@ -223,7 +236,7 @@ export default async function DashboardPage() {
           id: true,
         },
         with: {
-          user: {
+          member: {
             columns: {
               id: true,
             },
@@ -231,7 +244,9 @@ export default async function DashboardPage() {
         },
       })
 
-      const tippersSet = new Set(peopleWhoTippedThisRace.map((p) => p.user.id))
+      const tippersSet = new Set(
+        peopleWhoTippedThisRace.map((p) => p.member.id),
+      )
 
       type Member = (typeof groupMembers)[number]
 
@@ -252,9 +267,11 @@ export default async function DashboardPage() {
   async function CardTipNext({
     race,
     groupId,
+    memberId,
   }: {
     race: Database.Race
     groupId: Database.Group['id']
+    memberId: Database.GroupMemberId
   }) {
     const cutoff = await getCutoff({ groupId: groupId, userId })
     if (cutoff === undefined) {
@@ -323,7 +340,7 @@ export default async function DashboardPage() {
       return !!(await db.query.predictionsTable.findFirst({
         where: (prediction, { eq, and }) =>
           and(
-            eq(prediction.userId, userId),
+            eq(prediction.memberId, memberId),
             eq(prediction.groupId, groupId),
             eq(prediction.raceId, race.id),
           ),
@@ -557,24 +574,29 @@ export default async function DashboardPage() {
       return entries.map(({ position, tips }) => {
         const tipsByValue = tips.reduce(
           (acc, tip) => {
-            const { value, user } = tip
+            const { value, member } = tip
             if (!value) {
               return acc
             }
             const exists = acc.find((accTip) => accTip.tip.id === value.id)
+            const mappedMember = {
+              id: member.id,
+              profileImage: member.profileImageUrl || null,
+              userName: member.name,
+            }
             if (exists) {
-              exists.users.push(user)
+              exists.members.push(mappedMember)
               return acc
             }
-            acc.push({ tip: value, users: [user] })
+            acc.push({ tip: value, members: [mappedMember] })
             return acc
           },
           [] as Array<{
             tip: NonNullable<
               (typeof positionTips)[number]['tips'][number]['value']
             >
-            users: Array<
-              (typeof predictionEntries)[number]['prediction']['user']
+            members: Array<
+              (typeof predictionEntries)[number]['prediction']['member']
             >
           }>,
         )
@@ -606,9 +628,9 @@ export default async function DashboardPage() {
                 <AccordionItem key={position} value={position}>
                   <AccordionTrigger>{getLabel(position)}</AccordionTrigger>
                   <AccordionContent className='space-y-4'>
-                    {tipsByValue.map(({ tip, users }) => {
+                    {tipsByValue.map(({ tip, members: users }) => {
                       return (
-                        <TipRowByUser key={tip.id} users={users} tip={tip} />
+                        <TipRowByUser key={tip.id} members={users} tip={tip} />
                       )
                     })}
                   </AccordionContent>
@@ -671,9 +693,9 @@ export default async function DashboardPage() {
 
     function TipRowByUser({
       tip,
-      users,
+      members,
     }: {
-      users: (typeof predictionEntries)[number]['prediction']['user'][]
+      members: (typeof predictionEntries)[number]['prediction']['member'][]
       tip:
         | (typeof predictionEntries)[number]['constructor']
         | (typeof predictionEntries)[number]['driver']
@@ -719,16 +741,20 @@ export default async function DashboardPage() {
             </div>
           </div>
           <div className='space-y-3 p-3'>
-            {users.map((user) => (
+            {members.map((member) => (
               <div
                 className={cn(
                   'flex items-center gap-2',
-                  user.id === userId && 'font-semibold',
+                  member.id === userId && 'font-semibold',
                 )}
-                key={user.id}
+                key={member.id}
               >
-                <UserAvatar {...user} className='size-6 rounded-lg' />
-                <p>{user.name}</p>
+                <UserAvatar
+                  name={member.userName}
+                  profileImageUrl={member.profileImage}
+                  className='size-6 rounded-lg'
+                />
+                <p>{member.userName}</p>
               </div>
             ))}
           </div>
@@ -794,11 +820,11 @@ export default async function DashboardPage() {
               raceId: true,
             },
             with: {
-              user: {
+              member: {
                 columns: {
                   id: true,
-                  name: true,
-                  profileImageUrl: true,
+                  userName: true,
+                  profileImage: true,
                 },
               },
             },
@@ -827,10 +853,10 @@ export default async function DashboardPage() {
         RacePredictionField,
         {
           id: string
-          user: {
+          member: {
             name: string
             id: string
-            profileImageUrl: string
+            profileImageUrl: string | undefined | null
           }
           position: RacePredictionField
           value:
@@ -843,9 +869,9 @@ export default async function DashboardPage() {
         const position = entry.position as RacePredictionField
         const mappedEntry = {
           id: entry.id,
-          user: {
-            name: entry.prediction.user.name,
-            id: entry.prediction.user.id,
+          member: {
+            name: entry.prediction.member.userName,
+            id: entry.prediction.member.id,
             profileImageUrl: user.profileImageUrl,
           },
           position,
@@ -861,7 +887,7 @@ export default async function DashboardPage() {
 
       const sorted = Object.entries(object).reduce((acc, [key, values]) => {
         const items = values.toSorted((a, b) =>
-          a.user.name.localeCompare(b.user.name),
+          a.member.name.localeCompare(b.member.name),
         )
         acc[key as RacePredictionField] = items
         return acc

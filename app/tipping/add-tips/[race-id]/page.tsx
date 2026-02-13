@@ -34,7 +34,25 @@ export default async function RaceFormPage({
   const { userId } = await verifySession()
 
   const currentGroupId = await getCurrentGroupId()
+
   if (!currentGroupId) {
+    return <AlertNoGroup />
+  }
+
+  const currentMembership = await db.query.groupMembersTable.findFirst({
+    where: (membership, { and, eq }) =>
+      and(
+        eq(membership.groupId, currentGroupId),
+        eq(membership.userId, userId),
+      ),
+    columns: {
+      id: true,
+      profileImage: true,
+      userName: true,
+    },
+  })
+
+  if (!currentMembership) {
     return <AlertNoGroup />
   }
 
@@ -80,7 +98,7 @@ export default async function RaceFormPage({
   const constructors = await getConstructorOptions()
 
   const tips = await getTips({
-    userId,
+    memberId: currentMembership.id,
     groupId: currentGroupId,
     raceId: race.id,
   })
@@ -122,11 +140,11 @@ export default async function RaceFormPage({
   )
 
   async function getTips(info: {
-    userId: string
+    memberId: string
     groupId: string
     raceId: string
   }) {
-    const isForCurrentUser = eq(predictionsTable.userId, info.userId)
+    const isForCurrentMember = eq(predictionsTable.memberId, info.memberId)
     const isForSuppliedGroup = eq(predictionsTable.groupId, info.groupId)
     const isForRace = eq(predictionsTable.raceId, info.raceId)
 
@@ -137,7 +155,7 @@ export default async function RaceFormPage({
           db
             .select({ id: predictionsTable.id })
             .from(predictionsTable)
-            .where(and(isForCurrentUser, isForSuppliedGroup, isForRace)),
+            .where(and(isForCurrentMember, isForSuppliedGroup, isForRace)),
         ),
       with: {
         prediction: {

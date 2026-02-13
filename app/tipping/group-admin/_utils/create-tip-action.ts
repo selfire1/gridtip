@@ -1,7 +1,7 @@
 'use server'
 
 import { verifyIsAdmin, verifySession } from '@/lib/dal'
-import { getCurrentGroup } from '@/lib/utils/groups'
+import { getCurrentGroup, getGroupMembership } from '@/lib/utils/groups'
 import { ServerResponse } from '@/types'
 import { db } from '@/db'
 import { Database } from '@/db/types'
@@ -19,10 +19,20 @@ export async function createTip(data: Schema): Promise<ServerResponse> {
     return result
   }
   const { group, parsed } = result
+  const groupMembership = await getGroupMembership({
+    groupId: group.id,
+    userId: data.userId,
+  })
+  if (!groupMembership) {
+    return {
+      ok: false,
+      message: 'User is not a member of the group',
+    }
+  }
   const prediction = await getPrediction({
     groupId: group.id,
     raceId: data.raceId,
-    userId: data.userId,
+    memberId: groupMembership.id,
   })
   if (await doesTipAlreadyExist({ position: data.position, prediction })) {
     return {
@@ -32,11 +42,12 @@ export async function createTip(data: Schema): Promise<ServerResponse> {
     }
   }
   try {
-    await createPredictionEntryAndPredictionIfRequired(
-      prediction?.id,
-      parsed.data,
-      group.id,
-    )
+    await createPredictionEntryAndPredictionIfRequired({
+      predictionIdInput: prediction?.id,
+      data: parsed.data,
+      groupId: group.id,
+      memberId: groupMembership.id,
+    })
     revalidateTag(CacheTag.Predictions)
     return {
       ok: true,
@@ -49,12 +60,18 @@ export async function createTip(data: Schema): Promise<ServerResponse> {
     }
   }
 
-  async function createPredictionEntryAndPredictionIfRequired(
-    predictionIdInput: Database.PredictionId | undefined,
-    data: Schema,
-    groupId: Database.GroupId,
-  ) {
-    const { userId, raceId, position } = data
+  async function createPredictionEntryAndPredictionIfRequired({
+    predictionIdInput,
+    data,
+    groupId,
+    memberId,
+  }: {
+    predictionIdInput: Database.PredictionId | undefined
+    data: Schema
+    groupId: Database.GroupId
+    memberId: Database.GroupMember['id']
+  }) {
+    const { raceId, position } = data
 
     const predictionId = predictionIdInput ?? (await createPrediction()).id
     await createPredictionEntry(predictionId)
@@ -74,7 +91,7 @@ export async function createTip(data: Schema): Promise<ServerResponse> {
       const [inserted] = await db
         .insert(predictionsTable)
         .values({
-          userId,
+          memberId,
           groupId,
           isForChampionship: false,
           raceId,
@@ -206,11 +223,11 @@ function getValueObject(data: Schema) {
 
 async function getPrediction({
   groupId,
-  userId,
+  memberId,
   raceId,
 }: {
   raceId: Database.RaceId
-  userId: Database.UserId
+  memberId: Database.GroupMember['id']
   groupId: Database.GroupId
 }) {
   return await db.query.predictionsTable.findFirst({
@@ -218,7 +235,7 @@ async function getPrediction({
       return and(
         eq(table.groupId, groupId),
         eq(table.raceId, raceId),
-        eq(table.userId, userId),
+        eq(table.memberId, memberId),
       )
     },
   })

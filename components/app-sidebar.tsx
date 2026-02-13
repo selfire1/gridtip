@@ -48,7 +48,10 @@ export async function AppSidebar({
         />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user} groupProfile={profile} />
+        <NavUser
+          user={{ ...user, profileImageUrl: user.profileImageUrl || null }}
+          groupProfile={profile}
+        />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

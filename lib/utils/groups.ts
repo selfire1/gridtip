@@ -100,3 +100,16 @@ export async function getGroupMembers(groupId: string) {
     }
   })
 }
+
+export async function getGroupMembership({
+  userId,
+  groupId,
+}: {
+  userId: string
+  groupId: string
+}) {
+  return await db.query.groupMembersTable.findFirst({
+    where: (membership, { eq, and }) =>
+      and(eq(membership.groupId, groupId), eq(membership.userId, userId)),
+  })
+}

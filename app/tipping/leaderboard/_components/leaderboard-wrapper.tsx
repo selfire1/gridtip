@@ -10,7 +10,7 @@ import {
   getPredictionsOfRacesAfterCutoff,
 } from '@/lib/utils/race-results'
 import { getGroupMembers } from '@/lib/utils/groups'
-import { LeaderBoard } from './leaderboard'
+import { Leaderboard, LeaderBoard } from './leaderboard'
 
 export async function LeaderboardWrapper({
   groupId,
@@ -104,7 +104,7 @@ export async function LeaderboardWrapper({
       return []
     }
 
-    const increaseUserPoints = (userId: Database.User['id']) => {
+    const increaseMemberPoints = (userId: Database.User['id']) => {
       if (!membersMap?.has(userId)) {
         return
       }
@@ -125,14 +125,14 @@ export async function LeaderboardWrapper({
         overwriteTo,
         constructorId,
         raceId,
-        userId,
+        memberId,
       }) => {
         if (!raceId) {
           console.warn('No race id')
           return
         }
         if (overwriteTo === 'countAsCorrect') {
-          increaseUserPoints(userId)
+          increaseMemberPoints(memberId)
           return
         }
         if (overwriteTo === 'countAsIncorrect') {
@@ -151,7 +151,7 @@ export async function LeaderboardWrapper({
           if (!isCorrect) {
             return
           }
-          increaseUserPoints(userId)
+          increaseMemberPoints(memberId)
           return
         }
         if (predictedPosition === 'sprintP1' && raceResults.sprint) {
@@ -159,7 +159,7 @@ export async function LeaderboardWrapper({
           const result = raceResults.sprint.get(1)
           const isCorrect = tip === result?.id
           if (!isCorrect) return
-          increaseUserPoints(userId)
+          increaseMemberPoints(memberId)
         }
         const result = (() => {
           switch (predictedPosition) {
@@ -184,7 +184,7 @@ export async function LeaderboardWrapper({
         if (!isCorrect) {
           return
         }
-        increaseUserPoints(userId)
+        increaseMemberPoints(memberId)
       },
     )
 

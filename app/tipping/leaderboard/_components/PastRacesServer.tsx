@@ -19,6 +19,10 @@ export type RacePredictionMaps = ReturnType<typeof getResultsMaps>
 export type Constructors = Awaited<ReturnType<typeof getConstructors>>
 
 type RaceId = Database.Race['id']
+type GroupMember = Pick<
+  Database.GroupMember,
+  'id' | 'userName' | 'profileImage'
+>
 
 export default async function PastRacesServer({
   groupId,
@@ -139,8 +143,8 @@ function getGpTips({
   })
 }
 
-export type UserMapEntry = {
-  user: Pick<Database.User, 'id' | 'name' | 'image'>
+export type MemberMapEntry = {
+  member: GroupMember
   overwriteTo: Database.PredictionEntry['overwriteTo']
 }
 
@@ -149,27 +153,26 @@ function getPredictionsByUser(currentRacePredictions: AllPredictions) {
     const {
       driverId,
       position,
-      prediction: { user: rawUser },
+      prediction: { member },
       overwriteTo,
     } = entry
-    const user = rawUser as Pick<Database.User, 'id' | 'name' | 'image'>
     if (!driverId) {
       return driverMap
     }
-    const userInfo = {
-      user,
+    const memberInfo = {
+      member,
       overwriteTo,
     }
 
     if (!driverMap.has(driverId)) {
-      driverMap.set(driverId, new Map([[position, [userInfo]]]))
+      driverMap.set(driverId, new Map([[position, [memberInfo]]]))
       return driverMap
     }
     const positionMap = driverMap.get(driverId)!
     const existing = positionMap.get(position)
-    positionMap.set(position, [...(existing || []), userInfo])
+    positionMap.set(position, [...(existing || []), memberInfo])
     return driverMap
-  }, new Map<Database.Driver['id'], Map<(typeof PREDICTION_FIELDS)[number], UserMapEntry[]>>())
+  }, new Map<Database.Driver['id'], Map<(typeof PREDICTION_FIELDS)[number], MemberMapEntry[]>>())
 }
 
 function getQualifyingResults({
@@ -257,8 +260,8 @@ function getConstructorResults({
             constructorId === predictionEntry.constructorId,
         )
         .map((prediction) => {
-          const entry: UserMapEntry = {
-            user: prediction.prediction.user,
+          const entry: MemberMapEntry = {
+            member: prediction.prediction.member,
             overwriteTo: prediction.overwriteTo,
           }
           return entry

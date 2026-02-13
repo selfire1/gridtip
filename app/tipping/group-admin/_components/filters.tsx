@@ -9,7 +9,11 @@ interface FiltersProps {
   races: Array<
     Pick<Database.Race, 'id' | 'locality' | 'country' | 'grandPrixDate'>
   >
-  users: Array<{ id: string; name: string }>
+  users: Array<{
+    id: string
+    name: string
+    imageSrc: string | undefined | null
+  }>
   selectedRaceId: string | null
   selectedUserId: string | null
   onRaceChange: (raceId: string | null | 'all') => void
@@ -45,7 +49,10 @@ export function Filters({
   ]
 
   // Add "All" option to users
-  const usersWithAll = [{ id: 'all', name: 'All users' }, ...sortedUsers]
+  const usersWithAll = [
+    { id: 'all', name: 'All users', imageSrc: null },
+    ...sortedUsers,
+  ]
 
   return (
     <div className='flex gap-4 flex-wrap'>
@@ -102,8 +109,8 @@ export function Filters({
             <div className='flex items-center gap-2'>
               {user.id !== 'all' && (
                 <UserAvatar
-                  id={user.id}
                   name={user.name}
+                  profileImageUrl={user.imageSrc}
                   className='size-5 rounded-full'
                 />
               )}

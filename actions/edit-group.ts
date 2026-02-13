@@ -4,13 +4,13 @@ import { verifyIsAdmin, verifySession } from '@/lib/dal'
 import z from 'zod'
 import { db } from '@/db'
 import { groupsTable } from '@/db/schema/schema'
-import { CreateGroupData, CreateGroupSchema } from '@/lib/schemas/create-group'
 import { Database } from '@/db/types'
 import { eq } from 'drizzle-orm'
+import { EditGroupData, EditGroupSchema } from '@/lib/schemas/edit-group'
 
 export async function editGroup(
   groupId: Database.Group['id'],
-  data: CreateGroupData,
+  data: EditGroupData,
 ) {
   const _session = await verifySession()
 
@@ -22,7 +22,7 @@ export async function editGroup(
     }
   }
 
-  const result = CreateGroupSchema.safeParse(data)
+  const result = EditGroupSchema.safeParse(data)
   if (!result.success) {
     return {
       ok: false,

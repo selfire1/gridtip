@@ -17,6 +17,7 @@ import { SUPPORTED_ICON_NAMES } from '@/constants/icon-names'
 type FieldConfig = {
   name: string
   value: string | number
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setValue: (value: any) => void
   description?: string
 }

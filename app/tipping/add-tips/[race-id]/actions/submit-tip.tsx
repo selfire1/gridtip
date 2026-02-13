@@ -33,7 +33,7 @@ export async function submitChanges(input: Record<string, unknown>) {
     throw new Error('No tips supplied')
   }
 
-  const groupOfUser = await getTargetGroup()
+  const { group: groupOfUser, member } = await getTargetGroupAndMembership()
 
   const { prediction, entries: existing } = await getExistingPredictions()
   const race = await getRaceFromId(raceId)
@@ -61,7 +61,7 @@ export async function submitChanges(input: Record<string, unknown>) {
       .insert(predictionsTable)
       .values([
         {
-          userId,
+          memberId: member.id,
           groupId,
           raceId,
         },
@@ -137,7 +137,7 @@ export async function submitChanges(input: Record<string, unknown>) {
   async function getExistingPredictions() {
     const prediction = await db.query.predictionsTable.findFirst({
       where: and(
-        eq(predictionsTable.userId, userId),
+        eq(predictionsTable.memberId, member.id),
         eq(predictionsTable.raceId, raceId),
         eq(predictionsTable.groupId, groupId),
       ),
@@ -255,8 +255,8 @@ export async function submitChanges(input: Record<string, unknown>) {
     }
   }
 
-  async function getTargetGroup() {
-    const memberGroup = await db.query.groupMembersTable.findFirst({
+  async function getTargetGroupAndMembership() {
+    const membershipInfo = await db.query.groupMembersTable.findFirst({
       where: (group, { eq, and }) =>
         and(
           // group is target group
@@ -274,12 +274,16 @@ export async function submitChanges(input: Record<string, unknown>) {
         },
       },
     })
-    const group = memberGroup?.group
+    if (!membershipInfo) {
+      throw new Error('Not a member of group')
+    }
+    const { group, ...member } = membershipInfo
+    // const group = membershipInfo?.group
     if (!group) {
       console.error('no group', { input, groupId, userId })
       throw new Error('Invalid group')
     }
-    return group
+    return { group, member }
   }
 
   function validateInput() {
