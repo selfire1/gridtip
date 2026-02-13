@@ -33,6 +33,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { LeaderBoard } from '../tipping/leaderboard/_components/leaderboard'
+import { motion } from 'motion/react'
+import { duration } from 'drizzle-orm/gel-core'
 
 const groupTypes = [
   'friend group',
@@ -232,28 +234,51 @@ const faqs = [
 ]
 
 function Hero() {
+  const textAnimation = (delay: number) => ({
+    initial: {
+      opacity: 0,
+      filter: 'blur(5px)',
+      x: 8,
+    },
+    animate: { opacity: 1, filter: 'blur(0px)', x: 0 },
+    transition: {
+      duration: 0.7,
+      ease: 'easeOut' as const,
+      delay,
+    },
+  })
   return (
     <section className='is-container'>
       <div className='grid gap-12 md:grid-cols-2 md:gap-16 items-center'>
         <div className='flex flex-col gap-6 items-center md:items-start text-center md:text-left'>
-          <h1 className='text-4xl font-bold tracking-tight lg:text-5xl xl:text-6xl text-pretty'>
+          <motion.h1
+            className='text-4xl font-bold tracking-tight lg:text-5xl xl:text-6xl text-pretty'
+            {...textAnimation(0)}
+          >
             The F1 season is better with your friends
-          </h1>
-          <div className='text-lg text-muted-foreground space-y-2'>
+          </motion.h1>
+          <motion.div
+            className='text-lg text-muted-foreground space-y-2'
+            {...textAnimation(0.05)}
+          >
             <p>What makes the sport you love even better? Your friends!</p>
             <p>
               GridTip is a social tipping competition which infuses the season
               with fun and rivalries. So start a group, make your predictions
               and see how you compare!
             </p>
-          </div>
+          </motion.div>
           <div className='flex gap-4'>
-            <Button size='lg' asChild>
-              <Link href='/auth'>Get Started</Link>
-            </Button>
-            <Button size='lg' variant='outline' asChild>
-              <Link href='#'>Learn More</Link>
-            </Button>
+            <motion.div {...textAnimation(0.1)}>
+              <Button size='lg' asChild>
+                <Link href='/auth'>Get Started</Link>
+              </Button>
+            </motion.div>
+            <motion.div {...textAnimation(0.15)}>
+              <Button size='lg' variant='outline' asChild>
+                <Link href='#'>Learn More</Link>
+              </Button>
+            </motion.div>
           </div>
         </div>
         <HeroImage />
@@ -278,6 +303,40 @@ const showcaseSchema = z.object({
 type ShowcaseSchema = z.infer<typeof showcaseSchema>
 
 function HeroImage() {
+  const animationElevationOne = (delay: number) => ({
+    initial: {
+      opacity: 0,
+      y: -4,
+    },
+    animate: {
+      opacity: 1,
+      y: [0, -4, 0],
+    },
+    transition: {
+      delay: 2 + delay,
+      duration: 0.7,
+      ease: 'easeOut' as const,
+    },
+  })
+
+  const animationElevationTwo = (index: number) => ({
+    initial: {
+      opacity: 0,
+      scale: 0.5,
+      y: -4,
+    },
+    animate: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+    },
+    transition: {
+      delay: (index + 1) * 0.1 + 1,
+      duration: 0.2,
+      ease: 'easeOut' as const,
+    },
+  })
+
   const elevation = {
     one: 'z-[10] shadow',
     two: 'z-[20] shadow-md opacity-95',
@@ -291,7 +350,10 @@ function HeroImage() {
   )
   return (
     <div className='isolate w-full h-full aspect-[2/5] sm:aspect-square md:aspect-[2/3] lg:aspect-video relative'>
-      <div className={cn(imageWrapperClasses, 'top-0 left-0 rotate-3')}>
+      <motion.div
+        className={cn(imageWrapperClasses, 'top-0 left-0 rotate-3')}
+        {...animationElevationOne(0)}
+      >
         <Image
           src={HeroOne}
           sizes='100vw, (max-width: 640px) 50vw, (max-width: 768px) 400px, (max-width: 1024px) 920px'
@@ -302,20 +364,21 @@ function HeroImage() {
           alt='todo'
           className={cn(imageClasses, 'origin-left')}
         />
-      </div>
-      <div
+      </motion.div>
+      <motion.div
         className={cn(
           'absolute   backdrop-blur bg-background/80 p-4 border rounded rotate-2 w-48',
           'right-[2%] top-[22%]',
           'sm:left-[70%] sm:top-[10%]',
-          'md:left-[70%] sm:top-[1%]',
+          'md:left-[50%] sm:top-[1%]',
           'lg:left-[-2%] lg:top-[47%]',
           elevation.two,
         )}
+        {...animationElevationTwo(0)}
       >
         <DummyConstructorForm />
-      </div>
-      <div
+      </motion.div>
+      <motion.div
         className={cn(
           'absolute backdrop-blur bg-background/80 p-4 border rounded -rotate-1 w-48',
           'top-[90%] right-[4%]',
@@ -324,10 +387,12 @@ function HeroImage() {
           'lg:block lg:left-[30%] lg:top-[5%]',
           elevation.two,
         )}
+        {...animationElevationTwo(1)}
       >
         <DummyDriverForm defaultValue='verstappen' label='Pole Position' />
-      </div>
-      <div
+      </motion.div>
+      <motion.div
+        {...animationElevationTwo(2)}
         className={cn(
           'hidden sm:block absolute backdrop-blur bg-background/80 p-4 border rounded -rotate-1 w-48',
           elevation.two,
@@ -337,14 +402,15 @@ function HeroImage() {
         )}
       >
         <DummyDriverForm defaultValue='piastri' label='P1' />
-      </div>
-      <div
+      </motion.div>
+      <motion.div
+        {...animationElevationTwo(2)}
         className={cn(
           'absolute  bg-background/80 p-4 border rounded -rotate-6 w-90 backdrop-blur',
           'hidden',
           'sm:block sm:left-[2%] sm:top-[80%]',
-          'md:left-[2%] md:top-[65%]',
-          'lg:left-[4%] lg:top-[100%]',
+          'md:hidden md:left-[2%] md:top-[65%]',
+          'lg:block lg:left-[4%] lg:top-[100%]',
           elevation.two,
         )}
       >
@@ -363,8 +429,9 @@ function HeroImage() {
             },
           ]}
         />
-      </div>
+      </motion.div>
       <ChatAvatar
+        index={0}
         offset={65}
         src={Sarah}
         alt='Asian-Australian woman with shoulder-length black hair, wearing stylish glasses, with a professional but casual style'
@@ -380,6 +447,7 @@ function HeroImage() {
         text='manifesting an Oscar win'
       />
       <ChatAvatar
+        index={1}
         className={{
           root: cn(
             'shadow-none absolute',
@@ -396,6 +464,7 @@ function HeroImage() {
         text={'max’s qualy…\n simply lovely!'}
       />
       <ChatAvatar
+        index={2}
         className={{
           root: cn(
             'shadow-none absolute ',
@@ -412,11 +481,12 @@ function HeroImage() {
         text='insane first turn!'
       />
       <ChatAvatar
+        index={3}
         className={{
           root: cn(
             'left-0 top-[34%] absolute',
             'sm:left-[75%] sm:top-[25%]',
-            'md:left-[80%] sm:top-[17%]',
+            'md:left-[40%] sm:top-[17%]',
             'lg:left-[-10%] lg:top-[70%]',
           ),
           image: cn('rotate-4'),
@@ -427,7 +497,8 @@ function HeroImage() {
         alt='Young man with curly brown hair, stubble, looking skeptical'
         text='sketchy tips this round…'
       />
-      <div
+      <motion.div
+        {...animationElevationOne(0.2)}
         className={cn(
           imageWrapperClasses,
           'bottom-0 right-0 -rotate-3',
@@ -444,7 +515,7 @@ function HeroImage() {
           loading='eager'
           alt='todo'
         />
-      </div>
+      </motion.div>
     </div>
   )
 }
@@ -636,13 +707,32 @@ function SpeechBubble({
   text,
   offset,
   className,
+  delay,
 }: {
   text: string
   offset: number
+  delay: number
   className?: string
 }) {
+  const bubbleAnimation = {
+    initial: {
+      opacity: 0,
+      scale: 0.5,
+      y: -8,
+    },
+    animate: { opacity: 1, scale: 1, y: 0 },
+    transition: {
+      delay: delay + 0.2,
+      duration: 0.1,
+      ease: 'easeOut' as const,
+    },
+  }
+
   return (
-    <div className={cn(className, 'relative z-[40]')}>
+    <motion.div
+      className={cn(className, 'relative z-[40]')}
+      {...bubbleAnimation}
+    >
       <div
         style={{ '--offset': `${offset}%` } as React.CSSProperties}
         className={cn(
@@ -659,7 +749,7 @@ function SpeechBubble({
         className='speech-bubble-tail bg-blue-50/90 backdrop-blur-md'
         style={{ '--offset': `${offset}%` } as React.CSSProperties}
       />
-    </div>
+    </motion.div>
   )
 }
 
@@ -668,17 +758,38 @@ function ChatAvatar({
   text,
   src,
   offset,
+  index,
 }: {
   className?: {
     root?: string
     image?: string
     bubble?: string
   }
+  index: number
   src: StaticImageData
   alt: string
   text: string
   offset: number
 }) {
+  const delay = (index + 1) * 0.2 + 0.2
+  const avatarAnimation = {
+    initial: {
+      opacity: 0,
+      scale: 0.5,
+      rotate: 20,
+    },
+    animate: {
+      opacity: 1,
+      scale: 1,
+      rotate: 0,
+    },
+    transition: {
+      delay,
+      duration: 0.1,
+      ease: 'easeOut' as const,
+    },
+  }
+
   return (
     <div className={cn(className?.root)}>
       <div className='relative flex flex-col items-center'>
@@ -686,8 +797,10 @@ function ChatAvatar({
           className={cn('-mb-4', className?.bubble, 'z-[50]')}
           offset={offset}
           text={text}
+          delay={delay}
         />
-        <div
+        <motion.div
+          {...avatarAnimation}
           className={cn(
             'rounded-full overflow-hidden aspect-square size-[8rem] relative z-[30]',
             className?.image,
@@ -705,7 +818,7 @@ function ChatAvatar({
             loading='eager'
             alt='todo'
           />
-        </div>
+        </motion.div>
       </div>
     </div>
   )
