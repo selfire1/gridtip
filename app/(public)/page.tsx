@@ -34,7 +34,13 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { LeaderBoard } from '../tipping/leaderboard/_components/leaderboard'
 import { motion } from 'motion/react'
-import { duration } from 'drizzle-orm/gel-core'
+
+const ANIMATION = {
+  image: { y: 2, duration: 12 },
+  ui: { y: 4, duration: 10 },
+  avatar: { y: 6, duration: 6 },
+  bubble: { y: 6, duration: 6 },
+}
 
 const groupTypes = [
   'friend group',
@@ -306,16 +312,24 @@ function HeroImage() {
   const animationElevationOne = (delay: number) => ({
     initial: {
       opacity: 0,
-      y: -4,
+      y: ANIMATION.image.y * -1,
     },
     animate: {
       opacity: 1,
-      y: [0, -4, 0],
+      y: [ANIMATION.image.y * -1, ANIMATION.image.y],
     },
     transition: {
-      delay: 2 + delay,
-      duration: 0.7,
-      ease: 'easeOut' as const,
+      opacity: {
+        delay: 2 + delay,
+        duration: 0.7,
+      },
+      y: {
+        delay: 0.3 + delay,
+        duration: ANIMATION.image.duration + delay,
+        repeatType: 'reverse' as const,
+        repeat: Infinity,
+        ease: 'easeInOut' as const,
+      },
     },
   })
 
@@ -323,26 +337,40 @@ function HeroImage() {
     initial: {
       opacity: 0,
       scale: 0.5,
-      y: -4,
+      y: ANIMATION.ui.y * -1,
     },
     animate: {
       opacity: 1,
       scale: 1,
-      y: 0,
+      y: [ANIMATION.ui.y * -1, ANIMATION.image.y],
     },
     transition: {
-      delay: (index + 1) * 0.1 + 1,
-      duration: 0.2,
-      ease: 'easeOut' as const,
+      opacity: {
+        delay: (index + 1) * 0.1 + 1,
+        duration: 0.2,
+        ease: 'easeOut' as const,
+      },
+      scale: {
+        delay: (index + 1) * 0.1 + 1,
+        duration: 0.2,
+        ease: 'easeOut' as const,
+      },
+      y: {
+        delay: (index + 1) * 0.1 + 1 + 0.2,
+        duration: ANIMATION.ui.duration + (index + 1) * 0.2,
+        repeatType: 'reverse' as const,
+        repeat: Infinity,
+        ease: 'easeInOut' as const,
+      },
     },
   })
 
   const elevation = {
     one: 'z-[10] shadow',
-    two: 'z-[20] shadow-md opacity-95',
+    two: 'z-[20] shadow-md opacity-90',
   }
   const imageClasses =
-    'opacity-90 h-full w-full object-cover brightness-90 dark:brightness-50'
+    'opacity-80 h-full w-full object-cover brightness-90 dark:brightness-50'
 
   const imageWrapperClasses = cn(
     'absolute rounded overflow-hidden aspect-[2/3] h-[20rem] w-auto bg-muted',
@@ -352,7 +380,7 @@ function HeroImage() {
     <div className='isolate w-full h-full aspect-[2/5] sm:aspect-square md:aspect-[2/3] lg:aspect-video relative'>
       <motion.div
         className={cn(imageWrapperClasses, 'top-0 left-0 rotate-3')}
-        {...animationElevationOne(0)}
+        {...animationElevationOne(0.1)}
       >
         <Image
           src={HeroOne}
@@ -367,7 +395,7 @@ function HeroImage() {
       </motion.div>
       <motion.div
         className={cn(
-          'absolute   backdrop-blur bg-background/80 p-4 border rounded rotate-2 w-48',
+          'absolute backdrop-blur bg-background/80 p-4 border rounded rotate-2 w-48',
           'right-[2%] top-[22%]',
           'sm:left-[70%] sm:top-[10%]',
           'md:left-[50%] sm:top-[1%]',
@@ -718,13 +746,19 @@ function SpeechBubble({
     initial: {
       opacity: 0,
       scale: 0.5,
-      y: -8,
+      y: [ANIMATION.bubble.y * -1, ANIMATION.bubble.y],
     },
     animate: { opacity: 1, scale: 1, y: 0 },
     transition: {
-      delay: delay + 0.2,
-      duration: 0.1,
-      ease: 'easeOut' as const,
+      opacity: { delay: delay + 0.2, duration: 0.1, ease: 'easeOut' as const },
+      scale: { delay: delay + 0.2, duration: 0.1, ease: 'easeOut' as const },
+      y: {
+        delay: delay + 0.2,
+        duration: ANIMATION.bubble.duration + delay,
+        repeatType: 'reverse' as const,
+        repeat: Infinity,
+        ease: 'easeInOut' as const,
+      },
     },
   }
 
@@ -777,16 +811,38 @@ function ChatAvatar({
       opacity: 0,
       scale: 0.5,
       rotate: 20,
+      y: ANIMATION.avatar.y * -1,
     },
     animate: {
       opacity: 1,
       scale: 1,
       rotate: 0,
+      y: [ANIMATION.avatar.y * -1, ANIMATION.avatar.y],
     },
     transition: {
-      delay,
-      duration: 0.1,
-      ease: 'easeOut' as const,
+      y: {
+        delay: delay + 0.2,
+        duration: ANIMATION.avatar.duration + delay,
+        repeatType: 'reverse' as const,
+        repeat: Infinity,
+        ease: 'easeInOut' as const,
+      },
+
+      opacity: {
+        delay,
+        duration: 0.1,
+        ease: 'easeOut' as const,
+      },
+      scale: {
+        delay,
+        duration: 0.1,
+        ease: 'easeOut' as const,
+      },
+      rotate: {
+        delay,
+        duration: 0.1,
+        ease: 'easeOut' as const,
+      },
     },
   }
 
