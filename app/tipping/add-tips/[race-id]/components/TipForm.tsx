@@ -23,6 +23,7 @@ import { ConstructorProps } from '@/components/constructor'
 import { DriverOptionProps as DriverOption } from '@/components/driver-option'
 import { SelectConstructor } from '@/components/select-constructor'
 import { RacePredictionField } from '@/constants'
+import { getFormFields } from '@/lib/utils/tip-fields'
 
 const formSchema = submitTipSchema.partial()
 export type Schema = z.infer<typeof formSchema>
@@ -49,7 +50,7 @@ export default function TipForm({
     defaultValues,
   })
 
-  const fields = getFormFields()
+  const fields = getFormFields(isSprint)
   const [isPending, startTransition] = useTransition()
 
   const [isShouldShowSaved, setShouldShowSaved] = useState(false)
@@ -151,53 +152,5 @@ export default function TipForm({
         })
       }
     })
-  }
-
-  function getFormFields() {
-    const allFields = [
-      {
-        name: 'sprintP1',
-        description: 'Who will win the sprint race?',
-        label: 'Sprint P1',
-        type: 'driver',
-      },
-      {
-        label: 'Pole Position',
-        description: 'Which driver will start at the front?',
-        name: 'pole',
-        type: 'driver',
-      },
-      {
-        label: 'P1',
-        description: 'Who will finish first in the GP?',
-        name: 'p1',
-        type: 'driver',
-      },
-      {
-        label: 'P10',
-        description: 'Which driver will just snatch some points?',
-        name: 'p10',
-        type: 'driver',
-      },
-      {
-        label: 'Last place',
-        description: 'Which driver is last to finish? Excluding early DNFs.',
-        name: 'last',
-        type: 'driver',
-      },
-      {
-        label: 'Most constructor points',
-        description:
-          'Which constructor will haul the most points in the Grand Prix?',
-        name: 'constructorWithMostPoints',
-        type: 'constructor',
-      },
-    ] as const satisfies ({ name: RacePredictionField } & Record<
-      string,
-      string
-    >)[]
-    return allFields.filter((field) =>
-      field.name !== 'sprintP1' ? true : isSprint,
-    )
   }
 }

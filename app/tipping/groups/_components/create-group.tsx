@@ -69,6 +69,7 @@ export default function CreateGroup({ user }: { user: DalUser }) {
 }
 
 type GroupDetailsData = Omit<CreateGroupData, 'userName'>
+
 function CreateGroupDialog({ user }: { user: DalUser }) {
   const [open, setOpen] = useState(false)
   const [groupDetails, setGroupDetails] = useState<GroupDetailsData>()
@@ -172,7 +173,7 @@ function CreateGroupDialog({ user }: { user: DalUser }) {
   }
 }
 
-function GroupDetailsPage({
+export function GroupDetailsPage({
   isOpen,
   onSubmit,
 }: {

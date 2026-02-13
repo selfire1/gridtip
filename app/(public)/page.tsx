@@ -1,5 +1,7 @@
 'use client'
 
+import { Avatar, AvatarGroup } from '@ui/avatar'
+
 import HeroOne from '@/public/img/hero-one.jpg'
 import HeroTwo from '@/public/img/hero-two.jpg'
 
@@ -7,6 +9,11 @@ import Sarah from '@/public/people/sarah.png'
 import Marcus from '@/public/people/marcus.png'
 import Gina from '@/public/people/gina.png'
 import Jake from '@/public/people/jake.png'
+
+import SarahAvatar from '@/public/people/sarah-avatar.png'
+import MarcusAvatar from '@/public/people/marcus-avatar.png'
+import GinaAvatar from '@/public/people/gina-avatar.png'
+import JakeAvatar from '@/public/people/jake-avatar.png'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -17,13 +24,14 @@ import {
 } from '@/components/ui/accordion'
 import {
   Form,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Image, { StaticImageData } from 'next/image'
 import { cn } from '@/lib/utils'
 import { SelectConstructor } from '@/components/select-constructor'
@@ -34,6 +42,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { LeaderBoard } from '../tipping/leaderboard/_components/leaderboard'
 import { motion } from 'motion/react'
+import { ChevronRight, LucideTrophy } from 'lucide-react'
+import { getFormFields } from '@/lib/utils/tip-fields'
+import { Path } from '@/lib/utils/path'
+import { ConstructorProps } from '@/components/constructor'
 
 const ANIMATION = {
   image: { y: 2, duration: 12 },
@@ -72,7 +84,7 @@ function AnimatedGroupType() {
 
   return (
     <span
-      className={`inline-block transition-all duration-300 ${
+      className={`inline-block transition-all duration-300 font-black ${
         isFlipping
           ? 'opacity-0 -translate-y-2 scale-95'
           : 'opacity-100 translate-y-0 scale-100'
@@ -86,37 +98,8 @@ function AnimatedGroupType() {
 export default function Home() {
   return (
     <div className='space-y-32 py-16 md:space-y-40 md:py-20'>
-      {/* Hero Section */}
       <Hero />
-      {/* How It Works Section */}
-      <section className='is-container'>
-        <h2 className='text-3xl font-bold text-center mb-12'>How It Works</h2>
-        <div className='space-y-16'>
-          {steps.map((step, index) => (
-            <div
-              key={index}
-              className={`grid gap-8 lg:grid-cols-2 lg:gap-16 items-center ${
-                index % 2 === 1 ? 'lg:flex-row-reverse' : ''
-              }`}
-            >
-              <div
-                className={`space-y-4 ${index % 2 === 1 ? 'lg:order-2' : ''}`}
-              >
-                <div className='text-sm font-semibold text-primary'>
-                  Step {index + 1}
-                </div>
-                <h3 className='text-2xl font-bold'>{step.title}</h3>
-                <p className='text-muted-foreground'>{step.description}</p>
-              </div>
-              <div
-                className={`bg-gray-300 rounded-2xl aspect-square w-full ${
-                  index % 2 === 1 ? 'lg:order-1' : ''
-                }`}
-              />
-            </div>
-          ))}
-        </div>
-      </section>
+      <HowItWorks />
 
       {/* Banner CTA Section */}
       <section className='bg-primary/5 border-y'>
@@ -129,7 +112,10 @@ export default function Home() {
             It’s free!
           </p>
           <Button size='lg' asChild>
-            <Link href='/auth'>Start Now</Link>
+            <Link href={Path.SignUp}>
+              Start Now
+              <ChevronRight />
+            </Link>
           </Button>
         </div>
       </section>
@@ -144,7 +130,9 @@ export default function Home() {
             {faqs.map((faq, index) => (
               <AccordionItem key={index} value={`item-${index}`}>
                 <AccordionTrigger>{faq.question}</AccordionTrigger>
-                <AccordionContent>{faq.answer}</AccordionContent>
+                <AccordionContent className='typography'>
+                  {faq.answer}
+                </AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
@@ -154,52 +142,6 @@ export default function Home() {
   )
 }
 
-const testimonials = [
-  {
-    quote:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt.',
-    name: 'Alex Johnson',
-  },
-  {
-    quote:
-      'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.',
-    name: 'Sam Rivera',
-  },
-  {
-    quote:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.',
-    name: 'Jordan Lee',
-  },
-  {
-    quote:
-      'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt.',
-    name: 'Taylor Morgan',
-  },
-  {
-    quote:
-      'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque.',
-    name: 'Casey Parker',
-  },
-]
-
-const steps = [
-  {
-    title: 'Claim a group for your friends',
-    description:
-      'Create a platform where you and your friends can make predictions. Setting one up is faster than a Ferrari pit stop.',
-  },
-  {
-    title: 'Pick your tips',
-    description:
-      'Predict key results for each race. Did Max clinch pole? Will a rookie upset the order? And can Stroll be counted on to finish at the back? Seeing how your tips turn out makes every race more exciting.',
-  },
-  {
-    title: 'Climb the leaderboard',
-    description:
-      'Gather points throughout the weekend. That friend who reckons they’re an F1 expert? Let the results speak for themselves.',
-  },
-]
-
 const faqs = [
   {
     question: 'Do I need to pay for this?',
@@ -207,14 +149,36 @@ const faqs = [
   },
   {
     question: 'What do I tip?',
-    answer: `For each race, points are up for grabs for Pole Position (the driver who qualifies P1), the positions P1, P10 and Last in the Grand Prix, and whichever constructor scores the most points that weekend. On sprint weekends, you can score a bonus point for Sprint P1.
-
-        If you get in early, you can score bonus point for predicting the Drivers’ and Constructors’ Championships`,
+    answer: (
+      <>
+        <p>
+          For each race, points are up for grabs for Pole Position (the driver
+          who qualifies P1), the positions P1, P10 and Last in the Grand Prix,
+          and whichever constructor scores the most points that weekend. On
+          sprint weekends, you can score a bonus point for Sprint P1.
+        </p>
+        <p>
+          If you get in early, you can score bonus point for predicting the
+          Drivers’ and Constructors’ Championships
+        </p>
+      </>
+    ),
   },
   {
     question: 'How many points can I score?',
-    answer:
-      'On a regular weekend, you can score five points (Pole, P1, P10, Last and constructor with most points). On sprint weekends, there is an extra point up for grabs. Correctly predicting the constrcutors’s gives you 10 points, and they driver’s 15 points.',
+    answer: (
+      <>
+        <p>
+          On a regular weekend, you can score five points (Pole, P1, P10, Last
+          and constructor with most points). On sprint weekends, there is an
+          extra point up for grabs.
+        </p>
+        <p>
+          Correctly predicting the Constructors’s Championship gives you 10
+          points, and the Driver’s 15 points.
+        </p>
+      </>
+    ),
   },
   {
     question:
@@ -225,12 +189,26 @@ const faqs = [
   {
     question: 'Are there prizes?',
     answer:
-      'There are no predefined prizes. You can decide on them in your group. Some ideas: A chamapgne shower, shouting a dinner or taking the winner to a cart track!',
+      'There are no predefined prizes. You can decide on them in your group. Some ideas: A champagne shower, shouting a dinner or taking the winner to a cart track!',
   },
   {
     question: 'Is there an app?',
-    answer:
-      'You can add the GridTip website to your homescreen, iPhone: https://support.apple.com/en-au/guide/iphone/iphea86e5236/ios, Android: https://support.google.com/chrome/answer/15085120?hl=en&co=GENIE.Platform%3DAndroid',
+    answer: (
+      <>
+        <p>
+          For quick access, you can add the GridTip website to your homescreen.
+          Have a look at the{' '}
+          <Link href='https://support.apple.com/en-au/guide/iphone/iphea86e5236/ios'>
+            instructions for iPhone
+          </Link>{' '}
+          or for{' '}
+          <Link href='https://support.google.com/chrome/answer/15085120'>
+            Android
+          </Link>
+          .
+        </p>
+      </>
+    ),
   },
   {
     question: 'Who built this?',
@@ -277,12 +255,12 @@ function Hero() {
           <div className='flex gap-4'>
             <motion.div {...textAnimation(0.1)}>
               <Button size='lg' asChild>
-                <Link href='/auth'>Get Started</Link>
+                <Link href={Path.SignUp}>Get Started</Link>
               </Button>
             </motion.div>
             <motion.div {...textAnimation(0.15)}>
               <Button size='lg' variant='outline' asChild>
-                <Link href='#'>Learn More</Link>
+                <Link href='#how-it-works'>Learn More</Link>
               </Button>
             </motion.div>
           </div>
@@ -370,7 +348,7 @@ function HeroImage() {
     two: 'z-[20] shadow-md opacity-90',
   }
   const imageClasses =
-    'opacity-80 h-full w-full object-cover brightness-90 dark:brightness-50'
+    'opacity-85 h-full w-full object-cover brightness-90 dark:brightness-50'
 
   const imageWrapperClasses = cn(
     'absolute rounded overflow-hidden aspect-[2/3] h-[20rem] w-auto bg-muted',
@@ -389,7 +367,7 @@ function HeroImage() {
           priority={true}
           placeholder='blur'
           loading='eager'
-          alt='todo'
+          alt='sparks flying of a race car'
           className={cn(imageClasses, 'origin-left')}
         />
       </motion.div>
@@ -404,7 +382,10 @@ function HeroImage() {
         )}
         {...animationElevationTwo(0)}
       >
-        <DummyConstructorForm />
+        <DummyConstructorForm
+          label='Constructor with Most Points'
+          defaultValue='ferrari'
+        />
       </motion.div>
       <motion.div
         className={cn(
@@ -541,19 +522,27 @@ function HeroImage() {
           priority={true}
           placeholder='blur'
           loading='eager'
-          alt='todo'
+          alt='shillhouette of a driver against the sunlight'
         />
       </motion.div>
     </div>
   )
 }
 
-function DummyConstructorForm() {
+function DummyConstructorForm({
+  label,
+  description,
+  defaultValue,
+}: {
+  label: string
+  description?: string
+  defaultValue?: string
+}) {
   const form = useForm<ShowcaseSchema>({
     resolver: zodResolver(showcaseSchema),
     defaultValues: {
       constructorWithMostPoints: {
-        id: 'ferrari',
+        id: defaultValue,
       },
     },
   })
@@ -566,7 +555,7 @@ function DummyConstructorForm() {
           name='constructorWithMostPoints'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Most constructor points</FormLabel>
+              <FormLabel>{label}</FormLabel>
               <SelectConstructor
                 value={field.value}
                 onSelect={(constructor) =>
@@ -576,6 +565,7 @@ function DummyConstructorForm() {
                 }
                 constructors={getHardcodedConstructors()}
               />
+              <FormDescription>{description}</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -588,9 +578,11 @@ function DummyConstructorForm() {
 function DummyDriverForm({
   defaultValue,
   label,
+  description,
 }: {
   defaultValue?: ReturnType<typeof getHardcodedDrivers>[number]['id']
   label: string
+  description?: string
 }) {
   const form = useForm<ShowcaseSchema>({
     resolver: zodResolver(showcaseSchema),
@@ -620,6 +612,7 @@ function DummyDriverForm({
                 }}
                 drivers={getHardcodedDrivers()}
               />
+              <FormDescription>{description}</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -675,58 +668,142 @@ function getHardcodedConstructors() {
       id: 'williams',
       name: 'Williams',
     },
-  ] as const
+  ] satisfies ConstructorProps[]
 }
 
 function getHardcodedDrivers(): DriverOptionProps[] {
   return [
     {
-      id: 'verstappen',
-      givenName: 'Max',
-      familyName: 'Verstappen',
-      constructorId: 'red_bull',
-    },
-    {
-      id: 'hamilton',
-      givenName: 'Lewis',
-      familyName: 'Hamilton',
-      constructorId: 'ferrari',
-    },
-    {
-      id: 'leclerc',
-      givenName: 'Charles',
-      familyName: 'Leclerc',
-      constructorId: 'ferrari',
-    },
-    {
-      id: 'norris',
-      givenName: 'Lando',
-      familyName: 'Norris',
-      constructorId: 'mclaren',
-    },
-    {
-      id: 'piastri',
-      givenName: 'Oscar',
-      familyName: 'Piastri',
-      constructorId: 'mclaren',
-    },
-    {
-      id: 'russell',
-      givenName: 'George',
-      familyName: 'Russell',
-      constructorId: 'mercedes',
-    },
-    {
-      id: 'sainz',
-      givenName: 'Carlos',
-      familyName: 'Sainz',
+      id: 'albon',
       constructorId: 'williams',
+      givenName: 'Alexander',
+      familyName: 'Albon',
     },
     {
       id: 'alonso',
+      constructorId: 'aston_martin',
       givenName: 'Fernando',
       familyName: 'Alonso',
+    },
+    {
+      id: 'antonelli',
+      constructorId: 'mercedes',
+      givenName: 'Andrea Kimi',
+      familyName: 'Antonelli',
+    },
+    {
+      id: 'bearman',
+      constructorId: 'haas',
+      givenName: 'Oliver',
+      familyName: 'Bearman',
+    },
+    {
+      id: 'bortoleto',
+      constructorId: 'audi',
+      givenName: 'Gabriel',
+      familyName: 'Bortoleto',
+    },
+    {
+      id: 'bottas',
+      constructorId: 'cadillac',
+      givenName: 'Valtteri',
+      familyName: 'Bottas',
+    },
+    {
+      id: 'colapinto',
+      constructorId: 'alpine',
+      givenName: 'Franco',
+      familyName: 'Colapinto',
+    },
+    {
+      id: 'gasly',
+      constructorId: 'alpine',
+      givenName: 'Pierre',
+      familyName: 'Gasly',
+    },
+    {
+      id: 'hadjar',
+      constructorId: 'red_bull',
+      givenName: 'Isack',
+      familyName: 'Hadjar',
+    },
+    {
+      id: 'hamilton',
+      constructorId: 'ferrari',
+      givenName: 'Lewis',
+      familyName: 'Hamilton',
+    },
+    {
+      id: 'hulkenberg',
+      constructorId: 'audi',
+      givenName: 'Nico',
+      familyName: 'Hülkenberg',
+    },
+    {
+      id: 'lawson',
+      constructorId: 'rb',
+      givenName: 'Liam',
+      familyName: 'Lawson',
+    },
+    {
+      id: 'leclerc',
+      constructorId: 'ferrari',
+      givenName: 'Charles',
+      familyName: 'Leclerc',
+    },
+    {
+      id: 'lindblad',
+      constructorId: 'rb',
+      givenName: 'Arvid',
+      familyName: 'Lindblad',
+    },
+    {
+      id: 'norris',
+      constructorId: 'mclaren',
+      givenName: 'Lando',
+      familyName: 'Norris',
+    },
+    {
+      id: 'ocon',
+      constructorId: 'haas',
+      givenName: 'Esteban',
+      familyName: 'Ocon',
+    },
+    {
+      id: 'piastri',
+      constructorId: 'mclaren',
+      givenName: 'Oscar',
+      familyName: 'Piastri',
+    },
+    {
+      id: 'perez',
+      constructorId: 'cadillac',
+      givenName: 'Sergio',
+      familyName: 'Pérez',
+    },
+    {
+      id: 'russell',
+      constructorId: 'mercedes',
+      givenName: 'George',
+      familyName: 'Russell',
+    },
+    {
+      id: 'sainz',
+      constructorId: 'williams',
+      givenName: 'Carlos',
+      familyName: 'Sainz',
+    },
+    {
+      id: 'stroll',
       constructorId: 'aston_martin',
+      givenName: 'Lance',
+      familyName: 'Stroll',
+    },
+    {
+      id: 'max_verstappen',
+      constructorId: 'red_bull',
+      givenName: 'Max',
+      familyName: 'Verstappen',
     },
   ] as const
 }
@@ -876,6 +953,214 @@ function ChatAvatar({
           />
         </motion.div>
       </div>
+    </div>
+  )
+}
+
+function HowItWorks() {
+  return (
+    <section className='is-container'>
+      <h2 className='text-3xl font-bold text-center mb-12' id='how-it-works'>
+        How It Works
+      </h2>
+      <div className='space-y-16'>
+        <Step
+          overline='Step 1'
+          title='Claim a group for your friends'
+          description='Create a platform where you and your friends can make predictions. Setting one up is faster than a Ferrari pit stop.'
+        >
+          <div className='bg-background p-6 border rounded-md space-y-2 absolute top-[10%] left-[10%] -right-12'>
+            <div className='space-y-1'>
+              <LucideTrophy className='p-2 size-8 bg-muted rounded-lg' />
+              <p className='text-xl sm:text-2xl font-semibold tracking-tight'>
+                The Troublemakers
+              </p>
+            </div>
+            <AvatarGroup>
+              <Avatar size='lg'>
+                <div className='rounded-full overflow-hidden size-10'>
+                  <Image
+                    height={100}
+                    width={100}
+                    className='scale-[105%] h-full w-full object-cover'
+                    src={SarahAvatar}
+                    alt='example avatar of sarah'
+                  />
+                </div>
+              </Avatar>
+              <Avatar size='lg'>
+                <div className='rounded-full overflow-hidden size-10'>
+                  <Image
+                    height={100}
+                    width={100}
+                    className='scale-[105%] h-full w-full object-cover'
+                    src={JakeAvatar}
+                    alt='example avatar of jake'
+                  />
+                </div>
+              </Avatar>
+              <Avatar size='lg'>
+                <div className='rounded-full overflow-hidden size-10'>
+                  <Image
+                    height={100}
+                    width={100}
+                    className='scale-[105%] h-full w-full object-cover'
+                    src={GinaAvatar}
+                    alt='example avatar of gina'
+                  />
+                </div>
+              </Avatar>
+              <Avatar size='lg'>
+                <div className='rounded-full overflow-hidden size-10'>
+                  <Image
+                    height={100}
+                    width={100}
+                    className='scale-[105%] h-full w-full object-cover'
+                    src={MarcusAvatar}
+                    alt='example avatar of marcus'
+                  />
+                </div>
+              </Avatar>
+            </AvatarGroup>
+          </div>
+        </Step>
+        <Step
+          overline='Step 2'
+          title='Pick your tips'
+          isSwap
+          description='Predict key results for each race. Did Max clinch pole? Will a rookie upset the order? And can Stroll be counted on to finish at the back? Seeing how your tips turn out makes every race more exciting.'
+        >
+          <DummyTips />
+        </Step>
+        <Step
+          overline='Step 3'
+          title='Climb the leaderboard'
+          description='Gather points throughout the weekend. That friend who reckons they’re an F1 expert? Let the results speak for themselves.'
+        >
+          <div className='bg-background p-6 border rounded-md space-y-2 absolute top-[10%] left-[10%] -right-12'>
+            <LeaderBoard
+              leaderboard={[
+                {
+                  place: 1,
+                  delta: 2,
+                  points: 10,
+                  pointsDelta: 4,
+                  member: {
+                    id: '1',
+                    userName: 'You?',
+                    profileImage: '/people/you.png',
+                  },
+                },
+                {
+                  place: 2,
+                  delta: -1,
+                  points: 8,
+                  pointsDelta: 0,
+                  member: {
+                    id: '2',
+                    userName: 'Marcus',
+                    profileImage: '/people/marcus-avatar.png',
+                  },
+                },
+                {
+                  place: 3,
+                  delta: 1,
+                  points: 7,
+                  pointsDelta: 1,
+                  member: {
+                    id: '3',
+                    userName: 'Gina',
+                    profileImage: '/people/gina-avatar.png',
+                  },
+                },
+                {
+                  place: 3,
+                  delta: 1,
+                  points: 6,
+                  pointsDelta: 1,
+                  member: {
+                    id: '4',
+                    userName: 'Sarah',
+                    profileImage: '/people/sarah-avatar.png',
+                  },
+                },
+                {
+                  place: 4,
+                  delta: -2,
+                  points: 4,
+                  pointsDelta: 0,
+                  member: {
+                    id: '5',
+                    userName: 'Jake',
+                    profileImage: '/people/jake-avatar.png',
+                  },
+                },
+              ]}
+            />
+          </div>
+        </Step>
+      </div>
+    </section>
+  )
+
+  function Step({
+    isSwap = false,
+    overline,
+    title,
+    description,
+    children,
+  }: {
+    isSwap?: boolean
+    overline: string
+    title: string
+    description: string
+    children?: React.ReactNode
+  }) {
+    return (
+      <div
+        className={`grid gap-8 lg:grid-cols-2 lg:gap-16 items-center ${
+          isSwap ? 'lg:flex-row-reverse' : ''
+        }`}
+      >
+        <div className={`space-y-4 ${isSwap ? 'lg:order-2' : ''}`}>
+          <div className='text-sm font-semibold text-primary'>{overline}</div>
+          <h3 className='text-2xl font-bold'>{title}</h3>
+          <p className='text-muted-foreground'>{description}</p>
+        </div>
+        <div
+          className={`relative border overflow-hidden bg-muted rounded-md aspect-[3/2] w-full ${
+            isSwap ? 'lg:order-1' : ''
+          }`}
+        >
+          {children}
+        </div>
+      </div>
+    )
+  }
+}
+
+function DummyTips() {
+  return (
+    <div className='bg-background p-6 border rounded-md space-y-2 absolute top-[10%] left-[10%] -right-12'>
+      {getFormFields().map((field, index) => {
+        const isDriver = field.type === 'driver'
+        if (isDriver) {
+          return (
+            <DummyDriverForm
+              key={index}
+              label={field.label}
+              description={field.description}
+            />
+          )
+        }
+        return (
+          <DummyConstructorForm
+            key={index}
+            label={field.label}
+            description={field.description}
+          />
+        )
+      })}
     </div>
   )
 }

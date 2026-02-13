@@ -14,8 +14,10 @@ export default async function DefaultLayout({
   return (
     <div>
       <header className='sticky top-0 z-50'>
-        <div className='bg-gradient-to-b from-background from-40% to-transparent '>
-          <AppHeader renderRight={!session?.user && <AuthButtons />} />
+        <div className='bg-gradient-to-b from-background to-transparent '>
+          <AppHeader
+            renderRight={<AuthButtons isSession={!!session?.user} />}
+          />
         </div>
       </header>
       <main className='min-h-screen'>{children}</main>
@@ -26,7 +28,14 @@ export default async function DefaultLayout({
   )
 }
 
-function AuthButtons() {
+function AuthButtons({ isSession }: { isSession: boolean }) {
+  if (isSession) {
+    return (
+      <Button asChild size='sm'>
+        <Link href={Path.Dashboard}>Dashboard</Link>
+      </Button>
+    )
+  }
   return (
     <div className='flex items-center gap-4'>
       <Button asChild variant='outline' size='sm'>
