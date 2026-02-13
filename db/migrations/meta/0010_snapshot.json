@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "b5764363-2ea9-41ff-8947-80775d4cc41c",
+  "id": "d362e298-7e20-4ef6-8246-cd5bc4e7846d",
   "prevId": "e21b5b2f-c6e4-41cc-9998-c4751a6f46f4",
   "tables": {
     "constructors": {
@@ -1133,7 +1133,9 @@
   "_meta": {
     "schemas": {},
     "tables": {},
-    "columns": {}
+    "columns": {
+      "\"predictions\".\"user_id\"": "\"predictions\".\"member_id\""
+    }
   },
   "internal": {
     "indexes": {}
