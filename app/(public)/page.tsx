@@ -27,11 +27,12 @@ import { useEffect, useState } from 'react'
 import Image, { StaticImageData } from 'next/image'
 import { cn } from '@/lib/utils'
 import { SelectConstructor } from '@/components/select-constructor'
+import { SelectDriver } from '@/components/select-driver'
+import { DriverOptionProps } from '@/components/driver-option'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { LeaderBoard } from '../tipping/leaderboard/_components/leaderboard'
-import { ImageUpscale } from 'lucide-react'
 
 const groupTypes = [
   'friend group',
@@ -233,8 +234,8 @@ const faqs = [
 function Hero() {
   return (
     <section className='is-container'>
-      <div className='grid gap-12 lg:grid-cols-2 lg:gap-16 items-center'>
-        <div className='space-y-6'>
+      <div className='grid gap-12 md:grid-cols-2 md:gap-16 items-center'>
+        <div className='flex flex-col gap-6 items-center md:items-start text-center md:text-left'>
           <h1 className='text-4xl font-bold tracking-tight lg:text-5xl xl:text-6xl text-pretty'>
             The F1 season is better with your friends
           </h1>
@@ -267,36 +268,48 @@ const showcaseSchema = z.object({
       id: z.string(),
     })
     .optional(),
+  pole: z
+    .object({
+      id: z.string(),
+    })
+    .optional(),
 })
 
 type ShowcaseSchema = z.infer<typeof showcaseSchema>
 
 function HeroImage() {
   const elevation = {
-    one: 'z-[10] shadow opacity-90',
+    one: 'z-[10] shadow',
     two: 'z-[20] shadow-md opacity-95',
   }
+  const imageClasses =
+    'opacity-90 h-full w-full object-cover brightness-90 dark:brightness-50'
 
-  const imageClasses = cn(
-    'absolute rounded overflow-hidden aspect-[2/3] object-cover h-[20rem] w-auto brightness-90 dark:brightness-50',
+  const imageWrapperClasses = cn(
+    'absolute rounded overflow-hidden aspect-[2/3] h-[20rem] w-auto bg-muted',
     elevation.one,
   )
   return (
-    <div className='isolate w-full h-full aspect-square relative'>
-      <div className='absolute inset-0 bg-muted'></div>
-      <Image
-        src={HeroOne}
-        sizes='100vw, (max-width: 640px) 50vw, (max-width: 768px) 400px, (max-width: 1024px) 920px'
-        quality={80}
-        priority={true}
-        placeholder='blur'
-        loading='eager'
-        alt='todo'
-        className={cn(imageClasses, 'top-0 left-0 rotate-3 origin-left')}
-      />
+    <div className='isolate w-full h-full aspect-[2/5] sm:aspect-square md:aspect-[2/3] lg:aspect-video relative'>
+      <div className={cn(imageWrapperClasses, 'top-0 left-0 rotate-3')}>
+        <Image
+          src={HeroOne}
+          sizes='100vw, (max-width: 640px) 50vw, (max-width: 768px) 400px, (max-width: 1024px) 920px'
+          quality={80}
+          priority={true}
+          placeholder='blur'
+          loading='eager'
+          alt='todo'
+          className={cn(imageClasses, 'origin-left')}
+        />
+      </div>
       <div
         className={cn(
-          'absolute left-[70%] top-[10%] backdrop-blur bg-background/80 p-4 border rounded rotate-2 w-48',
+          'absolute   backdrop-blur bg-background/80 p-4 border rounded rotate-2 w-48',
+          'right-[2%] top-[22%]',
+          'sm:left-[70%] sm:top-[10%]',
+          'md:left-[70%] sm:top-[1%]',
+          'lg:left-[-2%] lg:top-[47%]',
           elevation.two,
         )}
       >
@@ -304,7 +317,34 @@ function HeroImage() {
       </div>
       <div
         className={cn(
-          'absolute left-[10%] top-[80%] bg-background/80 p-4 border rounded -rotate-6 w-90 backdrop-blur',
+          'absolute backdrop-blur bg-background/80 p-4 border rounded -rotate-1 w-48',
+          'top-[90%] right-[4%]',
+          'sm:left-[28%] sm:top-[55%]',
+          'md:hidden',
+          'lg:block lg:left-[30%] lg:top-[5%]',
+          elevation.two,
+        )}
+      >
+        <DummyDriverForm defaultValue='verstappen' label='Pole Position' />
+      </div>
+      <div
+        className={cn(
+          'hidden sm:block absolute backdrop-blur bg-background/80 p-4 border rounded -rotate-1 w-48',
+          elevation.two,
+          'z-[21]',
+          'sm:right-[4%] sm:top-[90%]',
+          'md:right-[1%] md:top-[90%]',
+        )}
+      >
+        <DummyDriverForm defaultValue='piastri' label='P1' />
+      </div>
+      <div
+        className={cn(
+          'absolute  bg-background/80 p-4 border rounded -rotate-6 w-90 backdrop-blur',
+          'hidden',
+          'sm:block sm:left-[2%] sm:top-[80%]',
+          'md:left-[2%] md:top-[65%]',
+          'lg:left-[4%] lg:top-[100%]',
           elevation.two,
         )}
       >
@@ -329,14 +369,26 @@ function HeroImage() {
         src={Sarah}
         alt='Asian-Australian woman with shoulder-length black hair, wearing stylish glasses, with a professional but casual style'
         className={{
-          root: cn('shadow-none absolute -right-[5%] top-[30%]'),
+          root: cn(
+            'shadow-none absolute',
+            'right-[2%] top-[54%]',
+            'sm:right-[4%] sm:top-[70%]',
+            'md:right-[1%] md:top-[60%]',
+          ),
+          bubble: 'rotate-1',
         }}
         text='manifesting an Oscar win'
       />
       <ChatAvatar
         className={{
-          root: cn('shadow-none absolute left-[5%] top-[45%]'),
-          bubble: '-rotate-2 -mb-4 -mr-8',
+          root: cn(
+            'shadow-none absolute',
+            'top-[70%] left-[2%]',
+            'sm:left-[5%] sm:top-[45%]',
+            'md:left-[5%] md:top-[45%]',
+            'lg:left-[65%] lg:top-[5%]',
+          ),
+          bubble: '-rotate-2 -mb-4 -mr-8 md:hidden lg:block',
         }}
         offset={15}
         src={Marcus}
@@ -345,7 +397,12 @@ function HeroImage() {
       />
       <ChatAvatar
         className={{
-          root: cn('shadow-none absolute left-[35%] top-[5%]'),
+          root: cn(
+            'shadow-none absolute ',
+            'top-2 right-0 ',
+            'sm:right-[40%] sm:top-[5%]',
+            'md:right-[80%] md:top-[2%]',
+          ),
           image: cn('rotate-3'),
           bubble: 'rotate-3 -mb-4 mr-8',
         }}
@@ -356,25 +413,38 @@ function HeroImage() {
       />
       <ChatAvatar
         className={{
-          root: cn('shadow-none absolute left-[35%] bottom-[15%]'),
+          root: cn(
+            'left-0 top-[34%] absolute',
+            'sm:left-[75%] sm:top-[25%]',
+            'md:left-[80%] sm:top-[17%]',
+            'lg:left-[-10%] lg:top-[70%]',
+          ),
           image: cn('rotate-4'),
-          bubble: '-rotate-3 -mb-4 mr-8',
+          bubble: '-rotate-3 -mb-4 mr-8 lg:mr-0',
         }}
         offset={65}
         src={Jake}
         alt='Young man with curly brown hair, stubble, looking skeptical'
         text='sketchy tips this round…'
       />
-      <Image
-        src={HeroTwo}
-        sizes='100vw, (max-width: 640px) 50vw, (max-width: 768px) 400px, (max-width: 1024px) 920px'
-        quality={80}
-        priority={true}
-        placeholder='blur'
-        loading='eager'
-        alt='todo'
-        className={cn(imageClasses, 'bottom-0 right-0 -rotate-3')}
-      />
+      <div
+        className={cn(
+          imageWrapperClasses,
+          'bottom-0 right-0 -rotate-3',
+          'lg:top-[30%]',
+        )}
+      >
+        <Image
+          src={HeroTwo}
+          sizes='100vw, (max-width: 640px) 50vw, (max-width: 768px) 400px, (max-width: 1024px) 920px'
+          quality={80}
+          className={imageClasses}
+          priority={true}
+          placeholder='blur'
+          loading='eager'
+          alt='todo'
+        />
+      </div>
     </div>
   )
 }
@@ -406,6 +476,50 @@ function DummyConstructorForm() {
                   })
                 }
                 constructors={getHardcodedConstructors()}
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </form>
+    </Form>
+  )
+}
+
+function DummyDriverForm({
+  defaultValue,
+  label,
+}: {
+  defaultValue?: ReturnType<typeof getHardcodedDrivers>[number]['id']
+  label: string
+}) {
+  const form = useForm<ShowcaseSchema>({
+    resolver: zodResolver(showcaseSchema),
+    defaultValues: {
+      pole: {
+        id: defaultValue,
+      },
+    },
+  })
+
+  return (
+    <Form {...form}>
+      <form onSubmit={(e) => e.preventDefault()}>
+        <FormField
+          control={form.control}
+          name='pole'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{label}</FormLabel>
+              <SelectDriver
+                value={field.value}
+                onSelect={(driver) => {
+                  if (!driver) return
+                  form.setValue('pole', driver, {
+                    shouldDirty: true,
+                  })
+                }}
+                drivers={getHardcodedDrivers()}
               />
               <FormMessage />
             </FormItem>
@@ -462,7 +576,60 @@ function getHardcodedConstructors() {
       id: 'williams',
       name: 'Williams',
     },
-  ]
+  ] as const
+}
+
+function getHardcodedDrivers(): DriverOptionProps[] {
+  return [
+    {
+      id: 'verstappen',
+      givenName: 'Max',
+      familyName: 'Verstappen',
+      constructorId: 'red_bull',
+    },
+    {
+      id: 'hamilton',
+      givenName: 'Lewis',
+      familyName: 'Hamilton',
+      constructorId: 'ferrari',
+    },
+    {
+      id: 'leclerc',
+      givenName: 'Charles',
+      familyName: 'Leclerc',
+      constructorId: 'ferrari',
+    },
+    {
+      id: 'norris',
+      givenName: 'Lando',
+      familyName: 'Norris',
+      constructorId: 'mclaren',
+    },
+    {
+      id: 'piastri',
+      givenName: 'Oscar',
+      familyName: 'Piastri',
+      constructorId: 'mclaren',
+    },
+    {
+      id: 'russell',
+      givenName: 'George',
+      familyName: 'Russell',
+      constructorId: 'mercedes',
+    },
+    {
+      id: 'sainz',
+      givenName: 'Carlos',
+      familyName: 'Sainz',
+      constructorId: 'williams',
+    },
+    {
+      id: 'alonso',
+      givenName: 'Fernando',
+      familyName: 'Alonso',
+      constructorId: 'aston_martin',
+    },
+  ] as const
 }
 
 function SpeechBubble({
