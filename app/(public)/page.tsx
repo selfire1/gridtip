@@ -1048,7 +1048,7 @@ function HowItWorks() {
                   member: {
                     id: '1',
                     userName: 'You?',
-                    profileImage: '/people/you.png',
+                    profileImage: '/people/you.webp',
                   },
                 },
                 {
@@ -1059,7 +1059,7 @@ function HowItWorks() {
                   member: {
                     id: '2',
                     userName: 'Marcus',
-                    profileImage: '/people/marcus-avatar.png',
+                    profileImage: '/people/marcus-avatar.webp',
                   },
                 },
                 {
@@ -1070,7 +1070,7 @@ function HowItWorks() {
                   member: {
                     id: '3',
                     userName: 'Gina',
-                    profileImage: '/people/gina-avatar.png',
+                    profileImage: '/people/gina-avatar.webp',
                   },
                 },
                 {
@@ -1081,7 +1081,7 @@ function HowItWorks() {
                   member: {
                     id: '4',
                     userName: 'Sarah',
-                    profileImage: '/people/sarah-avatar.png',
+                    profileImage: '/people/sarah-avatar.webp',
                   },
                 },
                 {
@@ -1092,7 +1092,7 @@ function HowItWorks() {
                   member: {
                     id: '5',
                     userName: 'Jake',
-                    profileImage: '/people/jake-avatar.png',
+                    profileImage: '/people/jake-avatar.webp',
                   },
                 },
               ]}
