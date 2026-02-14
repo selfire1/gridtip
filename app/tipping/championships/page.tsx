@@ -3,6 +3,7 @@ import {
   getCurrentGroup,
   getCurrentGroupId,
   getDriverOptions,
+  getFirstRace,
   getGroupMembership,
 } from '@/lib/utils/groups'
 import ChampionshipForm, { Schema } from './components/championship-form'
@@ -30,13 +31,7 @@ export default async function ChampionshipPage() {
   const { userId } = await verifySession()
 
   const [firstRace, groupId, drivers, constructors] = await Promise.all([
-    db.query.racesTable.findFirst({
-      orderBy: (race, { desc }) => desc(race.qualifyingDate),
-      columns: {
-        qualifyingDate: true,
-      },
-    }),
-
+    getFirstRace(),
     getCurrentGroupId(),
     getDriverOptions(),
     getConstructorOptions(),
