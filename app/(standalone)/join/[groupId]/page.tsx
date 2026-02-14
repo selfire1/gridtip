@@ -23,6 +23,7 @@ import type { DalUser } from '@/lib/dal'
 import { getAuthLinkWithOrigin } from '@/lib/utils/auth-origin'
 import { QueryOrigin } from '@/constants'
 import JoinGroupForm from './_components/join-group-form'
+import { Path } from '@/lib/utils/path'
 
 export const metadata: Metadata = {
   title: 'Join Group',
@@ -114,9 +115,14 @@ export default async function JoinGroup({
         redirect: `/join/${groupId}`,
       })
       return (
-        <Button asChild className='w-full'>
-          <Link href={href}>Log in to Join</Link>
-        </Button>
+        <div className='flex flex-col sm:flex-row gap-2 items-center justify-center'>
+          <Button asChild>
+            <Link href={Path.SignUp}>Sign Up to Join</Link>
+          </Button>
+          <Button variant='outline' asChild>
+            <Link href={href}>Log in to Join</Link>
+          </Button>
+        </div>
       )
     }
     return <JoinGroupForm user={props.user} groupId={groupId} />

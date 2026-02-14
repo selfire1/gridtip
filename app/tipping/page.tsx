@@ -21,7 +21,11 @@ import {
   predictionsTable,
 } from '@/db/schema/schema'
 import { verifySession } from '@/lib/dal'
-import { getCurrentGroupId, getGroupMembership } from '@/lib/utils/groups'
+import {
+  getCurrentGroupId,
+  getGroupMembers,
+  getGroupMembership,
+} from '@/lib/utils/groups'
 import {
   subDays,
   subMinutes,
@@ -53,6 +57,7 @@ import { Icon } from '@/components/icon'
 import { getCountryFlag } from '@/lib/utils/country-flag'
 import { cn } from '@/lib/utils'
 import { getConstructorCssVariable } from '@/lib/utils/constructor-css'
+import CopyLink from './groups/_components/copy-link'
 
 export default async function DashboardPage() {
   const { userId, user } = await verifySession()
@@ -94,10 +99,13 @@ export default async function DashboardPage() {
     group: NonNullable<Awaited<ReturnType<typeof getCurrentGroupInfo>>>
   }) {
     const membership = await getGroupMembership({ groupId, userId })
+    const groupMembers = await getGroupMembers(groupId)
 
     if (!membership) {
       return <CardJoinGroup />
     }
+
+    const showInviteCard = groupMembers.length < 2
 
     const showChampionshipCard =
       group.championshipTipsRevalDate &&
@@ -109,6 +117,7 @@ export default async function DashboardPage() {
 
     return (
       <>
+        {showInviteCard && <CardInviteGroup group={group} />}
         {shouldShowPrevious &&
           getPreviousRaceStatus(previousRace) === 'current' && (
             <CardPreviousRaceResults race={previousRace} isActive />
@@ -972,6 +981,7 @@ export default async function DashboardPage() {
           columns: {
             id: true,
             championshipTipsRevalDate: true,
+            name: true,
           },
         },
       },
@@ -1009,4 +1019,25 @@ async function getHasResults(id: string) {
         },
       })),
   )()
+}
+
+function CardInviteGroup({
+  group,
+}: {
+  group: Pick<Database.Group, 'id' | 'name'>
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Invite your friends</CardTitle>
+        <CardDescription>
+          F1 is better with your friends. Send them an invite link to start
+          tipping.
+        </CardDescription>
+      </CardHeader>
+      <CardFooter className='mt-auto'>
+        <CopyLink group={group} />
+      </CardFooter>
+    </Card>
+  )
 }

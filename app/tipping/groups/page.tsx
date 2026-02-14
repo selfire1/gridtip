@@ -87,7 +87,11 @@ export default async function GroupsPage() {
                       {membership.group.name}
                     </TableCell>
                     <TableCell>
-                      <CopyLink group={membership.group} />
+                      <CopyLink
+                        group={membership.group}
+                        size='sm'
+                        variant='outline'
+                      />
                     </TableCell>
                     <Suspense
                       fallback={

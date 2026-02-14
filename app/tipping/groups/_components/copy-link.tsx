@@ -1,16 +1,16 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
+import { Button, ShadButtonProps } from '@/components/ui/button'
 import { Database } from '@/db/types'
 import { LucideCheck, LucideClipboardCheck, LucideLink } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
-export default function CopyLink({
-  group,
-}: {
-  group: Pick<Database.Group, 'id' | 'name'>
-}) {
+export default function CopyLink(
+  props: {
+    group: Pick<Database.Group, 'id' | 'name'>
+  } & ShadButtonProps,
+) {
   const [isCopied, setIsCopied] = useState(false)
 
   useEffect(() => {
@@ -26,8 +26,10 @@ export default function CopyLink({
     }
   }, [isCopied])
 
+  const { group: _, ...buttonProps } = props
+
   return (
-    <Button size='sm' variant='outline' onClick={copyToClipboard}>
+    <Button {...buttonProps} onClick={copyToClipboard}>
       {isCopied ? <LucideCheck /> : <LucideLink />}
       Copy invite link
     </Button>
@@ -35,12 +37,12 @@ export default function CopyLink({
 
   function copyToClipboard() {
     const baseUrl = window.location.origin
-    navigator.clipboard.writeText(`${baseUrl}/join/${group.id}`)
+    navigator.clipboard.writeText(`${baseUrl}/join/${props.group.id}`)
     setIsCopied(true)
     toast.success(
       <p>
         <span>Copied link for </span>
-        <span className='font-semibold'>{group.name}</span>
+        <span className='font-semibold'>{props.group.name}</span>
       </p>,
       {
         icon: <LucideClipboardCheck size={18} />,
