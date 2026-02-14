@@ -25,8 +25,38 @@ import { QueryOrigin } from '@/constants'
 import JoinGroupForm from './_components/join-group-form'
 import { Path } from '@/lib/utils/path'
 
-export const metadata: Metadata = {
-  title: 'Join Group',
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ groupId: string }>
+}): Promise<Metadata> {
+  const { groupId } = await params
+
+  if (!groupId) {
+    return {
+      title: 'Join Group',
+    }
+  }
+
+  const group = await db.query.groupsTable.findFirst({
+    where(fields, operators) {
+      return operators.eq(fields.id, groupId)
+    },
+    columns: {
+      name: true,
+    },
+  })
+
+  if (!group) {
+    return {
+      title: 'Join Group',
+    }
+  }
+
+  return {
+    title: `Join ${group.name}`,
+    description: `Join ${group.name} to tip on Formula 1 races with the group members.`,
+  }
 }
 
 export default async function JoinGroup({
