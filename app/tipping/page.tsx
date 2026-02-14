@@ -1039,8 +1039,8 @@ function CardInviteGroup({
       <CardHeader>
         <CardTitle>Invite your friends</CardTitle>
         <CardDescription>
-          F1 is better with your friends. Send them an invite link to start
-          tipping.
+          F1 is better with your friends. Send them an invite link to your
+          group.
         </CardDescription>
       </CardHeader>
       <CardFooter className='mt-auto'>
