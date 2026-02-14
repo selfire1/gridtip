@@ -25,18 +25,6 @@ import { QueryOrigin } from '@/constants'
 import JoinGroupForm from './_components/join-group-form'
 import { Path } from '@/lib/utils/path'
 
-function getGroup(id: Database.Group['id']) {
-  return db.query.groupsTable.findFirst({
-    where(fields, operators) {
-      return operators.eq(fields.id, id)
-    },
-    columns: {
-      name: true,
-      iconName: true,
-    },
-  })
-}
-
 export async function generateMetadata({
   params,
 }: {
@@ -214,4 +202,16 @@ export default async function JoinGroup({
       </Card>
     )
   }
+}
+
+function getGroup(id: Database.Group['id']) {
+  return db.query.groupsTable.findFirst({
+    where(fields, operators) {
+      return operators.eq(fields.id, id)
+    },
+    columns: {
+      name: true,
+      iconName: true,
+    },
+  })
 }
