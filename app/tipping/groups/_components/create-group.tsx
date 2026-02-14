@@ -43,6 +43,8 @@ import z from 'zod'
 import { ButtonText } from '@/components/button-text'
 import { createGroup } from '@/actions/create-group'
 import { updateProfile } from '@/actions/update-profile'
+import posthog from 'posthog-js'
+import { AnalyticsEvent } from '@/lib/posthog/events'
 
 const ProfileSchema = z.object({
   name: z.string().trim().min(1, 'Required').max(60, 'Too long'),
@@ -140,6 +142,9 @@ function CreateGroupDialog({ user }: { user: DalUser }) {
         throw new Error(groupResult.message)
       }
       group = groupResult.group
+      posthog.capture(AnalyticsEvent.GROUP_CREATED, {
+        group_name_length: validation.data.name.length,
+      })
     } catch (error) {
       console.error(error)
       toast.error('Could not create group', {

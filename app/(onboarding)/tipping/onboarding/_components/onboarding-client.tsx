@@ -14,6 +14,8 @@ import React, { useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Path } from '@/lib/utils/path'
+import posthog from 'posthog-js'
+import { AnalyticsEvent } from '@/lib/posthog/events'
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -42,6 +44,10 @@ export default function OnboardingClient() {
 
   React.useState<'group-join' | 'group-create'>()
 
+  React.useEffect(() => {
+    posthog.capture(AnalyticsEvent.ONBOARDING_STARTED)
+  }, [])
+
   const progressPercentage = React.useMemo(() => {
     switch (state.currentComponent) {
       case 'welcome':
@@ -56,6 +62,13 @@ export default function OnboardingClient() {
         return (3 / 3) * 100
     }
   }, [state.currentComponent])
+
+  React.useEffect(() => {
+    posthog.capture(AnalyticsEvent.ONBOARDING_STEP_VIEWED, {
+      step: state.currentComponent,
+      progress: progressPercentage,
+    })
+  }, [state.currentComponent, progressPercentage])
 
   const [loadingText, setLoadingText] = React.useState('Setting up…')
   const loadingTexts = [
@@ -96,6 +109,11 @@ export default function OnboardingClient() {
   }, [state.currentComponent])
 
   const goBackAction = useCallback(() => {
+    const fromStep = state.currentComponent
+    posthog.capture(AnalyticsEvent.ONBOARDING_BACK_CLICKED, {
+      from_step: fromStep,
+    })
+
     switch (state.currentComponent) {
       case 'welcome-initial':
       case 'welcome':
@@ -164,6 +182,11 @@ export default function OnboardingClient() {
   )
 
   function handleOnboardingComplete() {
+    posthog.capture(AnalyticsEvent.ONBOARDING_COMPLETED, {
+      selected_action: state.welcomeScreenSelectedGroupStep,
+      joined_global: state.globalGroupScreenData?.isJoin,
+    })
+
     let index = 0
     const interval = setInterval(() => {
       setLoadingText(loadingTexts[index])
@@ -211,6 +234,7 @@ function ActionBar({
   render?: React.ReactNode
 }) {
   const [isPending, startTransition] = React.useTransition()
+  const { state } = useOnboarding()
   const router = useRouter()
 
   return (
@@ -281,6 +305,10 @@ function ActionBar({
   }
 
   function handleSkip() {
+    posthog.capture(AnalyticsEvent.ONBOARDING_SKIPPED, {
+      at_step: state.currentComponent,
+    })
+
     startTransition(async () => {
       const result = await authClient.updateUser({ hasSeenOnboarding: true })
       if (result.error) {

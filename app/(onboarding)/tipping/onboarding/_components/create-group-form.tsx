@@ -28,6 +28,8 @@ import React from 'react'
 import { CreateGroupDetailsOnlySchema } from '@/lib/schemas/create-group'
 import { useOnboarding } from '../_lib/onboarding-context'
 import { toast } from 'sonner'
+import posthog from 'posthog-js'
+import { AnalyticsEvent } from '@/lib/posthog/events'
 
 export const OnboardingCreateGroupFormSchema =
   CreateGroupDetailsOnlySchema.omit({ cutoff: true })
@@ -158,7 +160,9 @@ export default function CreateGroupForm() {
   )
 
   function onSubmit(data: OnboardingCreateGroupFormData) {
-    console.log('submit', data)
+    posthog.capture(AnalyticsEvent.ONBOARDING_GROUP_CREATED, {
+      group_name_length: data.name.length,
+    })
     updateState({
       createGroupScreenData: {
         ...data,

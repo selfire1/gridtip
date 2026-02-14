@@ -7,6 +7,8 @@ import { getAnimation } from '../onboarding-client'
 import { Card, CardDescription, CardHeader } from '@/components/ui/card'
 import ScreenLayout from '../screen-layout'
 import { useOnboarding } from '../../_lib/onboarding-context'
+import posthog from 'posthog-js'
+import { AnalyticsEvent } from '@/lib/posthog/events'
 
 export function WelcomeScreen({ isInitialLoad }: { isInitialLoad: boolean }) {
   const { state, updateState, goToScreen: goToComponent } = useOnboarding()
@@ -37,11 +39,14 @@ export function WelcomeScreen({ isInitialLoad }: { isInitialLoad: boolean }) {
           <GroupOptionCard
             animation={getAnimation({ delay: 0.2, isInitialLoad })}
             isSelected={state.welcomeScreenSelectedGroupStep === 'create'}
-            setSelected={() =>
+            setSelected={() => {
+              posthog.capture(AnalyticsEvent.ONBOARDING_GROUP_ACTION_SELECTED, {
+                action: 'create',
+              })
               updateState({
                 welcomeScreenSelectedGroupStep: 'create',
               })
-            }
+            }}
             ariaLabel='Select creating a group'
             icon={<LucidePlus />}
             heading='Create Group'
@@ -50,11 +55,14 @@ export function WelcomeScreen({ isInitialLoad }: { isInitialLoad: boolean }) {
           <GroupOptionCard
             animation={getAnimation({ delay: 0.25, isInitialLoad })}
             isSelected={state.welcomeScreenSelectedGroupStep === 'join'}
-            setSelected={() =>
+            setSelected={() => {
+              posthog.capture(AnalyticsEvent.ONBOARDING_GROUP_ACTION_SELECTED, {
+                action: 'join',
+              })
               updateState({
                 welcomeScreenSelectedGroupStep: 'join',
               })
-            }
+            }}
             ariaLabel='Select joining a group'
             icon={<LucideArrowRight />}
             heading='Join Group'

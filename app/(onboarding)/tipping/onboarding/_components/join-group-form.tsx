@@ -34,6 +34,8 @@ import { findGroup } from '@/actions/join-group'
 import Alert from '@/components/alert'
 import { IconFromName } from '@/components/icon-from-name'
 import { useOnboarding } from '../_lib/onboarding-context'
+import posthog from 'posthog-js'
+import { AnalyticsEvent } from '@/lib/posthog/events'
 
 export type JoinGroupData = NonNullable<
   Awaited<ReturnType<typeof findGroup>>['data']
@@ -256,6 +258,7 @@ function GroupDetailsCard({
   )
 
   function handleJoin() {
+    posthog.capture(AnalyticsEvent.ONBOARDING_GROUP_JOINED)
     updateState({
       joinGroupScreenData: group,
     })

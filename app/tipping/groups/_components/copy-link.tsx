@@ -5,6 +5,8 @@ import { Database } from '@/db/types'
 import { LucideCheck, LucideClipboardCheck, LucideLink } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import posthog from 'posthog-js'
+import { AnalyticsEvent } from '@/lib/posthog/events'
 
 export default function CopyLink(
   props: {
@@ -36,6 +38,7 @@ export default function CopyLink(
   )
 
   function copyToClipboard() {
+    posthog.capture(AnalyticsEvent.GROUP_INVITE_LINK_COPIED)
     const baseUrl = window.location.origin
     navigator.clipboard.writeText(`${baseUrl}/join/${props.group.id}`)
     setIsCopied(true)

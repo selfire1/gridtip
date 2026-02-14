@@ -30,6 +30,8 @@ import { useRouter } from 'next/navigation'
 import { Spinner } from '@/components/ui/spinner'
 import { IconName } from '@/constants/icon-names'
 import Link from 'next/link'
+import posthog from 'posthog-js'
+import { AnalyticsEvent } from '@/lib/posthog/events'
 
 type GroupProp = Pick<
   Database.Group,
@@ -177,6 +179,7 @@ function EditGroupDialogContent({
         })
         return
       }
+      posthog.capture(AnalyticsEvent.GROUP_EDITED)
       dismiss()
       toast.success(
         <p>

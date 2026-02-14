@@ -13,13 +13,15 @@ import {
 } from '@/components/ui/form'
 import { ConstructorProps } from '@/components/constructor'
 import { Button } from '@/components/ui/button'
-import { useTransition } from 'react'
+import { useEffect, useTransition } from 'react'
 import { Loader2Icon } from 'lucide-react'
 import { schema as formSchema } from '../actions/schema'
 import { DeepPartial } from '@/types'
 import { SelectConstructor } from '@/components/select-constructor'
 import { DriverOptionProps as DriverOption } from '@/components/driver-option'
 import { SelectDriver } from '@/components/select-driver'
+import posthog from 'posthog-js'
+import { AnalyticsEvent } from '@/lib/posthog/events'
 
 export type Schema = z.infer<typeof formSchema>
 
@@ -57,6 +59,14 @@ export default function ChampionshipForm({
   ] as const
 
   const [isPending] = useTransition()
+
+  useEffect(() => {
+    posthog.capture(AnalyticsEvent.CHAMPIONSHIP_TIPS_VIEWED, {
+      has_existing_tips: Boolean(
+        defaultValues.driverChampion || defaultValues.constructorChampion,
+      ),
+    })
+  }, [defaultValues])
 
   return (
     <Form {...form}>
@@ -122,6 +132,10 @@ export default function ChampionshipForm({
   )
 
   async function runSubmit(data: Schema) {
+    posthog.capture(AnalyticsEvent.CHAMPIONSHIP_TIPS_SUBMITTED, {
+      driver_selected: Boolean(data.driverChampion),
+      constructor_selected: Boolean(data.constructorChampion),
+    })
     Promise.resolve()
     // TODO: implement
     console.log(data)

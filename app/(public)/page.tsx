@@ -46,6 +46,8 @@ import { ChevronRight, LucideTrophy } from 'lucide-react'
 import { getFormFields } from '@/lib/utils/tip-fields'
 import { Path } from '@/lib/utils/path'
 import { ConstructorProps } from '@/components/constructor'
+import posthog from 'posthog-js'
+import { AnalyticsEvent } from '@/lib/posthog/events'
 
 const ANIMATION = {
   image: { y: 2, duration: 12 },
@@ -111,7 +113,13 @@ export default function Home() {
             Become the star of your group by setting up a friendly tipping comp.
             It’s free!
           </p>
-          <Button size='lg' asChild>
+          <Button
+            size='lg'
+            asChild
+            onClick={() =>
+              posthog.capture(AnalyticsEvent.LANDING_BANNER_CTA_CLICKED)
+            }
+          >
             <Link href={Path.SignUp}>
               Start Now
               <ChevronRight />
@@ -254,12 +262,27 @@ function Hero() {
           </motion.div>
           <div className='flex gap-4'>
             <motion.div {...textAnimation(0.1)}>
-              <Button size='lg' asChild>
+              <Button
+                size='lg'
+                asChild
+                onClick={() =>
+                  posthog.capture(AnalyticsEvent.LANDING_CTA_CLICKED, {
+                    location: 'hero',
+                  })
+                }
+              >
                 <Link href={Path.SignUp}>Get Started</Link>
               </Button>
             </motion.div>
             <motion.div {...textAnimation(0.15)}>
-              <Button size='lg' variant='outline' asChild>
+              <Button
+                size='lg'
+                variant='outline'
+                asChild
+                onClick={() =>
+                  posthog.capture(AnalyticsEvent.LANDING_LEARN_MORE_CLICKED)
+                }
+              >
                 <Link href='#how-it-works'>Learn More</Link>
               </Button>
             </motion.div>

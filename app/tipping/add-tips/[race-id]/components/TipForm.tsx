@@ -23,6 +23,8 @@ import { ConstructorProps } from '@/components/constructor'
 import { DriverOptionProps as DriverOption } from '@/components/driver-option'
 import { SelectConstructor } from '@/components/select-constructor'
 import { getFormFields } from '@/lib/utils/tip-fields'
+import posthog from 'posthog-js'
+import { AnalyticsEvent } from '@/lib/posthog/events'
 
 const formSchema = submitTipSchema.partial()
 export type Schema = z.infer<typeof formSchema>
@@ -58,6 +60,19 @@ export default function TipForm({
     formState: { isDirty, isSubmitSuccessful },
     reset,
   } = form
+
+  const isEditMode = Boolean(Object.values(defaultValues).length)
+
+  useEffect(() => {
+    posthog.capture(AnalyticsEvent.TIPS_FORM_VIEWED, {
+      race_id: race.id,
+      race_name: race.raceName,
+      is_sprint: isSprint,
+      mode: isEditMode ? 'edit' : 'create',
+      closed_fields: disabledFields.size,
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     resetFormStateToSetDirtyToFalse()
@@ -139,6 +154,20 @@ export default function TipForm({
     startTransition(async () => {
       try {
         await submitChanges(data)
+
+        const filledFieldsCount = Object.values(data).filter((v) => v).length
+        posthog.capture(
+          isEditMode
+            ? AnalyticsEvent.TIPS_EDITED
+            : AnalyticsEvent.TIPS_SUBMITTED,
+          {
+            race_id: race.id,
+            race_name: race.raceName,
+            is_sprint: isSprint,
+            fields_filled: filledFieldsCount,
+          },
+        )
+
         toast.success('Tips saved', {
           description: `Your tips for the ${race.raceName} have been saved. Good luck!`,
           duration: 2_000,

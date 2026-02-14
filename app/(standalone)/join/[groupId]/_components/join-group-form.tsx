@@ -21,6 +21,8 @@ import { LucideChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
+import posthog from 'posthog-js'
+import { AnalyticsEvent } from '@/lib/posthog/events'
 
 export default function JoinGroupForm({
   groupId,
@@ -93,6 +95,8 @@ export default function JoinGroupForm({
         file: image.file,
         useDefaultImage: image.preview === user.profileImageUrl,
       })
+
+      posthog.capture(AnalyticsEvent.GROUP_JOINED_VIA_LINK)
 
       router.push('/tipping')
       toast.success(

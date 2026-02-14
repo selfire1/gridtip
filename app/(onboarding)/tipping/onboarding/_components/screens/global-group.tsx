@@ -6,6 +6,8 @@ import ScreenLayout from '../screen-layout'
 import { motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { useOnboarding } from '../../_lib/onboarding-context'
+import posthog from 'posthog-js'
+import { AnalyticsEvent } from '@/lib/posthog/events'
 
 export default function GlobalGroupScreen() {
   const { goToScreen, updateState } = useOnboarding()
@@ -51,10 +53,12 @@ export default function GlobalGroupScreen() {
   )
 
   function handleSkip() {
+    posthog.capture(AnalyticsEvent.ONBOARDING_GLOBAL_GROUP_SKIPPED)
     goToScreen('profile')
   }
 
   function handleJoin() {
+    posthog.capture(AnalyticsEvent.ONBOARDING_GLOBAL_GROUP_JOINED)
     updateState({
       globalGroupScreenData: {
         isJoin: true,
