@@ -1,7 +1,6 @@
 'use server'
 
 import { createGroup } from './create-group'
-import { CreateGroupData as CreateGroupSchema } from '@/lib/schemas/create-group'
 import { joinGlobalGroup, joinGroup } from './join-group'
 import { verifySession } from '@/lib/dal'
 import { db } from '@/db'
@@ -10,6 +9,7 @@ import { eq } from 'drizzle-orm/sql'
 import { uploadMaybeFile } from '@/lib/utils/uploadthing'
 import { ProfileState } from '@/app/(onboarding)/tipping/onboarding/_components/screens/profile-screen'
 import { updateProfile } from './update-profile'
+import { OnboardingState } from '@/app/(onboarding)/tipping/onboarding/_lib/onboarding-context'
 
 export type Log = {
   icon?: string
@@ -22,7 +22,7 @@ export async function joinOrCreateGroupAndUpdateImage(
   input: (
     | {
         action: 'create'
-        groupData?: CreateGroupSchema
+        groupData?: OnboardingState['createGroupScreenData']
       }
     | {
         action: 'join'
@@ -32,20 +32,29 @@ export async function joinOrCreateGroupAndUpdateImage(
     profileData: ProfileState | undefined
   },
 ) {
-  await verifySession()
+  const { user } = await verifySession()
 
   const logs = [] as Log[]
-  const { log: groupLog, group } = await joinOrCreateGroup()
+  const profile = {
+    name: input.profileData?.name || user.name,
+    file: input.profileData?.imageFile,
+  }
+  if (!profile.name) {
+    logs.push({
+      ok: false,
+      title: 'Could not create group',
+      description: 'No username provided',
+    })
+  }
+  const { log: groupLog, group } = await joinOrCreateGroup({
+    userName: profile.name,
+  })
   if (groupLog) {
     logs.push(groupLog)
   }
   if (!group?.id) {
     console.log('no group id')
     return logs
-  }
-  const profile = {
-    name: input.profileData?.name,
-    file: input.profileData?.imageFile,
   }
   console.log({
     group: input.groupData?.name ?? 'none',
@@ -63,9 +72,13 @@ export async function joinOrCreateGroupAndUpdateImage(
 
   return [...logs, ...profileResultLogs]
 
-  async function joinOrCreateGroup() {
+  async function joinOrCreateGroup({ userName }: { userName: string }) {
     if (input.action === 'create' && input.groupData) {
-      const result = await createGroup(input.groupData)
+      const result = await createGroup({
+        ...input.groupData,
+        cutoff: 60,
+        userName,
+      })
       if (!result.ok) {
         const log = {
           ok: false as const,

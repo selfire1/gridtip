@@ -29,13 +29,16 @@ import { CreateGroupDetailsOnlySchema } from '@/lib/schemas/create-group'
 import { useOnboarding } from '../_lib/onboarding-context'
 import { toast } from 'sonner'
 
-const formSchema = CreateGroupDetailsOnlySchema.omit({ cutoff: true })
-type FormSchema = z.infer<typeof formSchema>
+export const OnboardingCreateGroupFormSchema =
+  CreateGroupDetailsOnlySchema.omit({ cutoff: true })
+export type OnboardingCreateGroupFormData = z.infer<
+  typeof OnboardingCreateGroupFormSchema
+>
 
 export default function CreateGroupForm() {
   const { updateState, goToScreen, state } = useOnboarding()
-  const form = useForm<FormSchema>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<OnboardingCreateGroupFormData>({
+    resolver: zodResolver(OnboardingCreateGroupFormSchema),
     defaultValues: {
       name: state.createGroupScreenData?.name ?? '',
       icon: state.createGroupScreenData?.icon ?? SUPPORTED_ICON_NAMES[0],
@@ -154,12 +157,11 @@ export default function CreateGroupForm() {
     </div>
   )
 
-  function onSubmit(data: FormSchema) {
+  function onSubmit(data: OnboardingCreateGroupFormData) {
     console.log('submit', data)
     updateState({
       createGroupScreenData: {
         ...data,
-        cutoff: 0,
       },
     })
     goToScreen('global-group')

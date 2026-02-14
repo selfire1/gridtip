@@ -8,7 +8,6 @@ import {
   useState,
 } from 'react'
 import { GroupAction } from '../_components/onboarding-client'
-import { CreateGroupData as CreateGroupSchema } from '@/lib/schemas/create-group'
 import { JoinGroupData } from '../_components/join-group-form'
 import { ProfileState } from '../_components/screens/profile-screen'
 import type { DalUser } from '@/lib/dal'
@@ -19,6 +18,7 @@ import {
   type Log,
 } from '@/actions/complete-onboarding'
 import { toast } from 'sonner'
+import { OnboardingCreateGroupFormData } from '../_components/create-group-form'
 
 type ComponentKey =
   | 'welcome-initial'
@@ -32,7 +32,7 @@ export type OnboardingState = {
   currentComponent: ComponentKey
   welcomeScreenSelectedGroupStep?: GroupAction
 
-  createGroupScreenData?: CreateGroupSchema
+  createGroupScreenData?: OnboardingCreateGroupFormData
   joinGroupScreenData?: JoinGroupData
 
   globalGroupScreenData?: { isJoin: boolean }
