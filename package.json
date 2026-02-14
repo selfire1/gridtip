@@ -36,6 +36,7 @@
     "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@sentry/nextjs": "^10",
     "@tanstack/react-form": "^1.27.7",
     "@tanstack/react-table": "^8.21.3",
     "bcryptjs": "^3.0.2",
