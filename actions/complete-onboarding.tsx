@@ -159,6 +159,7 @@ export async function joinGlobalGroupIfDesiredAndUpdateImage(input: {
     userName: input.profileName,
   })
   if (!joinGlobalResult.ok) {
+    console.error(joinGlobalResult)
     logs.push({
       ok: false,
       title: 'Could not join global group',
