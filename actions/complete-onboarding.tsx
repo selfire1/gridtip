@@ -146,6 +146,7 @@ export async function joinGlobalGroupIfDesiredAndUpdateImage(input: {
 
   await verifySession()
   if (!input.profileName) {
+    console.log('no username for global group')
     logs.push({
       ok: false as const,
       title: 'Could not join global group',
