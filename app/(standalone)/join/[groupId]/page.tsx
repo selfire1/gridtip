@@ -46,10 +46,16 @@ export async function generateMetadata({
     }
   }
 
+  const title = `Join ${group.name}`
+  const description = `Join ${group.name} to tip on Formula 1 races with the group members.`
   return {
-    title: `Join ${group.name}`,
-    description: `Join ${group.name} to tip on Formula 1 races with the group members.`,
-  }
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+    },
+  } satisfies Metadata
 }
 
 export default async function JoinGroup({
