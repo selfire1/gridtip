@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: 'Privacy Policy',
 }
 
-export default function Privacy() {
+export default async function Privacy() {
   return (
     <div className='py-12 is-container space-y-12'>
       <div className='text-center max-w-prose mx-auto space-y-4'>
@@ -20,7 +20,7 @@ export default function Privacy() {
       <div
         className='typography'
         dangerouslySetInnerHTML={{
-          __html: getHtmlFromMarkdown(getContents()),
+          __html: await getHtmlFromMarkdown(getContents()),
         }}
       />
     </div>

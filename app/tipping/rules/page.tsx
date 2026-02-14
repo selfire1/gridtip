@@ -6,13 +6,13 @@ export const metadata: Metadata = {
   title: 'Rules',
 }
 
-export default function RulesPage() {
+export default async function RulesPage() {
   return (
     <div className='typography'>
       <h1 className='sr-only'>Rules</h1>
       <div
         dangerouslySetInnerHTML={{
-          __html: getHtmlFromMarkdown(getContents()),
+          __html: await getHtmlFromMarkdown(getContents()),
         }}
       />
     </div>
