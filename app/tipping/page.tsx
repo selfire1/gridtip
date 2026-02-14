@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import Image from 'next/image'
 import {
   Accordion,
   AccordionContent,
@@ -14,6 +15,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { RACE_PREDICTION_FIELDS, RacePredictionField } from '@/constants'
+import ChampionshipImage from '@/public/img/championship.jpg'
 import { db } from '@/db'
 import {
   groupMembersTable,
@@ -23,6 +25,7 @@ import {
 import { verifySession } from '@/lib/dal'
 import {
   getCurrentGroupId,
+  getFirstRace,
   getGroupMembers,
   getGroupMembership,
 } from '@/lib/utils/groups'
@@ -41,7 +44,7 @@ import { and, eq, inArray } from 'drizzle-orm'
 import { LucideArrowRight, LucideClock, LucideIcon } from 'lucide-react'
 import React, { cache, ReactNode } from 'react'
 import UserAvatar from '@/components/user-avatar'
-import clsx from 'clsx'
+import clsx, { ClassValue } from 'clsx'
 import Constructor from '@/components/constructor'
 import CountryFlag from '@/components/country-flag'
 import { Database } from '@/db/types'
@@ -59,19 +62,26 @@ import { cn } from '@/lib/utils'
 import { getConstructorCssVariable } from '@/lib/utils/constructor-css'
 import CopyLink from './groups/_components/copy-link'
 import { GLOBAL_GROUP_ID } from '@/constants/group'
+import { TimeTile } from '@/components/time-tile'
 
 export default async function DashboardPage() {
   const { userId, user } = await verifySession()
   const currentUserGroup = await getCurrentGroupId()
 
   const getCutoff = cache(getCutoffUncached)
-  const [hasGroups, ongoingRaceWithOffset, ongoingRaceStrict, nextRace] =
-    await Promise.all([
-      getIsUserInGroups(userId),
-      getOngoingRace(userId, { plusDay: 1 }),
-      getOngoingRace(userId, { plusDay: 0 }),
-      getNextRace(userId),
-    ])
+  const [
+    hasGroups,
+    ongoingRaceWithOffset,
+    ongoingRaceStrict,
+    nextRace,
+    firstRace,
+  ] = await Promise.all([
+    getIsUserInGroups(userId),
+    getOngoingRace(userId, { plusDay: 1 }),
+    getOngoingRace(userId, { plusDay: 0 }),
+    getNextRace(userId),
+    getFirstRace(),
+  ])
   const previousRace = await getPreviousRace(nextRace?.round)
 
   const shouldShowPrevious = !ongoingRaceStrict && previousRace
@@ -118,6 +128,9 @@ export default async function DashboardPage() {
         end: addDays(group.championshipTipsRevalDate, 3),
       })
 
+    const showTipChampionshipsCard =
+      firstRace?.qualifyingDate && isFuture(firstRace.qualifyingDate)
+
     return (
       <>
         {showInviteCard && <CardInviteGroup group={group} />}
@@ -131,6 +144,9 @@ export default async function DashboardPage() {
             groupId={groupId}
             collapsed={hasOngoingWithOffsetResults}
           />
+        )}
+        {showTipChampionshipsCard && (
+          <CardTipChampionships deadline={firstRace.qualifyingDate} />
         )}
         {shouldShouldShowOngoingCards && (
           <>
@@ -333,19 +349,6 @@ export default async function DashboardPage() {
         </CardFooter>
       </FlagBackgroundCard>
     )
-
-    function getBadgeVariant(
-      due: Date,
-    ): 'destructive' | 'default' | 'outline' | 'secondary' {
-      const hoursToNow = differenceInHours(due, new Date())
-      if (hoursToNow < 3) {
-        return 'destructive'
-      }
-      if (hoursToNow < 24 * 2) {
-        return 'default'
-      }
-      return 'secondary'
-    }
 
     async function getHasTipped() {
       return !!(await db.query.predictionsTable.findFirst({
@@ -1045,4 +1048,106 @@ function CardInviteGroup({
       </CardFooter>
     </Card>
   )
+}
+
+function CardTipChampionships({ deadline }: { deadline: Date }) {
+  return (
+    <BackgroundCard
+      blur='blur-2xl'
+      image={
+        <Image
+          src={ChampionshipImage}
+          height={150}
+          width={100}
+          className='w-full h=full'
+          alt=''
+        />
+      }
+    >
+      <CardHeader className='flex gap-2 justify-between items-center'>
+        <div className='flex flex-col gap-2'>
+          <CardTitle>
+            {' '}
+            <span className='flex flex-col gap-2'>
+              <div className='flex items-center gap-2'>
+                <Badge variant={getBadgeVariant(deadline)}>
+                  Due in {formatDistanceToNowStrict(deadline)}
+                </Badge>
+              </div>
+              <span>Tip Championships</span>
+            </span>
+          </CardTitle>
+          <CardDescription>
+            Predict the Driver’s and Constructor’s championships for extra
+            points
+          </CardDescription>
+        </div>
+        <Image
+          src={ChampionshipImage}
+          height={300}
+          width={200}
+          className='size-12 overflow-hidden object-cover rounded-full border-2'
+          alt='Golden trophy in front of a wheel'
+        />
+      </CardHeader>
+      <CardContent className='flex'>
+        <TimeTile
+          title='Tips due'
+          date={new Date(deadline)}
+          icon='Tipping'
+          isActive={true}
+        />
+      </CardContent>
+      <CardFooter className='mt-auto'>
+        <Button asChild>
+          <Link href={`/tipping/championships`}>
+            Predict championships
+            <LucideArrowRight />
+          </Link>
+        </Button>
+      </CardFooter>
+    </BackgroundCard>
+  )
+}
+
+function BackgroundCard({
+  image,
+  children,
+  blur,
+  gradient,
+}: {
+  image: ReactNode
+  blur?: ClassValue
+  gradient?: string
+  children: ReactNode
+}) {
+  return (
+    <Card className='relative isolate overflow-hidden'>
+      <div
+        className={cn('absolute inset-0 overflow-hidden z-[-1] blur-3xl', blur)}
+      >
+        <div
+          className={cn(
+            'absolute inset-0 bg-gradient-to-br from-card/85 to-card',
+            gradient,
+          )}
+        />
+        {image}
+      </div>
+      {children}
+    </Card>
+  )
+}
+
+function getBadgeVariant(
+  due: Date,
+): 'destructive' | 'default' | 'outline' | 'secondary' {
+  const hoursToNow = differenceInHours(due, new Date())
+  if (hoursToNow < 3) {
+    return 'destructive'
+  }
+  if (hoursToNow < 24 * 2) {
+    return 'default'
+  }
+  return 'secondary'
 }
