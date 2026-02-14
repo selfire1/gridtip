@@ -119,7 +119,7 @@ export function GroupSwitcher({
 
   function CurrentGroupLabel() {
     return (
-      <div className='flex items-center gap-2 relative'>
+      <div className='flex items-center gap-2 relative w-full'>
         <Link href='/tipping' className='absolute inset-0' title='Dashboard' />
         <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg'>
           <IconFromName
