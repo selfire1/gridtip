@@ -11,8 +11,8 @@ export default function CreateGroupScreen() {
       title='Create Group'
       description={
         <p>
-          Start a new group for your mates. You receive an invitation link in
-          the next step.
+          Start a new group for your mates. You can invite them after completing
+          the setup.
         </p>
       }
       content={
