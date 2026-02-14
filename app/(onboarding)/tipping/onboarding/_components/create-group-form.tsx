@@ -25,10 +25,11 @@ import { cn } from '@/lib/utils'
 import { Button } from '@ui/button'
 import { LucideChevronRight } from 'lucide-react'
 import React from 'react'
-import { CreateGroupSchema } from '@/lib/schemas/create-group'
+import { CreateGroupDetailsOnlySchema } from '@/lib/schemas/create-group'
 import { useOnboarding } from '../_lib/onboarding-context'
+import { toast } from 'sonner'
 
-const formSchema = CreateGroupSchema.omit({ cutoff: true })
+const formSchema = CreateGroupDetailsOnlySchema.omit({ cutoff: true })
 type FormSchema = z.infer<typeof formSchema>
 
 export default function CreateGroupForm() {
@@ -37,13 +38,17 @@ export default function CreateGroupForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: state.createGroupScreenData?.name ?? '',
-      icon: state.createGroupScreenData?.icon ?? undefined,
+      icon: state.createGroupScreenData?.icon ?? SUPPORTED_ICON_NAMES[0],
     },
   })
 
   return (
     <div className='space-y-6'>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit, (errors) =>
+          toast.error('Invalid form'),
+        )}
+      >
         <Card>
           <CardHeader>
             <CardTitle>Your group</CardTitle>
@@ -150,6 +155,7 @@ export default function CreateGroupForm() {
   )
 
   function onSubmit(data: FormSchema) {
+    console.log('submit', data)
     updateState({
       createGroupScreenData: {
         ...data,
