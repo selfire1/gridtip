@@ -167,13 +167,13 @@ export default async function DashboardPage() {
         <CardContent>
           <div className='grid grid-cols-2 gap-4'>
             {tipped.length > 0 && (
-              <UserList title='Tipped' Icon={Icon.Tipping} users={tipped} />
+              <MemberList title='Tipped' Icon={Icon.Tipping} members={tipped} />
             )}
             {notTipped.length > 0 && (
-              <UserList
+              <MemberList
                 title='Yet To Tip'
                 Icon={LucideClock}
-                users={notTipped}
+                members={notTipped}
               />
             )}
           </div>
@@ -181,12 +181,14 @@ export default async function DashboardPage() {
       </Card>
     )
 
-    function UserList({
+    function MemberList({
       title,
       Icon,
-      users,
+      members: members,
     }: {
-      users: Array<Pick<Database.User, 'id' | 'name' | 'profileImageUrl'>>
+      members: Array<
+        Pick<Database.GroupMember, 'id' | 'userName' | 'profileImage'>
+      >
       title: string
       Icon: LucideIcon
     }) {
@@ -198,10 +200,14 @@ export default async function DashboardPage() {
           </p>
           <div className='rounded-lg overflow-hidden border'>
             <div className='space-y-4 p-4  h-32 overflow-y-auto'>
-              {users.map((user) => (
-                <div key={user.id} className='flex items-center gap-2'>
-                  <UserAvatar className='size-6 rounded-lg' {...user} />
-                  <p className='text-sm'>{user.name}</p>
+              {members.map((member) => (
+                <div key={member.id} className='flex items-center gap-2'>
+                  <UserAvatar
+                    className='size-6 rounded-lg'
+                    profileImageUrl={member.profileImage}
+                    name={member.userName}
+                  />
+                  <p className='text-sm'>{member.userName}</p>
                 </div>
               ))}
             </div>
@@ -211,23 +217,14 @@ export default async function DashboardPage() {
     }
 
     async function getTippingStatus() {
-      const groupMembers = (
-        await db.query.groupMembersTable.findMany({
-          where: (group, { eq }) => eq(group.groupId, groupId),
-          columns: {
-            id: true,
-          },
-          with: {
-            user: {
-              columns: {
-                id: true,
-                name: true,
-                profileImageUrl: true,
-              },
-            },
-          },
-        })
-      ).map((groupMember) => groupMember.user)
+      const groupMembers = await db.query.groupMembersTable.findMany({
+        where: (group, { eq }) => eq(group.groupId, groupId),
+        columns: {
+          id: true,
+          userName: true,
+          profileImage: true,
+        },
+      })
 
       const peopleWhoTippedThisRace = await db.query.predictionsTable.findMany({
         where: (prediction, { eq, and }) =>
