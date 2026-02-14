@@ -129,11 +129,6 @@ export function IconFromName(props: {
     ['lucide:globe', LucideGlobe],
   ])
 
-  console.assert(
-    SUPPORTED_ICON_NAMES.includes(props.iconName as IconName),
-    'invalid icon name',
-  )
-
   const IconComponent =
     stringToIcon.get(props.iconName as IconName) ||
     (props.fallback ? stringToIcon.get(props.fallback) : undefined)
