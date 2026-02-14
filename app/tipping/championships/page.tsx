@@ -6,7 +6,7 @@ import {
   getFirstRace,
   getGroupMembership,
 } from '@/lib/utils/groups'
-import ChampionshipForm, { Schema } from './components/championship-form'
+import ChampionshipForm from './components/championship-form'
 import { verifySession } from '@/lib/dal'
 import { db } from '@/db'
 import { DeepPartial } from '@/types'
@@ -26,6 +26,7 @@ import React from 'react'
 import { getConstructorCssVariable } from '@/lib/utils/constructor-css'
 import { Database } from '@/db/types'
 import EmptyGroup from '@/components/empty-group'
+import { ChampionshipsTipData } from './actions/schema'
 
 export default async function ChampionshipPage() {
   const { userId } = await verifySession()
@@ -97,9 +98,7 @@ export default async function ChampionshipPage() {
     </div>
   )
 
-  async function getDefaultValues(
-    memberId: string,
-  ): Promise<DeepPartial<Schema>> {
+  async function getDefaultValues(memberId: string) {
     const tips = await getDefaultValuesArray({ memberId })
     const driverTip = tips.find((tip) => tip.position === 'championshipDriver')
     const constructorTip = tips.find(
@@ -112,7 +111,7 @@ export default async function ChampionshipPage() {
       constructorChampion: {
         id: constructorTip?.constructor?.id,
       },
-    }
+    } satisfies DeepPartial<ChampionshipsTipData>
   }
 
   async function getDefaultValuesArray({ memberId }: { memberId: string }) {

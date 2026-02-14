@@ -2,7 +2,6 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import z from 'zod'
 import {
   Form,
   FormDescription,
@@ -15,15 +14,18 @@ import { ConstructorProps } from '@/components/constructor'
 import { Button } from '@/components/ui/button'
 import { useEffect, useTransition } from 'react'
 import { Loader2Icon } from 'lucide-react'
-import { schema as formSchema } from '../actions/schema'
+import {
+  ChampionshipsTipData,
+  ChampionshipsTipSchema as formSchema,
+} from '../actions/schema'
 import { DeepPartial } from '@/types'
 import { SelectConstructor } from '@/components/select-constructor'
 import { DriverOptionProps as DriverOption } from '@/components/driver-option'
 import { SelectDriver } from '@/components/select-driver'
 import posthog from 'posthog-js'
 import { AnalyticsEvent } from '@/lib/posthog/events'
-
-export type Schema = z.infer<typeof formSchema>
+import { submitChampionship } from '../actions/submit-championships'
+import { toast } from 'sonner'
 
 export default function ChampionshipForm({
   drivers,
@@ -31,12 +33,12 @@ export default function ChampionshipForm({
   defaultValues,
   disabled,
 }: {
-  defaultValues: DeepPartial<Schema>
+  defaultValues: DeepPartial<ChampionshipsTipData>
   drivers: DriverOption[]
   constructors: ConstructorProps[]
   disabled: boolean
 }) {
-  const form = useForm<Schema>({
+  const form = useForm<ChampionshipsTipData>({
     resolver: zodResolver(formSchema),
     defaultValues,
   })
@@ -58,7 +60,7 @@ export default function ChampionshipForm({
     },
   ] as const
 
-  const [isPending] = useTransition()
+  const [isPending, startTransition] = useTransition()
 
   useEffect(() => {
     posthog.capture(AnalyticsEvent.CHAMPIONSHIP_TIPS_VIEWED, {
@@ -131,28 +133,26 @@ export default function ChampionshipForm({
     </Form>
   )
 
-  async function runSubmit(data: Schema) {
-    posthog.capture(AnalyticsEvent.CHAMPIONSHIP_TIPS_SUBMITTED, {
-      driver_selected: Boolean(data.driverChampion),
-      constructor_selected: Boolean(data.constructorChampion),
+  function runSubmit(data: ChampionshipsTipData) {
+    startTransition(async () => {
+      try {
+        const result = await submitChampionship(data)
+        if (!result.ok) {
+          throw new Error(result.message)
+        }
+        posthog.capture(AnalyticsEvent.CHAMPIONSHIP_TIPS_SUBMITTED, {
+          driver_selected: Boolean(data.driverChampion),
+          constructor_selected: Boolean(data.constructorChampion),
+        })
+        toast.success('Tips saved', {
+          description: `Your tips for the Championships have been saved. Good luck!`,
+        })
+      } catch (err) {
+        const error = err as Error
+        toast.error('Could not save', {
+          description: error.message,
+        })
+      }
     })
-    Promise.resolve()
-    // TODO: implement
-    console.log(data)
-    // startTransition(async () => {
-    //   try {
-    //     await submitChanges(data)
-    //     toast.success('Tips saved', {
-    //       description: `Your tips for the ${race.raceName} have been saved. Good luck!`,
-    //       duration: 2_000,
-    //     })
-    //     setShouldShowSaved(true)
-    //   } catch (err) {
-    //     const error = err as Error
-    //     toast.error('Could not save', {
-    //       description: error.message,
-    //     })
-    //   }
-    // })
   }
 }

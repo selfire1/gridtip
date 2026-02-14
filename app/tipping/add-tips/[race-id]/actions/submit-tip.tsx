@@ -18,6 +18,7 @@ import { onConflictUpdateKeys } from '@/lib/utils/drizzle'
 import { serverSubmitTipSchema as schema } from './schema'
 import { revalidateTag } from 'next/cache'
 import { CacheTag } from '@/constants/cache'
+import { getTargetGroupAndMembership } from '@/lib/utils/groups'
 
 export async function submitChanges(input: Record<string, unknown>) {
   type Schema = z.infer<typeof schema>
@@ -33,7 +34,10 @@ export async function submitChanges(input: Record<string, unknown>) {
     throw new Error('No tips supplied')
   }
 
-  const { group: groupOfUser, member } = await getTargetGroupAndMembership()
+  const { group: groupOfUser, member } = await getTargetGroupAndMembership({
+    groupId,
+    userId,
+  })
 
   const { prediction, entries: existing } = await getExistingPredictions()
   const race = await getRaceFromId(raceId)
@@ -253,37 +257,6 @@ export async function submitChanges(input: Record<string, unknown>) {
     function throwError(position: RacePredictionField) {
       throw new Error(`Cannot predict ${position} after cutoff`)
     }
-  }
-
-  async function getTargetGroupAndMembership() {
-    const membershipInfo = await db.query.groupMembersTable.findFirst({
-      where: (group, { eq, and }) =>
-        and(
-          // group is target group
-          eq(group.groupId, groupId),
-          // user is member
-          eq(group.userId, userId),
-        ),
-      columns: { id: true },
-      with: {
-        group: {
-          columns: {
-            id: true,
-            cutoffInMinutes: true,
-          },
-        },
-      },
-    })
-    if (!membershipInfo) {
-      throw new Error('Not a member of group')
-    }
-    const { group, ...member } = membershipInfo
-    // const group = membershipInfo?.group
-    if (!group) {
-      console.error('no group', { input, groupId, userId })
-      throw new Error('Invalid group')
-    }
-    return { group, member }
   }
 
   function validateInput() {

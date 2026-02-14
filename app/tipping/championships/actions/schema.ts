@@ -1,6 +1,6 @@
 import z from 'zod'
 
-export const schema = z.object({
+export const ChampionshipsTipSchema = z.object({
   driverChampion: z.object({
     id: z.string().min(1, 'Required'),
   }),
@@ -8,3 +8,5 @@ export const schema = z.object({
     id: z.string().min(1, 'Required'),
   }),
 })
+
+export type ChampionshipsTipData = z.infer<typeof ChampionshipsTipSchema>

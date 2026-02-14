@@ -7,6 +7,7 @@ import { GROUP_ID_COOKIE_NAME } from '@/constants'
 import { cookies } from 'next/headers'
 import { unstable_cache } from 'next/cache'
 import { CacheTag } from '@/constants/cache'
+import { Database } from '@/db/types'
 
 export {
   cachedGetGroupsForUser as getGroupsForUser,
@@ -127,4 +128,36 @@ export async function getFirstRace() {
   return await unstable_cache(getRaceUncached, [], {
     tags: [CacheTag.Races],
   })()
+}
+
+export async function getTargetGroupAndMembership({
+  groupId,
+  userId,
+}: {
+  groupId: Database.GroupId
+  userId: Database.UserId
+}) {
+  const membershipInfo = await db.query.groupMembersTable.findFirst({
+    where: (group, { eq, and }) =>
+      and(
+        // group is target group
+        eq(group.groupId, groupId),
+        // user is member
+        eq(group.userId, userId),
+      ),
+    columns: { id: true },
+    with: {
+      group: {
+        columns: {
+          id: true,
+          cutoffInMinutes: true,
+        },
+      },
+    },
+  })
+  if (!membershipInfo) {
+    throw new Error('Not a member of group')
+  }
+  const { group, ...member } = membershipInfo
+  return { group, member }
 }
