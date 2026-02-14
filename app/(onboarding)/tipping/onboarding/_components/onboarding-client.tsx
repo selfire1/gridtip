@@ -168,7 +168,7 @@ export default function OnboardingClient() {
     const interval = setInterval(() => {
       setLoadingText(loadingTexts[index])
       index = (index + 1) % loadingTexts.length
-    }, 2000)
+    }, 3000)
     startTransition(async () => {
       const logs = await completeOnboarding()
       router.push(Path.Dashboard)
