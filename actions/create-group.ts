@@ -7,6 +7,7 @@ import { groupMembersTable, groupsTable } from '@/db/schema/schema'
 import { Database } from '@/db/types'
 import { CreateGroupData, CreateGroupSchema } from '@/lib/schemas/create-group'
 import { setGroupCookie } from '@/lib/utils/group-cookie-server'
+import * as Sentry from '@sentry/nextjs'
 
 export async function createGroup(data: CreateGroupData) {
   const { user } = await verifySession()
@@ -33,6 +34,16 @@ export async function createGroup(data: CreateGroupData) {
       .returning()
     group = createdGroup
   } catch (error) {
+    Sentry.captureException(error, {
+      tags: {
+        operation: 'create-group-insert',
+        context: 'server-action',
+      },
+      extra: {
+        userId: user.id,
+        groupName: data.name,
+      },
+    })
     return {
       ok: false as const,
       error: (error as Error)?.message,
@@ -49,6 +60,16 @@ export async function createGroup(data: CreateGroupData) {
       userName: data.userName,
     })
   } catch (error) {
+    Sentry.captureException(error, {
+      tags: {
+        operation: 'create-group-member',
+        context: 'server-action',
+      },
+      extra: {
+        userId: user.id,
+        groupId: group.id,
+      },
+    })
     return {
       ok: false as const,
       error: (error as Error)?.message,

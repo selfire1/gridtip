@@ -7,6 +7,7 @@ import { groupsTable } from '@/db/schema/schema'
 import { Database } from '@/db/types'
 import { eq } from 'drizzle-orm'
 import { EditGroupData, EditGroupSchema } from '@/lib/schemas/edit-group'
+import * as Sentry from '@sentry/nextjs'
 
 export async function editGroup(
   groupId: Database.Group['id'],
@@ -47,6 +48,15 @@ export async function editGroup(
       group,
     }
   } catch (error) {
+    Sentry.captureException(error, {
+      tags: {
+        operation: 'edit-group',
+        context: 'server-action',
+      },
+      extra: {
+        groupId,
+      },
+    })
     return {
       ok: false,
       error: (error as Error)?.message,

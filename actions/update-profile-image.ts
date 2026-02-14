@@ -6,6 +6,7 @@ import { user } from '@/db/schema/auth-schema'
 import { eq } from 'drizzle-orm'
 import { ServerResponse } from '@/types'
 import { uploadImageFile } from '@/lib/utils/uploadthing'
+import * as Sentry from '@sentry/nextjs'
 
 export async function updateDefaultProfileImage(
   formData: FormData,
@@ -33,6 +34,15 @@ export async function updateDefaultProfileImage(
 
     return { ok: true, message: 'Profile image updated' }
   } catch (error) {
+    Sentry.captureException(error, {
+      tags: {
+        operation: 'upload-profile-image',
+        context: 'server-action',
+      },
+      extra: {
+        userId: session.user.id,
+      },
+    })
     console.error('Upload error:', error)
     return { ok: false, message: 'Failed to upload image' }
   }

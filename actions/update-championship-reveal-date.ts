@@ -6,6 +6,7 @@ import { db } from '@/db'
 import { groupsTable } from '@/db/schema/schema'
 import { Database } from '@/db/types'
 import { eq } from 'drizzle-orm'
+import * as Sentry from '@sentry/nextjs'
 
 const schema = z.object({
   championshipTipsRevalDate: z.date().nullable(),
@@ -51,6 +52,15 @@ export async function updateChampionshipRevealDate(
       message: 'Championship reveal date updated',
     }
   } catch (error) {
+    Sentry.captureException(error, {
+      tags: {
+        operation: 'update-championship-reveal-date',
+        context: 'server-action',
+      },
+      extra: {
+        groupId,
+      },
+    })
     return {
       ok: false,
       error: (error as Error)?.message,

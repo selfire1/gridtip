@@ -5,6 +5,7 @@ import z from 'zod'
 import { db } from '@/db'
 import { user } from '@/db/schema/auth-schema'
 import { eq } from 'drizzle-orm/sql'
+import * as Sentry from '@sentry/nextjs'
 
 export async function POST(req: NextRequest) {
   try {
@@ -51,6 +52,12 @@ export async function POST(req: NextRequest) {
       success: true,
     })
   } catch (error) {
+    Sentry.captureException(error, {
+      tags: {
+        operation: 'migrate-profile-image',
+        context: 'api-route',
+      },
+    })
     console.error('Image migration failed:', error)
     return NextResponse.json(
       {

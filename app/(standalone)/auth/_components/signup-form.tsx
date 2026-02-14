@@ -23,6 +23,7 @@ import { Path } from '@/lib/utils/path'
 import z from 'zod'
 import { ButtonText } from '@/components/button-text'
 import { GIcon } from './google-icon'
+import * as Sentry from '@sentry/nextjs'
 
 export function SignupForm({
   className,
@@ -158,6 +159,12 @@ export function SignupForm({
         }
         router.push('/auth/confirm-email')
       } catch (error) {
+        Sentry.captureException(error, {
+          tags: {
+            operation: 'signup-email',
+            context: 'client-component',
+          },
+        })
         console.error(error)
         toast.error('Something went wrong', {
           description:

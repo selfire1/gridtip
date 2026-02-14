@@ -7,6 +7,7 @@ import { db } from '@/db'
 import { driversTable } from '@/db/schema/schema'
 import { sql } from 'drizzle-orm'
 import { Database } from '@/db/types'
+import * as Sentry from '@sentry/nextjs'
 
 export const GET = async (_request: NextRequest) => {
   const validationResponse = await validateToken()
@@ -19,6 +20,12 @@ export const GET = async (_request: NextRequest) => {
   try {
     jolpicaDrivers = await getJolpicaDrivers()
   } catch (error) {
+    Sentry.captureException(error, {
+      tags: {
+        operation: 'fetch-jolpica-drivers',
+        context: 'api-route',
+      },
+    })
     return createResponse(
       500,
       'Failed to fetch drivers: ' + (error as Error).message,

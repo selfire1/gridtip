@@ -12,6 +12,7 @@ import { CacheTag } from '@/constants/cache'
 import { eq } from 'drizzle-orm'
 import { RacePredictionField } from '@/constants'
 import { getTipTypeFromPosition } from '@/lib/utils/prediction-fields'
+import * as Sentry from '@sentry/nextjs'
 
 export async function createTip(data: Schema): Promise<ServerResponse> {
   const result = await verifyRequest(data)
@@ -54,6 +55,17 @@ export async function createTip(data: Schema): Promise<ServerResponse> {
       message: 'Saved prediction',
     }
   } catch (error) {
+    Sentry.captureException(error, {
+      tags: {
+        operation: 'admin-create-tip',
+        context: 'server-action',
+      },
+      extra: {
+        userId: data.userId,
+        groupId: group.id,
+        raceId: data.raceId,
+      },
+    })
     return {
       ok: false,
       message: (error as Error)?.message || 'Something went wrong ',
@@ -195,6 +207,15 @@ export async function updateTip(
       message: 'Updated prediction',
     }
   } catch (error) {
+    Sentry.captureException(error, {
+      tags: {
+        operation: 'admin-update-tip',
+        context: 'server-action',
+      },
+      extra: {
+        predictionEntryId,
+      },
+    })
     return {
       ok: false,
       message: (error as Error)?.message || 'Something went wrong ',

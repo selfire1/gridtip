@@ -9,6 +9,7 @@ import {
 import { db } from '@/db'
 import { predictionEntriesTable, predictionsTable } from '@/db/schema/schema'
 import { and, eq } from 'drizzle-orm/sql'
+import * as Sentry from '@sentry/nextjs'
 
 export async function submitChampionship(input: ChampionshipsTipData) {
   const { userId } = await verifySession()
@@ -104,6 +105,15 @@ export async function submitChampionship(input: ChampionshipsTipData) {
     })
     return { ok: true as const, message: '' }
   } catch (error) {
+    Sentry.captureException(error, {
+      tags: {
+        operation: 'submit-championships',
+        context: 'server-action',
+      },
+      extra: {
+        userId,
+      },
+    })
     console.error(error)
     return {
       ok: false as const,

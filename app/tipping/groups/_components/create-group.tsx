@@ -45,6 +45,7 @@ import { createGroup } from '@/actions/create-group'
 import { updateProfile } from '@/actions/update-profile'
 import posthog from 'posthog-js'
 import { AnalyticsEvent } from '@/lib/posthog/events'
+import * as Sentry from '@sentry/nextjs'
 
 const ProfileSchema = z.object({
   name: z.string().trim().min(1, 'Required').max(60, 'Too long'),
@@ -146,6 +147,12 @@ function CreateGroupDialog({ user }: { user: DalUser }) {
         group_name_length: validation.data.name.length,
       })
     } catch (error) {
+      Sentry.captureException(error, {
+        tags: {
+          operation: 'create-group-client',
+          context: 'client-component',
+        },
+      })
       console.error(error)
       toast.error('Could not create group', {
         description: (error as Error)?.message,
@@ -166,6 +173,12 @@ function CreateGroupDialog({ user }: { user: DalUser }) {
         throw new Error(isNotOkay.title)
       }
     } catch (error) {
+      Sentry.captureException(error, {
+        tags: {
+          operation: 'update-profile-after-group',
+          context: 'client-component',
+        },
+      })
       console.error(error)
       toast.error('Could not update your profile', {
         description: (error as Error)?.message,

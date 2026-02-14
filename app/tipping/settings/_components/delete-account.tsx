@@ -19,6 +19,7 @@ import { getAuthLinkWithOrigin } from '@/lib/utils/auth-origin'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
+import * as Sentry from '@sentry/nextjs'
 
 export default function DeleteAccount() {
   const [isPending, startTransition] = useTransition()
@@ -66,6 +67,12 @@ export default function DeleteAccount() {
         router.push(getAuthLinkWithOrigin(QueryOrigin.Deleted))
         setOpen(false)
       } catch (error) {
+        Sentry.captureException(error, {
+          tags: {
+            operation: 'delete-account',
+            context: 'client-component',
+          },
+        })
         toast.error('Could not delete account', {
           description: (error as Error)?.message,
         })

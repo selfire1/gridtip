@@ -16,6 +16,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import * as Sentry from '@sentry/nextjs'
 
 export const columns: ColumnDef<PredictionRow>[] = [
   {
@@ -141,6 +142,16 @@ export const columns: ColumnDef<PredictionRow>[] = [
       try {
         return formatter.format(new Date(row.original.created))
       } catch (error) {
+        Sentry.captureException(error, {
+          tags: {
+            operation: 'format-date-cell',
+            context: 'table-column',
+          },
+          level: 'warning',
+          extra: {
+            rowData: row.original,
+          },
+        })
         console.log(error, row.original)
         return
       }

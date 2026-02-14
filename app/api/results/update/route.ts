@@ -12,6 +12,7 @@ import { ResultsResponse, SprintResultsResponse } from '@/types/ergast'
 import { db } from '@/db'
 import { resultsTable } from '@/db/schema/schema'
 import { Database } from '@/db/types'
+import * as Sentry from '@sentry/nextjs'
 
 export const GET = async (_request: NextRequest) => {
   const validationResponse = await validateToken()
@@ -24,6 +25,12 @@ export const GET = async (_request: NextRequest) => {
   try {
     jolpicaResults = await getJolpicaResults()
   } catch (error) {
+    Sentry.captureException(error, {
+      tags: {
+        operation: 'fetch-jolpica-results',
+        context: 'api-route',
+      },
+    })
     return createResponse(
       500,
       'Failed to fetch results: ' + (error as Error).message,

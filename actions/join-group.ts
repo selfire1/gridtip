@@ -8,6 +8,7 @@ import { verifySession } from '@/lib/dal'
 import { setGroupCookie } from '@/lib/utils/group-cookie-server'
 import z from 'zod'
 import { JoinGroupData, JoinGroupSchema } from './join-group-schema'
+import * as Sentry from '@sentry/nextjs'
 
 export async function joinGlobalGroup({ userName }: { userName: string }) {
   return await joinGroup({ groupId: GLOBAL_GROUP_ID, userName })
@@ -59,6 +60,16 @@ export async function joinGroup(data: JoinGroupData) {
       group,
     }
   } catch (error) {
+    Sentry.captureException(error, {
+      tags: {
+        operation: 'join-group',
+        context: 'server-action',
+      },
+      extra: {
+        userId: user.id,
+        groupId: group.id,
+      },
+    })
     return {
       ok: false as const,
       message: (error as Error)?.message,

@@ -25,6 +25,7 @@ import { SelectConstructor } from '@/components/select-constructor'
 import { getFormFields } from '@/lib/utils/tip-fields'
 import posthog from 'posthog-js'
 import { AnalyticsEvent } from '@/lib/posthog/events'
+import * as Sentry from '@sentry/nextjs'
 
 const formSchema = submitTipSchema.partial()
 export type Schema = z.infer<typeof formSchema>
@@ -175,6 +176,12 @@ export default function TipForm({
         setShouldShowSaved(true)
       } catch (err) {
         const error = err as Error
+        Sentry.captureException(error, {
+          tags: {
+            operation: 'tip-form-submit',
+            context: 'client-component',
+          },
+        })
         toast.error('Could not save', {
           description: error.message,
         })
