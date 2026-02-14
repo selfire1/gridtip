@@ -25,9 +25,12 @@ export default function ConfirmEmailPage() {
               <LucideMailQuestion />
             </EmptyMedia>
             <EmptyTitle>Confirm your email</EmptyTitle>
-            <EmptyDescription>
-              Please check your email inbox to verify your account.
-            </EmptyDescription>
+            <div className='space-y-2'>
+              <EmptyDescription>
+                Please check your email inbox to verify your account.
+              </EmptyDescription>
+              <EmptyDescription>You can close this tab.</EmptyDescription>
+            </div>
           </EmptyHeader>
         </Empty>
       }
