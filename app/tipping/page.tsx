@@ -58,6 +58,7 @@ import { getCountryFlag } from '@/lib/utils/country-flag'
 import { cn } from '@/lib/utils'
 import { getConstructorCssVariable } from '@/lib/utils/constructor-css'
 import CopyLink from './groups/_components/copy-link'
+import { GLOBAL_GROUP_ID } from '@/constants/group'
 
 export default async function DashboardPage() {
   const { userId, user } = await verifySession()
@@ -105,7 +106,9 @@ export default async function DashboardPage() {
       return <CardJoinGroup />
     }
 
-    const showInviteCard = groupMembers.length < 2
+    const isGlobalGroup = groupId === GLOBAL_GROUP_ID
+
+    const showInviteCard = groupMembers.length < 2 && !isGlobalGroup
 
     const showChampionshipCard =
       group.championshipTipsRevalDate &&
@@ -136,7 +139,9 @@ export default async function DashboardPage() {
               race={nextRace}
               groupId={groupId}
             />
-            <CardTipStatus groupId={groupId} race={nextRace} />
+            {!isGlobalGroup && (
+              <CardTipStatus groupId={groupId} race={nextRace} />
+            )}
           </>
         )}
         {showChampionshipCard && <CardChampionshipTips />}
