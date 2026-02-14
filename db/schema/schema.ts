@@ -21,7 +21,7 @@ export const groupsTable = sqliteTable('groups', {
   name: text().notNull(),
   adminUser: text()
     .notNull()
-    .references(() => user.id, { onDelete: 'no action' }),
+    .references(() => user.id, { onDelete: 'set null' }),
   createdAt: integer('created_at', { mode: 'timestamp' })
     .default(sql`(unixepoch())`)
     .notNull(),
