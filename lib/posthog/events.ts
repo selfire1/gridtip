@@ -69,6 +69,11 @@ export const AnalyticsEvent = {
   INVITE_LINK_VIEWED: 'invite_link_viewed',
   INVITE_SIGNUP_CLICKED: 'invite_signup_clicked',
   INVITE_LOGIN_CLICKED: 'invite_login_clicked',
+
+  // Profile Events
+  PROFILE_UPDATED: 'profile_updated',
+  PROFILE_IMAGE_UPLOADED: 'profile_image_uploaded',
+  PROFILE_IMAGE_REMOVED: 'profile_image_removed',
 } as const
 
 export type AnalyticsEventName =
