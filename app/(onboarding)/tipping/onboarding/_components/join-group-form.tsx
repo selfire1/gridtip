@@ -57,13 +57,16 @@ export default function JoinGroupForm() {
         { message: 'Invalid invite link' },
       ),
   })
+
+  const initialUrl = state.joinGroupScreenData?.id
+    ? `https://gridtipapp.com/join/${state.joinGroupScreenData.id}`
+    : state.pendingInviteUrl || ''
+
   const form = useForm<FormSchema>({
     mode: 'onBlur',
     resolver: zodResolver(schema),
     defaultValues: {
-      url: state.joinGroupScreenData?.id
-        ? `https://gridtipapp.com/join/${state.joinGroupScreenData.id}`
-        : '',
+      url: initialUrl,
     },
   })
 
@@ -91,6 +94,19 @@ export default function JoinGroupForm() {
   )
 
   const [isPending, startTransition] = React.useTransition()
+
+  // Auto-fetch group details if we have a pending invite URL from the join page
+  const hasFetchedPendingInvite = React.useRef(false)
+  React.useEffect(() => {
+    if (
+      state.pendingInviteUrl &&
+      !state.joinGroupScreenData &&
+      !hasFetchedPendingInvite.current
+    ) {
+      hasFetchedPendingInvite.current = true
+      fetchGroupFromUrl(state.pendingInviteUrl)
+    }
+  }, [state.pendingInviteUrl]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className='space-y-6'>
@@ -189,10 +205,14 @@ export default function JoinGroupForm() {
   )
 
   function onSubmit(data: FormSchema) {
+    fetchGroupFromUrl(data.url)
+  }
+
+  function fetchGroupFromUrl(url: string) {
     setGroupState(undefined)
 
     startTransition(async () => {
-      const groupId = getId(data.url)
+      const groupId = getId(url)
       if (!groupId) {
         setGroupState({
           state: 'error',

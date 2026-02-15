@@ -5,6 +5,7 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useState,
 } from 'react'
 import { GroupAction } from '../_components/onboarding-client'
@@ -19,6 +20,7 @@ import {
 } from '@/actions/complete-onboarding'
 import { toast } from 'sonner'
 import { OnboardingCreateGroupFormData } from '../_components/create-group-form'
+import { consumePendingInviteUrl } from '@/lib/utils/pending-invite'
 
 type ComponentKey =
   | 'welcome-initial'
@@ -34,6 +36,8 @@ export type OnboardingState = {
 
   createGroupScreenData?: OnboardingCreateGroupFormData
   joinGroupScreenData?: JoinGroupData
+
+  pendingInviteUrl?: string
 
   globalGroupScreenData?: { isJoin: boolean }
 
@@ -71,6 +75,17 @@ export function OnboardingProvider({
     profileJoinGroupData: defaultProfileData,
     profileCreateGroupData: defaultProfileData,
   })
+
+  useEffect(() => {
+    const url = consumePendingInviteUrl()
+    if (url) {
+      setState((prev) => ({
+        ...prev,
+        pendingInviteUrl: url,
+        welcomeScreenSelectedGroupStep: 'join',
+      }))
+    }
+  }, [])
 
   const goToScreen = useCallback((component: ComponentKey) => {
     setState((prevState) => ({

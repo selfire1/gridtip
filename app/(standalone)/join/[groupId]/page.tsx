@@ -143,7 +143,7 @@ export default async function JoinGroup({
       const href = withQuery(getAuthLinkWithOrigin(QueryOrigin.Join), {
         redirect: `/join/${groupId}`,
       })
-      return <InviteButtons loginHref={href} />
+      return <InviteButtons loginHref={href} groupId={groupId} />
     }
     return <JoinGroupForm user={props.user} groupId={groupId} />
   }
