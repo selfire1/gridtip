@@ -5,20 +5,22 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useState,
 } from 'react'
-import { GroupAction } from '../_components/onboarding-client'
-import { JoinGroupData } from '../_components/join-group-form'
-import { ProfileState } from '../_components/screens/profile-screen'
-import type { DalUser } from '@/lib/dal'
+import { toast } from 'sonner'
 import {
-  joinOrCreateGroupAndUpdateImage,
-  joinGlobalGroupIfDesiredAndUpdateImage,
   completeProfileOnboardingAction,
+  joinGlobalGroupIfDesiredAndUpdateImage,
+  joinOrCreateGroupAndUpdateImage,
   type Log,
 } from '@/actions/complete-onboarding'
-import { toast } from 'sonner'
+import type { DalUser } from '@/lib/dal'
+import { consumePendingInviteUrlFromLocalStorage } from '@/lib/utils/pending-invite'
 import { OnboardingCreateGroupFormData } from '../_components/create-group-form'
+import { JoinGroupData } from '../_components/join-group-form'
+import { GroupAction } from '../_components/onboarding-client'
+import { ProfileState } from '../_components/screens/profile-screen'
 
 type ComponentKey =
   | 'welcome-initial'
@@ -34,6 +36,8 @@ export type OnboardingState = {
 
   createGroupScreenData?: OnboardingCreateGroupFormData
   joinGroupScreenData?: JoinGroupData
+
+  pendingInviteUrl?: string
 
   globalGroupScreenData?: { isJoin: boolean }
 
@@ -71,6 +75,18 @@ export function OnboardingProvider({
     profileJoinGroupData: defaultProfileData,
     profileCreateGroupData: defaultProfileData,
   })
+
+  useEffect(() => {
+    const url = consumePendingInviteUrlFromLocalStorage()
+    if (url) {
+      // eslint-disable-next-line  react-hooks/set-state-in-effect
+      setState((prev) => ({
+        ...prev,
+        pendingInviteUrl: url,
+        welcomeScreenSelectedGroupStep: 'join',
+      }))
+    }
+  }, [])
 
   const goToScreen = useCallback((component: ComponentKey) => {
     setState((prevState) => ({

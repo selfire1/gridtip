@@ -1,9 +1,23 @@
 'use client'
 
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@ui/input-group'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { isCuid } from '@paralleldrive/cuid2'
+import { Button } from '@ui/button'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@ui/input-group'
+import {
+  LinkIcon,
+  LucideAlertCircle,
+  LucideCheck,
+  LucideChevronRight,
+  LucideSearch,
+} from 'lucide-react'
+import posthog from 'posthog-js'
+import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { findGroup } from '@/actions/join-group'
+import Alert from '@/components/alert'
+import { IconFromName } from '@/components/icon-from-name'
 import {
   Card,
   CardContent,
@@ -19,23 +33,9 @@ import {
   FieldLabel,
   FieldSet,
 } from '@/components/ui/field'
-import { Button } from '@ui/button'
-import {
-  LinkIcon,
-  LucideAlertCircle,
-  LucideCheck,
-  LucideChevronRight,
-  LucideSearch,
-} from 'lucide-react'
-import React from 'react'
 import { Spinner } from '@/components/ui/spinner'
-import { isCuid } from '@paralleldrive/cuid2'
-import { findGroup } from '@/actions/join-group'
-import Alert from '@/components/alert'
-import { IconFromName } from '@/components/icon-from-name'
-import { useOnboarding } from '../_lib/onboarding-context'
-import posthog from 'posthog-js'
 import { AnalyticsEvent } from '@/lib/posthog/events'
+import { useOnboarding } from '../_lib/onboarding-context'
 
 export type JoinGroupData = NonNullable<
   Awaited<ReturnType<typeof findGroup>>['data']
@@ -57,13 +57,16 @@ export default function JoinGroupForm() {
         { message: 'Invalid invite link' },
       ),
   })
+
+  const initialUrl = state.joinGroupScreenData?.id
+    ? `https://gridtipapp.com/join/${state.joinGroupScreenData.id}`
+    : state.pendingInviteUrl || ''
+
   const form = useForm<FormSchema>({
     mode: 'onBlur',
     resolver: zodResolver(schema),
     defaultValues: {
-      url: state.joinGroupScreenData?.id
-        ? `https://gridtipapp.com/join/${state.joinGroupScreenData.id}`
-        : '',
+      url: initialUrl,
     },
   })
 
@@ -91,6 +94,19 @@ export default function JoinGroupForm() {
   )
 
   const [isPending, startTransition] = React.useTransition()
+
+  // Auto-fetch group details if we have a pending invite URL from the join page
+  const hasFetchedPendingInvite = React.useRef(false)
+  React.useEffect(() => {
+    if (
+      state.pendingInviteUrl &&
+      !state.joinGroupScreenData &&
+      !hasFetchedPendingInvite.current
+    ) {
+      hasFetchedPendingInvite.current = true
+      fetchGroupFromUrl(state.pendingInviteUrl)
+    }
+  }, [state.pendingInviteUrl]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className='space-y-6'>
@@ -190,9 +206,12 @@ export default function JoinGroupForm() {
 
   function onSubmit(data: FormSchema) {
     setGroupState(undefined)
+    fetchGroupFromUrl(data.url)
+  }
 
+  function fetchGroupFromUrl(url: string) {
     startTransition(async () => {
-      const groupId = getId(data.url)
+      const groupId = getId(url)
       if (!groupId) {
         setGroupState({
           state: 'error',
