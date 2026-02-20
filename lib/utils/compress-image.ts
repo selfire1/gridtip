@@ -1,14 +1,14 @@
-import defu from 'defu'
-import imageCompression from 'browser-image-compression'
 import type { Options } from 'browser-image-compression'
+import imageCompression from 'browser-image-compression'
+import defu from 'defu'
 
 export async function getCompressedFile(
   imageFile: File,
   options?: Partial<Options>,
 ) {
   const defaults = {
-    maxSizeMB: 0.6,
-    maxWidthOrHeight: 800,
+    maxSizeMB: 1.5,
+    maxWidthOrHeight: 1000,
     useWebWorker: true,
   } satisfies Options
 

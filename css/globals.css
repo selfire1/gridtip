@@ -1,6 +1,8 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import './team-colours.css';
+@import 'uploadthing/tw/v4';
+@source "../node_modules/@uploadthing/react/dist";
 
 @theme inline {
   --color-background: var(--background);
