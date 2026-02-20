@@ -1,11 +1,11 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Path } from '@/lib/utils/path'
 import posthog from 'posthog-js'
+import { Button } from '@/components/ui/button'
 import { AnalyticsEvent } from '@/lib/posthog/events'
-import { savePendingInviteUrl } from '@/lib/utils/pending-invite'
+import { Path } from '@/lib/utils/path'
+import { savePendingInviteUrlToLocalStorage } from '@/lib/utils/pending-invite'
 
 export function InviteButtons({
   loginHref,
@@ -20,7 +20,7 @@ export function InviteButtons({
         asChild
         onClick={() => {
           const joinUrl = `${window.location.origin}/join/${groupId}`
-          savePendingInviteUrl(joinUrl)
+          savePendingInviteUrlToLocalStorage(joinUrl)
           posthog.capture(AnalyticsEvent.INVITE_SIGNUP_CLICKED)
         }}
       >

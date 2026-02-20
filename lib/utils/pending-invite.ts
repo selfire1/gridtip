@@ -1,10 +1,6 @@
 const STORAGE_KEY = 'gridtip:pendingInviteUrl'
 
-/**
- * Stores a join invite URL in localStorage so it can be prefilled
- * during onboarding after a new user signs up from an invite link.
- */
-export function savePendingInviteUrl(joinUrl: string) {
+export function savePendingInviteUrlToLocalStorage(joinUrl: string) {
   try {
     localStorage.setItem(STORAGE_KEY, joinUrl)
   } catch {
@@ -12,11 +8,7 @@ export function savePendingInviteUrl(joinUrl: string) {
   }
 }
 
-/**
- * Reads and removes the pending invite URL from localStorage.
- * Returns null if nothing is stored or localStorage is unavailable.
- */
-export function consumePendingInviteUrl(): string | null {
+export function consumePendingInviteUrlFromLocalStorage(): string | null {
   try {
     const url = localStorage.getItem(STORAGE_KEY)
     if (url) {
@@ -28,10 +20,7 @@ export function consumePendingInviteUrl(): string | null {
   }
 }
 
-/**
- * Removes the pending invite URL from localStorage without reading it.
- */
-export function clearPendingInviteUrl() {
+export function clearPendingInviteUrlFromLocalStorage() {
   try {
     localStorage.removeItem(STORAGE_KEY)
   } catch {
