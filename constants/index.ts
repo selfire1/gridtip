@@ -63,6 +63,6 @@ export const GROUP_ID_COOKIE_NAME = 'grid-tip-group-id' as const
 export const GROUP_ID_COOKIE_MAX_AGE = 60 * 60 * 24 * 365
 
 export const enum HREF_LINKS {
-  GithubIssues = 'https://github.com/selfire1/f1-tipping/issues',
+  GithubIssues = 'https://github.com/selfire1/gridtip/issues',
   Email = 'mailto:hi+gridtip@joschua.io',
 }
