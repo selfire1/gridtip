@@ -60,6 +60,7 @@ export const nav = [
   },
   {
     title: 'Manage' as const,
+    isActive: true,
     url: '#',
     icon: Settings2,
     items: [
