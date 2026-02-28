@@ -1,7 +1,9 @@
 import { eq } from 'drizzle-orm'
+import { revalidateTag } from 'next/cache'
 import { createUploadthing, type FileRouter } from 'uploadthing/next'
 import { UploadThingError } from 'uploadthing/server'
 import z from 'zod'
+import { CacheTag } from '@/constants/cache'
 import { db } from '@/db'
 import { user as userTable } from '@/db/schema/auth-schema'
 import { groupMembersTable } from '@/db/schema/schema'
@@ -31,6 +33,8 @@ export const ourFileRouter = {
           profileImageUrl: file.ufsUrl,
         })
         .where(eq(userTable.id, user.id))
+
+      revalidateTag(CacheTag.MyGroupProfile)
     }),
 
   setGroupImage: f({
@@ -70,7 +74,7 @@ export const ourFileRouter = {
           profileImage: file.ufsUrl,
         })
         .where(eq(groupMembersTable.id, groupMembership.id))
-
+      revalidateTag(CacheTag.MyGroupProfile)
       return { group: groupMembership.group }
     }),
 } satisfies FileRouter
