@@ -53,7 +53,10 @@ export default function Profiles({ defaultProfile, groups }: ProfilesProps) {
               Customise your profile for each group.
             </CardDescription>
           </CardHeader>
-          <CardContent className='gap-6 grid is-grid-card-fit'>
+          <CardContent
+            className='gap-6 grid is-grid-card-fit'
+            style={{ '--card-width': '25rem' } as React.CSSProperties}
+          >
             {groups.map((group) => (
               <GroupProfileCard
                 key={group.id}
@@ -196,7 +199,7 @@ function DefaultProfileCard({ defaultProfile }: { defaultProfile: Profile }) {
   const [imageFile, setImageFile] = React.useState<File | undefined>(undefined)
 
   return (
-    <Card>
+    <Card className='max-w-2xl'>
       <CardHeader>
         <CardTitle>Default Profile</CardTitle>
       </CardHeader>
