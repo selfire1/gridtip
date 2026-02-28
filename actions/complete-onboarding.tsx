@@ -144,3 +144,67 @@ export async function joinGlobalGroupWrapper(input: { profileName?: string }) {
     ok: true as const,
   } satisfies Result
 }
+
+export async function createOrJoinPrimaryGroup({
+  action,
+  name,
+  createData,
+  joinData,
+}: {
+  action: OnboardingState['welcomeScreenSelectedGroupStep']
+  name: string | undefined
+  createData: OnboardingState['createGroupScreenData']
+  joinData: OnboardingState['joinGroupScreenData']
+}) {
+  if (!action) {
+    return {
+      ok: false as const,
+      title: 'Could not join group',
+      description: 'No group selected',
+      data: null,
+    } satisfies Result
+  }
+
+  await verifySession()
+  const input = getInput()
+
+  if (!name) {
+    return {
+      ok: false as const,
+      title: 'Could not create group',
+      description: 'No username provided',
+      data: null,
+    } satisfies Result
+  }
+
+  const joinOrCreateResult = await joinOrCreateGroup({
+    userName: name,
+    ...input,
+  })
+  if (!joinOrCreateResult.ok) {
+    return joinOrCreateResult
+  }
+  return {
+    ...joinOrCreateResult,
+    data: {
+      input,
+      ...joinOrCreateResult.data,
+    },
+  }
+
+  function getInput() {
+    if (action === 'create') {
+      return {
+        action: 'create' as const,
+        groupData: createData,
+      }
+    }
+    return {
+      action: 'join' as const,
+      groupData: {
+        id: joinData?.id,
+        name: joinData?.name,
+      },
+    }
+  }
+}

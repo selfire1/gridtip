@@ -11,13 +11,13 @@ import {
 } from 'react'
 import { toast } from 'sonner'
 import {
+  createOrJoinPrimaryGroup,
   joinGlobalGroupWrapper,
-  joinOrCreateGroup,
   type Result,
   setCurrentGroupMemberImageToDefaultImage,
 } from '@/actions/complete-onboarding'
 import { authClient } from '@/lib/auth-client'
-import { type DalUser, verifySession } from '@/lib/dal'
+import { type DalUser } from '@/lib/dal'
 import { useUploadThing } from '@/lib/uploadthing'
 import { consumePendingInviteUrlFromLocalStorage } from '@/lib/utils/pending-invite'
 import { OnboardingCreateGroupFormData } from '../_components/create-group-form'
@@ -128,12 +128,25 @@ export function OnboardingProvider({
   const completeOnboarding = useCallback(async () => {
     const logs: Result[] = []
     try {
-      const primaryGroupResult = await createOrJoinPrimaryGroup(state)
+      const action = state.welcomeScreenSelectedGroupStep
+      const name =
+        action === 'create'
+          ? state.profileCreateGroupData?.name
+          : state.profileJoinGroupData?.name
+      const primaryGroupResult = await createOrJoinPrimaryGroup({
+        action,
+        name,
+        createData: state.createGroupScreenData,
+        joinData: state.joinGroupScreenData,
+      })
       logs.push(primaryGroupResult)
 
       // update image
       if (primaryGroupResult.ok) {
-        const profileData = primaryGroupResult.data.input.profileData
+        const profileData =
+          action === 'create'
+            ? state.profileCreateGroupData
+            : state.profileJoinGroupData
         const hasUserNotRemovedDefaultImage = !!(
           profileData?.imagePreview && !profileData.imageFile
         )
@@ -248,65 +261,4 @@ export function useOnboarding() {
     throw new Error('useOnboarding must be used within a OnboardingProvider')
   }
   return context
-}
-
-async function createOrJoinPrimaryGroup(state: OnboardingState) {
-  const action = state.welcomeScreenSelectedGroupStep
-  if (!action) {
-    return {
-      ok: false as const,
-      title: 'Could not join group',
-      description: 'No group selected',
-      data: null,
-    } satisfies Result
-  }
-
-  const input = getInput()
-  const { user } = await verifySession()
-
-  const profile = {
-    name: input.profileData?.name || user.name,
-  }
-
-  if (!profile.name) {
-    return {
-      ok: false as const,
-      title: 'Could not create group',
-      description: 'No username provided',
-      data: null,
-    } satisfies Result
-  }
-
-  const joinOrCreateResult = await joinOrCreateGroup({
-    userName: profile.name,
-    ...input,
-  })
-  if (!joinOrCreateResult.ok) {
-    return joinOrCreateResult
-  }
-  return {
-    ...joinOrCreateResult,
-    data: {
-      input,
-      ...joinOrCreateResult.data,
-    },
-  }
-
-  function getInput() {
-    if (action === 'create') {
-      return {
-        action: 'create' as const,
-        profileData: state.profileCreateGroupData,
-        groupData: state.createGroupScreenData,
-      }
-    }
-    return {
-      action: 'join' as const,
-      profileData: state.profileJoinGroupData,
-      groupData: {
-        id: state.joinGroupScreenData?.id,
-        name: state.joinGroupScreenData?.name,
-      },
-    }
-  }
 }
