@@ -1,8 +1,6 @@
 'use client'
 
-import { LucideList, Settings2 } from 'lucide-react'
-
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, LucideList, Settings2 } from 'lucide-react'
 
 import {
   Collapsible,
@@ -18,8 +16,8 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar'
-import { Icon } from './icon'
 import { Database } from '@/db/types'
+import { Icon } from './icon'
 
 export const nav = [
   {
