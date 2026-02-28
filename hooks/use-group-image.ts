@@ -4,7 +4,7 @@ import { Result } from '@/actions/complete-onboarding'
 import { Database } from '@/db/types'
 import {
   revalidateGroupProfile,
-  setCurrentGroupMemberImageToDefaultImage,
+  setGroupMemberImageToDefaultImage,
 } from '@/lib/image'
 import { useUploadThing } from '@/lib/uploadthing'
 
@@ -34,7 +34,7 @@ export function useSetGroupProfileImage(
     try {
       // set image to default
       if (useDefaultImage) {
-        await setCurrentGroupMemberImageToDefaultImage(groupId)
+        await setGroupMemberImageToDefaultImage(groupId)
         return
       }
       if (file) {

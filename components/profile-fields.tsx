@@ -26,12 +26,14 @@ export default function ProfileFields({
   image,
   onImageChange,
   onNameChange,
+  imageSlot,
 }: {
   id: string
   image: string | undefined
   name: string
   onNameChange: (name: string) => void
   onImageChange: (preview: string | undefined, file?: File) => void
+  imageSlot?: React.ReactNode
 }) {
   const [isProcessingImage, startTransition] = React.useTransition()
 
@@ -76,7 +78,7 @@ export default function ProfileFields({
                 <AvatarImage
                   className={cn(
                     isProcessingImage && 'opacity-0',
-                    'transition-opacity',
+                    'transition-opacity object-cover',
                   )}
                   src={image}
                   alt=''
@@ -122,6 +124,7 @@ export default function ProfileFields({
             <FieldDescription>Select to replace image</FieldDescription>
           </Field>
         </FieldGroup>
+        {imageSlot && <div>{imageSlot}</div>}
       </FieldSet>
     </>
   )

@@ -18,6 +18,7 @@ export default function UserAvatar(
         <AvatarImage
           src={props.profileImageUrl || undefined}
           alt={props.name}
+          className='object-cover'
         />
         <AvatarFallback className='rounded-lg'>{fallbackString}</AvatarFallback>
       </Avatar>

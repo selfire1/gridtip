@@ -65,6 +65,10 @@ export const AnalyticsEvent = {
   // Global Leaderboard Events
   GLOBAL_LEADERBOARD_JOINED: 'global_leaderboard_joined',
 
+  // Profile Settings Events
+  PROFILE_DEFAULT_UPDATED: 'profile_default_updated',
+  PROFILE_GROUP_UPDATED: 'profile_group_updated',
+
   // Invitation Flow Events
   INVITE_LINK_VIEWED: 'invite_link_viewed',
   INVITE_SIGNUP_CLICKED: 'invite_signup_clicked',

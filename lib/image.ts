@@ -8,9 +8,7 @@ import { db } from '@/db'
 import { groupMembersTable } from '@/db/schema/schema'
 import { verifySession } from '@/lib/dal'
 
-export async function setCurrentGroupMemberImageToDefaultImage(
-  groupId: string,
-) {
+export async function setGroupMemberImageToDefaultImage(groupId: string) {
   const { user } = await verifySession()
   const groupMembership = await db.query.groupMembersTable.findFirst({
     where: (groupMembersTable, { and, eq }) =>

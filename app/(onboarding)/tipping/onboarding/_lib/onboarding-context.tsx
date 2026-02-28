@@ -19,7 +19,7 @@ import { authClient } from '@/lib/auth-client'
 import { type DalUser } from '@/lib/dal'
 import {
   revalidateGroupProfile,
-  setCurrentGroupMemberImageToDefaultImage,
+  setGroupMemberImageToDefaultImage,
 } from '@/lib/image'
 import { useUploadThing } from '@/lib/uploadthing'
 import { consumePendingInviteUrlFromLocalStorage } from '@/lib/utils/pending-invite'
@@ -160,7 +160,7 @@ export function OnboardingProvider({
         try {
           // set image to default
           if (hasUserNotRemovedDefaultImage) {
-            await setCurrentGroupMemberImageToDefaultImage(groupId)
+            await setGroupMemberImageToDefaultImage(groupId)
           } else if (profileData?.imageFile) {
             // upload image
             startGroupImageUpload([profileData.imageFile], {
@@ -203,7 +203,7 @@ export function OnboardingProvider({
           try {
             // set image to default
             if (hasUserNotRemovedDefaultImage) {
-              await setCurrentGroupMemberImageToDefaultImage(groupId)
+              await setGroupMemberImageToDefaultImage(groupId)
             } else if (profileData?.imageFile) {
               // upload image
               startGroupImageUpload([profileData.imageFile], {
