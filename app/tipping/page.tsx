@@ -1,11 +1,33 @@
-import { Button } from '@/components/ui/button'
+import clsx, { ClassValue } from 'clsx'
+import {
+  addDays,
+  differenceInDays,
+  differenceInHours,
+  formatDistanceToNowStrict,
+  isFuture,
+  isPast,
+  isWithinInterval,
+  subDays,
+  subMinutes,
+} from 'date-fns'
+import { and, eq, inArray } from 'drizzle-orm'
+import { LucideArrowRight, LucideClock, LucideIcon } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
+import React, { cache, ReactNode } from 'react'
+import Constructor from '@/components/constructor'
+import CountryFlag from '@/components/country-flag'
+import { Icon } from '@/components/icon'
+import RaceTimes from '@/components/race-times'
+import { TimeTile } from '@/components/time-tile'
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -14,15 +36,20 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import UserAvatar from '@/components/user-avatar'
 import { RACE_PREDICTION_FIELDS, RacePredictionField } from '@/constants'
-import ChampionshipImage from '@/public/img/championship.jpg'
+import { GLOBAL_GROUP_ID } from '@/constants/group'
 import { db } from '@/db'
 import {
   groupMembersTable,
   predictionEntriesTable,
   predictionsTable,
 } from '@/db/schema/schema'
+import { Database } from '@/db/types'
 import { verifySession } from '@/lib/dal'
+import { cn } from '@/lib/utils'
+import { getConstructorCssVariable } from '@/lib/utils/constructor-css'
+import { getCountryFlag } from '@/lib/utils/country-flag'
 import {
   getCurrentGroupId,
   getFirstRace,
@@ -30,39 +57,12 @@ import {
   getGroupMembership,
 } from '@/lib/utils/groups'
 import {
-  subDays,
-  subMinutes,
-  formatDistanceToNowStrict,
-  differenceInHours,
-  isFuture,
-  differenceInDays,
-  isWithinInterval,
-  addDays,
-  isPast,
-} from 'date-fns'
-import { and, eq, inArray } from 'drizzle-orm'
-import { LucideArrowRight, LucideClock, LucideIcon } from 'lucide-react'
-import React, { cache, ReactNode } from 'react'
-import UserAvatar from '@/components/user-avatar'
-import clsx, { ClassValue } from 'clsx'
-import Constructor from '@/components/constructor'
-import CountryFlag from '@/components/country-flag'
-import { Database } from '@/db/types'
-import Link from 'next/link'
-import RaceTimes from '@/components/race-times'
-import {
   getIsSprint,
   getLabel,
   getTipsDue,
 } from '@/lib/utils/prediction-fields'
-import { Badge } from '@/components/ui/badge'
-import { Icon } from '@/components/icon'
-import { getCountryFlag } from '@/lib/utils/country-flag'
-import { cn } from '@/lib/utils'
-import { getConstructorCssVariable } from '@/lib/utils/constructor-css'
+import ChampionshipImage from '@/public/img/championship.jpg'
 import CopyLink from './groups/_components/copy-link'
-import { GLOBAL_GROUP_ID } from '@/constants/group'
-import { TimeTile } from '@/components/time-tile'
 
 export default async function DashboardPage() {
   const { userId, user } = await verifySession()
