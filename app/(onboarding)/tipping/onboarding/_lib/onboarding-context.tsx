@@ -14,10 +14,13 @@ import {
   createOrJoinPrimaryGroup,
   joinGlobalGroupWrapper,
   type Result,
-  setCurrentGroupMemberImageToDefaultImage,
 } from '@/actions/complete-onboarding'
 import { authClient } from '@/lib/auth-client'
 import { type DalUser } from '@/lib/dal'
+import {
+  revalidateGroupProfile,
+  setCurrentGroupMemberImageToDefaultImage,
+} from '@/lib/image'
 import { useUploadThing } from '@/lib/uploadthing'
 import { consumePendingInviteUrlFromLocalStorage } from '@/lib/utils/pending-invite'
 import { OnboardingCreateGroupFormData } from '../_components/create-group-form'
@@ -108,6 +111,9 @@ export function OnboardingProvider({
   const { startUpload: startGroupImageUpload } = useUploadThing(
     'setGroupImage',
     {
+      onClientUploadComplete: () => {
+        revalidateGroupProfile()
+      },
       onUploadError: (error) => {
         captureException(error)
         toast.error('Image upload error', {
