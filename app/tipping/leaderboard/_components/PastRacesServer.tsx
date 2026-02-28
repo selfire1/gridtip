@@ -1,5 +1,8 @@
+import { LucideHourglass, LucideList } from 'lucide-react'
 import { unstable_cache } from 'next/cache'
+import EmptyState from '@/components/empty-state'
 import { PREDICTION_FIELDS } from '@/constants'
+import { CacheTag } from '@/constants/cache'
 import { db } from '@/db'
 import { Database } from '@/db/types'
 import {
@@ -8,7 +11,6 @@ import {
   getOnlyRacesWithResults,
   getRaceIdToResultMap,
 } from '@/lib/utils/race-results'
-import { CacheTag } from '@/constants/cache'
 import PastRacesClient from './PastRacesClient'
 
 export type RacesWithResults = Awaited<
@@ -37,6 +39,16 @@ export default async function PastRacesServer({
 
   const racesWithResults = await getOnlyRacesWithResults()
   const allPredictionsWithUser = await getAllPredictions()
+
+  if (!racesWithResults.length) {
+    return (
+      <EmptyState
+        title='No Results'
+        icon={<LucideHourglass />}
+        description='We haven’t received any race results to display yet.'
+      />
+    )
+  }
 
   const results = await getRaceIdToResultMap()
 
