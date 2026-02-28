@@ -1,10 +1,10 @@
-import { Database } from '@/db/types'
-import { verifySession } from '../dal'
-import { db } from '@/db'
-import { cache } from 'react'
-import { Profile } from '@/types'
 import { unstable_cache } from 'next/cache'
+import { cache } from 'react'
 import { CacheTag } from '@/constants/cache'
+import { db } from '@/db'
+import { Database } from '@/db/types'
+import { Profile } from '@/types'
+import { verifySession } from '../dal'
 
 export async function getGroupProfile(
   group: Pick<Database.Group, 'id'> | undefined,

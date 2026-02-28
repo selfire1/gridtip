@@ -1,8 +1,7 @@
 import * as React from 'react'
-
+import { GroupSwitcher } from '@/components/group-switcher'
 import { NavMain } from '@/components/nav-main'
 import { NavUser } from '@/components/nav-user'
-import { GroupSwitcher } from '@/components/group-switcher'
 import {
   Sidebar,
   SidebarContent,
@@ -11,9 +10,9 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar'
 import { verifyIsAdmin, verifySession } from '@/lib/dal'
+import { getGroupProfile } from '@/lib/utils/group-profile'
 import { getCurrentGroup, getGroupsForUser } from '@/lib/utils/groups'
 import { getNextRace } from '@/lib/utils/races'
-import { getGroupProfile } from '@/lib/utils/group-profile'
 
 export async function AppSidebar({
   ...props

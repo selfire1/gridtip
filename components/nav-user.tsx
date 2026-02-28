@@ -1,7 +1,7 @@
 'use client'
 
 import { ChevronsUpDown, LogOut } from 'lucide-react'
-
+import { useRouter } from 'next/navigation'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,13 +16,12 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { authClient } from '@/lib/auth-client'
-import { useRouter } from 'next/navigation'
-import UserAvatar from './user-avatar'
-import { Path } from '@/lib/utils/path'
 import { User } from '@/db/schema/schema'
-import { Profile } from '@/types'
+import { authClient } from '@/lib/auth-client'
 import { getDefaultProfile } from '@/lib/utils/default-profile'
+import { Path } from '@/lib/utils/path'
+import { Profile } from '@/types'
+import UserAvatar from './user-avatar'
 
 export function NavUser({
   user,
