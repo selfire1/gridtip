@@ -1,5 +1,6 @@
 'use client'
 
+import { captureException } from '@sentry/nextjs'
 import {
   createContext,
   ReactNode,
@@ -10,12 +11,14 @@ import {
 } from 'react'
 import { toast } from 'sonner'
 import {
-  completeProfileOnboardingAction,
-  joinGlobalGroupIfDesiredAndUpdateImage,
-  joinOrCreateGroupAndUpdateImage,
-  type Log,
+  joinGlobalGroupWrapper,
+  joinOrCreateGroup,
+  type Result,
+  setCurrentGroupMemberImageToDefaultImage,
 } from '@/actions/complete-onboarding'
-import type { DalUser } from '@/lib/dal'
+import { authClient } from '@/lib/auth-client'
+import { type DalUser, verifySession } from '@/lib/dal'
+import { useUploadThing } from '@/lib/uploadthing'
 import { consumePendingInviteUrlFromLocalStorage } from '@/lib/utils/pending-invite'
 import { OnboardingCreateGroupFormData } from '../_components/create-group-form'
 import { JoinGroupData } from '../_components/join-group-form'
@@ -50,7 +53,7 @@ export type OnboardingState = {
 type OnboardingContextType = {
   state: OnboardingState
   updateState: (updates: Partial<OnboardingState>) => void
-  completeOnboarding: () => Promise<Log[]>
+  completeOnboarding: () => Promise<Result[]>
   goToScreen: (component: ComponentKey) => void
 }
 
@@ -79,7 +82,7 @@ export function OnboardingProvider({
   useEffect(() => {
     const url = consumePendingInviteUrlFromLocalStorage()
     if (url) {
-      // eslint-disable-next-line  react-hooks/set-state-in-effect
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setState((prev) => ({
         ...prev,
         pendingInviteUrl: url,
@@ -102,25 +105,123 @@ export function OnboardingProvider({
     }))
   }, [])
 
+  const { startUpload: startGroupImageUpload } = useUploadThing(
+    'setGroupImage',
+    {
+      onUploadError: (error) => {
+        captureException(error)
+        toast.error('Image upload error', {
+          description: 'Failed to upload image for group',
+        })
+      },
+    },
+  )
+  const { startUpload: startUserImageUpload } = useUploadThing('setUserImage', {
+    onUploadError: (error) => {
+      captureException(error)
+      toast.error('Image upload error', {
+        description: 'Failed to upload your default image',
+      })
+    },
+  })
+
   const completeOnboarding = useCallback(async () => {
-    const logs: Log[] = []
+    const logs: Result[] = []
     try {
-      const groupLogs = await createOrJoinPrimaryGroup(state)
-      logs.push(...groupLogs)
+      const primaryGroupResult = await createOrJoinPrimaryGroup(state)
+      logs.push(primaryGroupResult)
 
-      const globalLogs = await joinGlobalGroupIfDesiredAndUpdateImage({
-        shouldJoin: state.globalGroupScreenData?.isJoin ?? false,
-        profileName: state.profileGlobalGroupData?.name,
-        profileImageFile: state.profileGlobalGroupData?.imageFile,
-        profileImagePreview: state.profileGlobalGroupData?.imagePreview,
-      })
-      logs.push(...globalLogs)
+      // update image
+      if (primaryGroupResult.ok) {
+        const profileData = primaryGroupResult.data.input.profileData
+        const hasUserNotRemovedDefaultImage = !!(
+          profileData?.imagePreview && !profileData.imageFile
+        )
+        const groupId = primaryGroupResult.data.group.id
+        try {
+          // set image to default
+          if (hasUserNotRemovedDefaultImage) {
+            await setCurrentGroupMemberImageToDefaultImage(groupId)
+          } else if (profileData?.imageFile) {
+            // upload image
+            startGroupImageUpload([profileData.imageFile], {
+              groupId,
+            })
+          }
+        } catch (error) {
+          captureException(error)
+          logs.push({
+            ok: false,
+            title: 'Image error',
+            description: `Could not update image for ${primaryGroupResult.data.group.name}`,
+            data: null,
+          })
+        }
+      }
 
-      const profileLogs = await completeProfileOnboardingAction({
-        name: state.profileDefaultData?.name,
-        profileImage: state.profileDefaultData?.imageFile,
-      })
-      logs.push(...profileLogs)
+      const shouldJoinGlobalGroup = state.globalGroupScreenData?.isJoin
+
+      if (shouldJoinGlobalGroup) {
+        const name = state.profileGlobalGroupData?.name
+
+        const joinGroupResult = await joinGlobalGroupWrapper({
+          profileName: name,
+        })
+
+        if (joinGroupResult) {
+          logs.push(joinGroupResult)
+        }
+
+        if (joinGroupResult?.ok) {
+          const profileData = {
+            imageFile: state.profileGlobalGroupData?.imageFile,
+            imagePreview: state.profileGlobalGroupData?.imagePreview,
+          }
+          const hasUserNotRemovedDefaultImage = !!(
+            profileData?.imagePreview && !profileData.imageFile
+          )
+          const groupId = joinGroupResult.data.group.id
+          try {
+            // set image to default
+            if (hasUserNotRemovedDefaultImage) {
+              await setCurrentGroupMemberImageToDefaultImage(groupId)
+            } else if (profileData?.imageFile) {
+              // upload image
+              startGroupImageUpload([profileData.imageFile], {
+                groupId,
+              })
+            }
+          } catch (error) {
+            captureException(error)
+            logs.push({
+              ok: false,
+              title: 'Image error',
+              description: 'Could not update image for global group',
+              data: null,
+            })
+          }
+        }
+      }
+
+      if (state.profileDefaultData?.name) {
+        try {
+          await authClient.updateUser({
+            name: state.profileDefaultData.name,
+          })
+        } catch (error) {
+          captureException(error)
+          logs.push({
+            ok: false,
+            title: 'Name error',
+            description: 'Could not update name',
+            data: null,
+          })
+        }
+      }
+
+      if (state.profileDefaultData?.imageFile) {
+        startUserImageUpload([state.profileDefaultData.imageFile])
+      }
 
       return logs
     } catch (error) {
@@ -130,7 +231,7 @@ export function OnboardingProvider({
       console.error('Onboarding failed:', error)
       return []
     }
-  }, [state])
+  }, [state, startGroupImageUpload, startUserImageUpload])
 
   return (
     <OnboardingContext.Provider
@@ -152,12 +253,44 @@ export function useOnboarding() {
 async function createOrJoinPrimaryGroup(state: OnboardingState) {
   const action = state.welcomeScreenSelectedGroupStep
   if (!action) {
-    return []
+    return {
+      ok: false as const,
+      title: 'Could not join group',
+      description: 'No group selected',
+      data: null,
+    } satisfies Result
   }
 
   const input = getInput()
-  const logs = await joinOrCreateGroupAndUpdateImage(input)
-  return logs
+  const { user } = await verifySession()
+
+  const profile = {
+    name: input.profileData?.name || user.name,
+  }
+
+  if (!profile.name) {
+    return {
+      ok: false as const,
+      title: 'Could not create group',
+      description: 'No username provided',
+      data: null,
+    } satisfies Result
+  }
+
+  const joinOrCreateResult = await joinOrCreateGroup({
+    userName: profile.name,
+    ...input,
+  })
+  if (!joinOrCreateResult.ok) {
+    return joinOrCreateResult
+  }
+  return {
+    ...joinOrCreateResult,
+    data: {
+      input,
+      ...joinOrCreateResult.data,
+    },
+  }
 
   function getInput() {
     if (action === 'create') {

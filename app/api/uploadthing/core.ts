@@ -10,7 +10,7 @@ import { verifySession } from '@/lib/dal'
 const f = createUploadthing()
 
 export const ourFileRouter = {
-  userImageUploader: f({
+  setUserImage: f({
     image: {
       maxFileSize: '2MB',
       maxFileCount: 1,
@@ -33,7 +33,7 @@ export const ourFileRouter = {
         .where(eq(userTable.id, user.id))
     }),
 
-  groupImageUploader: f({
+  setGroupImage: f({
     image: {
       maxFileSize: '2MB',
       maxFileCount: 1,

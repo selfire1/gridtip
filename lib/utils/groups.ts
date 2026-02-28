@@ -1,12 +1,12 @@
 import 'server-only'
-import { db } from '@/db'
-import { groupMembersTable } from '@/db/schema/schema'
 import { eq } from 'drizzle-orm'
+import { unstable_cache } from 'next/cache'
+import { cookies } from 'next/headers'
 import { cache } from 'react'
 import { GROUP_ID_COOKIE_NAME } from '@/constants'
-import { cookies } from 'next/headers'
-import { unstable_cache } from 'next/cache'
 import { CacheTag } from '@/constants/cache'
+import { db } from '@/db'
+import { groupMembersTable } from '@/db/schema/schema'
 import { Database } from '@/db/types'
 
 export {

@@ -1,12 +1,12 @@
 'use server'
 
-import { Database } from '@/db/types'
-import { verifySession } from '@/lib/dal'
-import { Log } from './complete-onboarding'
-import { uploadMaybeFile } from '@/lib/utils/uploadthing'
+import { eq } from 'drizzle-orm'
 import { db } from '@/db'
 import { groupMembersTable } from '@/db/schema/schema'
-import { eq } from 'drizzle-orm'
+import { Database } from '@/db/types'
+import { verifySession } from '@/lib/dal'
+import { uploadMaybeFile } from '@/lib/utils/uploadthing'
+import { Result } from './complete-onboarding'
 
 export async function updateProfile(
   group: Pick<Database.Group, 'name' | 'id'>,
@@ -14,7 +14,7 @@ export async function updateProfile(
 ) {
   const { userId, user } = await verifySession()
   console.log({ profile })
-  const logs = [] as Log[]
+  const logs = [] as Result[]
   if (!profile.name && !profile.file && !profile.useDefaultImage) {
     console.log('no input')
     return logs

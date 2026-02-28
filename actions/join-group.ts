@@ -1,14 +1,14 @@
 'use server'
 
+import * as Sentry from '@sentry/nextjs'
+import z from 'zod'
 import { GLOBAL_GROUP_ID } from '@/constants/group'
 import { db } from '@/db'
 import { groupMembersTable } from '@/db/schema/schema'
 import { Database } from '@/db/types'
 import { verifySession } from '@/lib/dal'
 import { setGroupCookie } from '@/lib/utils/group-cookie-server'
-import z from 'zod'
 import { JoinGroupData, JoinGroupSchema } from './join-group-schema'
-import * as Sentry from '@sentry/nextjs'
 
 export async function joinGlobalGroup({ userName }: { userName: string }) {
   return await joinGroup({ groupId: GLOBAL_GROUP_ID, userName })
@@ -18,6 +18,7 @@ export async function joinGroup(data: JoinGroupData) {
   const result = JoinGroupSchema.safeParse(data)
   if (!result.success) {
     console.warn('Invalid join group data', data)
+    Sentry.captureException(new Error('Invalid join group data'))
     return {
       ok: false as const,
       message: 'Invalid group id',
