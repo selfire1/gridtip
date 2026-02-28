@@ -3,20 +3,22 @@
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldSet,
 } from '@ui/field'
 import { Input } from '@ui/input'
-import { Avatar, AvatarImage } from './ui/avatar'
+import { LucideImageOff, LucideX } from 'lucide-react'
 import React from 'react'
+import { UsernameSchema } from '@/lib/schemas/username'
+import { cn } from '@/lib/utils'
 import { getCompressedFile } from '@/lib/utils/compress-image'
 import { getFileDataURL } from '@/lib/utils/file-data-url'
-import { cn } from '@/lib/utils'
-import { Spinner } from './ui/spinner'
-import { LucideImageOff, LucideX } from 'lucide-react'
-import { Button } from './ui/button'
 import { ALLOWED_TYPES } from '@/lib/utils/file-limits'
+import { Avatar, AvatarImage } from './ui/avatar'
+import { Button } from './ui/button'
+import { Spinner } from './ui/spinner'
 
 export default function ProfileFields({
   id,
@@ -33,6 +35,19 @@ export default function ProfileFields({
 }) {
   const [isProcessingImage, startTransition] = React.useTransition()
 
+  const [nameValidationError, setNameValidationError] = React.useState<
+    string | undefined
+  >(undefined)
+
+  function validateName(name: string) {
+    setNameValidationError(undefined)
+    const validation = UsernameSchema.safeParse(name)
+    if (!validation.success) {
+      setNameValidationError(validation.error.issues[0].message)
+      return
+    }
+  }
+
   return (
     <>
       <Field>
@@ -40,11 +55,16 @@ export default function ProfileFields({
         <Input
           autoComplete='off'
           className='bg-background'
+          onBlur={(e) => validateName(e.target.value)}
           id={`name-${id}`}
           name='name'
           value={name}
           onChange={(e) => onNameChange(e.target.value)}
+          aria-invalid={!!nameValidationError}
         />
+        {!!nameValidationError && (
+          <FieldError>{nameValidationError}</FieldError>
+        )}
       </Field>
       <FieldSet>
         <FieldLabel htmlFor={`image-${id}`}>Image</FieldLabel>
