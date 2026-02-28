@@ -1,5 +1,26 @@
 'use client'
 
+import * as Sentry from '@sentry/nextjs'
+import { LucideArrowUpRight } from 'lucide-react'
+import { motion } from 'motion/react'
+import { useRouter } from 'next/navigation'
+import posthog from 'posthog-js'
+import { useEffect, useRef, useState, useTransition } from 'react'
+import { toast } from 'sonner'
+import z from 'zod'
+import { createGroup } from '@/actions/create-group'
+import { ButtonText } from '@/components/button-text'
+import GroupFields, { GroupFieldsProps } from '@/components/group-fields'
+import { Icon } from '@/components/icon'
+import ProfileFields from '@/components/profile-fields'
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import {
   Dialog,
   DialogClose,
@@ -10,42 +31,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-
-import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { LucideArrowUpRight } from 'lucide-react'
-import { useEffect, useRef, useState, useTransition } from 'react'
-import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
+import { FieldDescription, FieldLegend, FieldSet } from '@/components/ui/field'
+import { IconName, SUPPORTED_ICON_NAMES } from '@/constants/icon-names'
+import { Database } from '@/db/types'
+import { useSetGroupProfileImage } from '@/hooks/use-group-image'
+import { DalUser } from '@/lib/dal'
+import { AnalyticsEvent } from '@/lib/posthog/events'
 import {
   CreateGroupData,
   CreateGroupDetailsOnlyData,
   CreateGroupSchema,
   validateGroupDetailSchema,
 } from '@/lib/schemas/create-group'
-import GroupFields, { GroupFieldsProps } from '@/components/group-fields'
-import { IconName, SUPPORTED_ICON_NAMES } from '@/constants/icon-names'
-import { Database } from '@/db/types'
-import { Icon } from '@/components/icon'
 import { cn } from '@/lib/utils'
-import ProfileFields from '@/components/profile-fields'
 import { getDefaultProfile } from '@/lib/utils/default-profile'
-import { DalUser } from '@/lib/dal'
-import { motion } from 'motion/react'
-import { FieldDescription, FieldLegend, FieldSet } from '@/components/ui/field'
-import z from 'zod'
-import { ButtonText } from '@/components/button-text'
-import { createGroup } from '@/actions/create-group'
-import { updateProfile } from '@/actions/update-profile'
-import posthog from 'posthog-js'
-import { AnalyticsEvent } from '@/lib/posthog/events'
-import * as Sentry from '@sentry/nextjs'
 
 const ProfileSchema = z.object({
   name: z.string().trim().min(1, 'Required').max(60, 'Too long'),
@@ -89,6 +88,15 @@ function CreateGroupDialog({ user }: { user: DalUser }) {
       }, 400)
     }
   }, [open])
+
+  const { startUpload } = useSetGroupProfileImage({
+    onUploadError: (error) => {
+      Sentry.captureException(error)
+      toast.error('Image upload error', {
+        description: 'Failed to upload your profile image',
+      })
+    },
+  })
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -164,14 +172,10 @@ function CreateGroupDialog({ user }: { user: DalUser }) {
         throw new Error('Group not found')
       }
 
-      const logs = await updateProfile(group, {
+      await startUpload(group.id, {
         file: data.imageFile,
         useDefaultImage: data.imagePreview === user.profileImageUrl,
       })
-      const isNotOkay = logs.find((log) => !log.ok)
-      if (isNotOkay) {
-        throw new Error(isNotOkay.title)
-      }
     } catch (error) {
       Sentry.captureException(error, {
         tags: {

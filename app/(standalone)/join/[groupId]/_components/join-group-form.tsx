@@ -1,8 +1,12 @@
 'use client'
 
+import { LucideChevronRight } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import posthog from 'posthog-js'
+import { useState, useTransition } from 'react'
+import { toast } from 'sonner'
 import { joinGroup } from '@/actions/join-group'
 import { JoinGroupSchema } from '@/actions/join-group-schema'
-import { updateProfile } from '@/actions/update-profile'
 import { ButtonText } from '@/components/button-text'
 import ProfileFields from '@/components/profile-fields'
 import { Button } from '@/components/ui/button'
@@ -15,14 +19,10 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Database } from '@/db/types'
+import { useSetGroupProfileImage } from '@/hooks/use-group-image'
 import type { DalUser } from '@/lib/dal'
-import { getDefaultProfile } from '@/lib/utils/default-profile'
-import { LucideChevronRight } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useState, useTransition } from 'react'
-import { toast } from 'sonner'
-import posthog from 'posthog-js'
 import { AnalyticsEvent } from '@/lib/posthog/events'
+import { getDefaultProfile } from '@/lib/utils/default-profile'
 
 export default function JoinGroupForm({
   groupId,
@@ -39,6 +39,8 @@ export default function JoinGroupForm({
     preview: profile.image,
     file: undefined,
   })
+
+  const { startUpload } = useSetGroupProfileImage()
 
   return (
     <Card className='shadow-none bg-muted/25'>
@@ -91,7 +93,8 @@ export default function JoinGroupForm({
         toast.error(result.message)
         return
       }
-      await updateProfile(result.group, {
+
+      await startUpload(result.group.id, {
         file: image.file,
         useDefaultImage: image.preview === user.profileImageUrl,
       })
