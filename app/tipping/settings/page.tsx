@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
 import { verifySession } from '@/lib/dal'
 import { getDefaultProfile } from '@/lib/utils/default-profile'
 import { getGroupProfile } from '@/lib/utils/group-profile'
@@ -28,25 +28,18 @@ export default async function SettingsPage() {
   )
 
   return (
-    <div className='space-y-6'>
-      <section className='space-y-4'>
-        <h2 className='text-xl font-semibold'>Profiles</h2>
-        <Profiles defaultProfile={defaultProfile} groups={groups} />
+    <div className='space-y-8'>
+      <Profiles defaultProfile={defaultProfile} groups={groups} />
+      <Separator />
+      <section className='space-y-2'>
+        <h2 className='text-sm font-medium'>Danger Zone</h2>
+        <p className='text-sm text-muted-foreground'>
+          Permanently delete your account and all associated data.
+        </p>
+        <div className='pt-2'>
+          <DeleteAccount />
+        </div>
       </section>
-      <DeleteCard />
     </div>
   )
-
-  function DeleteCard() {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Danger Zone</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <DeleteAccount />
-        </CardContent>
-      </Card>
-    )
-  }
 }

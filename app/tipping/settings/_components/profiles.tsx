@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
@@ -44,16 +43,25 @@ type ProfilesProps = {
 
 export default function Profiles({ defaultProfile, groups }: ProfilesProps) {
   return (
-    <div className='space-y-6'>
-      {groups.length && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Groups</CardTitle>
-            <CardDescription>
-              Customise your profile for each group.
-            </CardDescription>
-          </CardHeader>
-          <CardContent
+    <div className='space-y-10'>
+      <section className='space-y-4'>
+        <div className='space-y-1'>
+          <h2 className='text-xl font-semibold'>Default Profile</h2>
+          <p className='text-sm text-muted-foreground'>
+            Your default name and image, used as a fallback for groups.
+          </p>
+        </div>
+        <DefaultProfileCard defaultProfile={defaultProfile} />
+      </section>
+      {!!groups.length && (
+        <section className='space-y-4'>
+          <div className='space-y-1'>
+            <h2 className='text-xl font-semibold'>Group Profiles</h2>
+            <p className='text-sm text-muted-foreground'>
+              Customise your profile for each group you belong to.
+            </p>
+          </div>
+          <div
             className='gap-6 grid is-grid-card-fit'
             style={{ '--card-width': '25rem' } as React.CSSProperties}
           >
@@ -64,10 +72,9 @@ export default function Profiles({ defaultProfile, groups }: ProfilesProps) {
                 defaultImage={defaultProfile.image}
               />
             ))}
-          </CardContent>
-        </Card>
+          </div>
+        </section>
       )}
-      <DefaultProfileCard defaultProfile={defaultProfile} />
     </div>
   )
 }
@@ -200,9 +207,6 @@ function DefaultProfileCard({ defaultProfile }: { defaultProfile: Profile }) {
 
   return (
     <Card className='max-w-2xl'>
-      <CardHeader>
-        <CardTitle>Default Profile</CardTitle>
-      </CardHeader>
       <CardContent className='space-y-8'>
         <ProfileFields
           id='default'
@@ -211,10 +215,12 @@ function DefaultProfileCard({ defaultProfile }: { defaultProfile: Profile }) {
           onNameChange={setName}
           onImageChange={handleImageChange}
         />
-        <Button onClick={save} disabled={isPending}>
-          {isPending && <Spinner />}
-          Save
-        </Button>
+        <div className='flex justify-end'>
+          <Button onClick={save} disabled={isPending}>
+            {isPending && <Spinner />}
+            Save
+          </Button>
+        </div>
       </CardContent>
     </Card>
   )
