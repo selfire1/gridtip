@@ -20,6 +20,7 @@ import TipFormProvider from './_components/edit-tip-context'
 import React from 'react'
 import { ChampionshipRevealDate } from './_components/championship-reveal-date'
 import { PredictionMember } from './types/prediction-member'
+import { Database } from '@/db/types'
 
 export default async function GroupSettings() {
   const { userId } = await verifySession()
@@ -35,6 +36,24 @@ export default async function GroupSettings() {
     redirect('/tipping')
   }
 
+  return (
+    <div className='space-y-6'>
+      <div className='space-y-1'>
+        <h1 className='page-title'>{group.name}</h1>
+        <p className='text-muted-foreground'>
+          You can manage this group through these admin settings.
+        </p>
+      </div>
+      <ChampionshipRevealDate
+        groupId={group.id}
+        currentDate={group.championshipTipsRevalDate}
+      />
+      <PredictionTab group={group} />
+    </div>
+  )
+}
+
+async function PredictionTab({ group }: { group: Pick<Database.Group, 'id'> }) {
   const [predictions, constructors, drivers, races, rawMembers] =
     await Promise.all([
       createGetAllPredictions(group.id)(),
@@ -68,37 +87,23 @@ export default async function GroupSettings() {
     constructors,
     drivers,
   }
-
   return (
-    <div className='space-y-6'>
-      <div className='space-y-1'>
-        <h1 className='page-title'>{group.name}</h1>
-        <p className='text-muted-foreground'>
-          You can manage this group through these admin settings.
-        </p>
-      </div>
-      <ChampionshipRevealDate
-        groupId={group.id}
-        currentDate={group.championshipTipsRevalDate}
-      />
-      <section className='space-y-4'>
-        <div className='flex gap-x-4 flex-wrap justify-between items-end gap-y-2'>
-          <div className='space-y-1'>
-            <h2 className='title-2'>Predictions</h2>
-            <p className='text-muted-foreground'>
-              View predictions, update them or create a new prediction for a
-              group member.
-            </p>
-          </div>
-          <CreateOrEditTipDialog {...formProps} />
+    <section className='space-y-4'>
+      <div className='flex gap-x-4 flex-wrap justify-between items-end gap-y-2'>
+        <div className='space-y-1'>
+          <h2 className='title-2'>Predictions</h2>
+          <p className='text-muted-foreground'>
+            View predictions, update them or create a new prediction for a group
+            member.
+          </p>
         </div>
-        <TipFormProvider context={formProps}>
-          <PredictionsTableWrapper rows={rows} races={races} users={members} />
-        </TipFormProvider>
-      </section>
-    </div>
+        <CreateOrEditTipDialog {...formProps} />
+      </div>
+      <TipFormProvider context={formProps}>
+        <PredictionsTableWrapper rows={rows} races={races} users={members} />
+      </TipFormProvider>
+    </section>
   )
-
   function getRaces() {
     return unstable_cache(
       async () =>
