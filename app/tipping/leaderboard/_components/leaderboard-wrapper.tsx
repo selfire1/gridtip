@@ -1,7 +1,6 @@
 import { Group } from '@/db/schema/schema'
 
-import { LucideListX } from 'lucide-react'
-import Alert from '@/components/alert'
+import { LucideList } from 'lucide-react'
 import { Database } from '@/db/types'
 import {
   getRaceIdToResultMap,
@@ -13,6 +12,7 @@ import { getGroupMembers, GetGroupMembersData } from '@/lib/utils/groups'
 import { Leaderboard, LeaderBoard } from './leaderboard'
 import { verifySession } from '@/lib/dal'
 import { GLOBAL_GROUP_ID } from '@/constants/group'
+import EmptyState from '@/components/empty-state'
 
 export async function LeaderboardWrapper({
   groupId,
@@ -26,7 +26,13 @@ export async function LeaderboardWrapper({
   const leaderboard = getLeaderboardInfo()
 
   if (!leaderboard.length) {
-    return <Alert icon={LucideListX} title='Leaderboard is empty' />
+    return (
+      <EmptyState
+        icon={<LucideList />}
+        title='Leaderboard is empty'
+        description='Check back after the first results are available.'
+      />
+    )
   }
 
   const isGlobalGroup = groupId === GLOBAL_GROUP_ID
