@@ -15,6 +15,7 @@ import { OnboardingState, useOnboarding } from '../../_lib/onboarding-context'
 import { JoinGroupData } from '../join-group-form'
 import { IconFromName } from '@/components/icon-from-name'
 import ProfileFields from '@/components/profile-fields'
+import { GLOBAL_GROUP_ID } from '@/constants/group'
 
 export type ProfileState = {
   name: string
@@ -79,7 +80,7 @@ function ProfileContent() {
         name: 'Global Leaderboard',
         // @ts-expect-error special icon
         iconName: 'lucide:globe',
-        id: 'global',
+        id: GLOBAL_GROUP_ID,
       } satisfies JoinGroupData
     }
   }, [state])
@@ -204,7 +205,7 @@ function ProfileCard({
           {title}
         </CardTitle>
         <CardDescription>
-          {id === 'global' ? (
+          {id === GLOBAL_GROUP_ID ? (
             <Alert className='mt-2 bg-amber-50 dark:bg-amber-950'>
               <LucideEye />
               <AlertTitle>Heads up!</AlertTitle>
