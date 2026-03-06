@@ -117,7 +117,7 @@ export function NavMain({
                           href={'/tipping/group-admin'}
                           title={`Settings for ${currentGroup.name}`}
                         >
-                          <span>{currentGroup.name}</span>
+                          <span>Group Admin Settings</span>
                         </a>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
