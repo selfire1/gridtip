@@ -85,6 +85,20 @@
       "when": 1772753158455,
       "tag": "0011_wild_valeria_richards",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1772753250131,
+      "tag": "0012_set_champ_points",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1772759581858,
+      "tag": "0013_happy_gertrude_yorkes",
+      "breakpoints": true
     }
   ]
 }

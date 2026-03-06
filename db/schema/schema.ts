@@ -19,6 +19,8 @@ export const TIP_OVERWRITE_OPTIONS = [
 export const groupsTable = sqliteTable('groups', {
   id: text().primaryKey().$defaultFn(createId),
   name: text().notNull(),
+  driversChampionshipPoints: integer().default(15).notNull(),
+  constructorsChampionshipPoints: integer().default(10).notNull(),
   adminUser: text()
     .notNull()
     .references(() => user.id, { onDelete: 'set null' }),

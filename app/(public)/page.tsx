@@ -182,8 +182,8 @@ const faqs = [
           extra point up for grabs.
         </p>
         <p>
-          Correctly predicting the Constructors’s Championship gives you 10
-          points, and the Driver’s 15 points.
+          Correctly predicting the Constructors’s Championship and/or the
+          Driver’s Championship gives you extra points.
         </p>
       </>
     ),

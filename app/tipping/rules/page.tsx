@@ -1,12 +1,22 @@
 import { Metadata } from 'next'
 import { marked } from 'marked'
+import { JSDOM } from 'jsdom'
+import DOMPurify from 'dompurify'
 import 'server-only'
+import { verifySession } from '@/lib/dal'
+import { getCurrentGroup } from '@/lib/utils/groups'
 
 export const metadata: Metadata = {
   title: 'Rules',
 }
 
 export default async function RulesPage() {
+  const { user } = await verifySession()
+  const group = await getCurrentGroup(user.id)
+
+  const window = new JSDOM('').window
+  const purify = DOMPurify(window)
+
   return (
     <div className='typography'>
       <h1 className='sr-only'>Rules</h1>
@@ -18,8 +28,10 @@ export default async function RulesPage() {
     </div>
   )
 
-  function getHtmlFromMarkdown(markdown: string) {
-    return marked.parse(markdown)
+  async function getHtmlFromMarkdown(markdown: string) {
+    const html = await marked.parse(markdown)
+    const clean = purify.sanitize(html)
+    return clean
   }
 
   function getContents() {
@@ -53,8 +65,8 @@ Examples of what that could look like:
 
 You can score extra points by correctly predicting the Constructors’ and Drivers’ Championships.
 
-- Drivers’ Championship: 15 points  
-- Constructors’ Championship: 10 points
+- Drivers’ Championship: ${group?.driversChampionshipPoints ?? 15} points  
+- Constructors’ Championship: ${group?.constructorsChampionshipPoints ?? 10} points
 
 Championship picks must be submitted before the first qualifying session of the season.
 

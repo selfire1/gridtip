@@ -30,6 +30,8 @@ async function getGroupsForUser(userId: string) {
           name: true,
           iconName: true,
           championshipTipsRevalDate: true,
+          constructorsChampionshipPoints: true,
+          driversChampionshipPoints: true,
         },
       },
     },

@@ -1,3 +1,4 @@
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import EmptyGroup from '@/components/empty-group'
 import { verifyIsAdmin, verifySession } from '@/lib/dal'
 import { PredictionsTableWrapper } from './_components/predictions-table-wrapper'
@@ -21,6 +22,7 @@ import React from 'react'
 import { ChampionshipRevealDate } from './_components/championship-reveal-date'
 import { PredictionMember } from './types/prediction-member'
 import { Database } from '@/db/types'
+import { ChampionshipPoints } from './_components/championship-points'
 
 export default async function GroupSettings() {
   const { userId } = await verifySession()
@@ -36,19 +38,55 @@ export default async function GroupSettings() {
     redirect('/tipping')
   }
 
+  enum Tab {
+    Championships = 'championships',
+    RacePredictions = 'predictions',
+  }
+
   return (
     <div className='space-y-6'>
       <div className='space-y-1'>
         <h1 className='page-title'>{group.name}</h1>
         <p className='text-muted-foreground'>
-          You can manage this group through these admin settings.
+          Manage this group through admin settings.
         </p>
       </div>
+      <Tabs defaultValue={Tab.RacePredictions}>
+        <TabsList className='mb-4'>
+          <TabsTrigger value={Tab.RacePredictions}>
+            Race Predictions
+          </TabsTrigger>
+          <TabsTrigger value={Tab.Championships}>Championships</TabsTrigger>
+        </TabsList>
+        <TabsContent value={Tab.Championships}>
+          <ChampionshipsTab group={group} />
+        </TabsContent>
+        <TabsContent value={Tab.RacePredictions}>
+          <PredictionTab group={group} />
+        </TabsContent>
+      </Tabs>
+    </div>
+  )
+}
+
+async function ChampionshipsTab({
+  group,
+}: {
+  group: Pick<
+    Database.Group,
+    | 'id'
+    | 'championshipTipsRevalDate'
+    | 'driversChampionshipPoints'
+    | 'constructorsChampionshipPoints'
+  >
+}) {
+  return (
+    <div className='space-y-8'>
+      <ChampionshipPoints group={group} />
       <ChampionshipRevealDate
         groupId={group.id}
         currentDate={group.championshipTipsRevalDate}
       />
-      <PredictionTab group={group} />
     </div>
   )
 }
