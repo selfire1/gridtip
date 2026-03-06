@@ -15,6 +15,7 @@ export const submitTipSchema = z.object({
   sprintP1: idObject,
   groupId: z.string('No group id'),
   raceId: z.string('Invalid race id'),
+  groupTarget: z.literal('all').or(z.literal('this')),
 })
 
 export const serverSubmitTipSchema = submitTipSchema.partial().extend({

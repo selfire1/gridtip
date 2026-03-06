@@ -25,6 +25,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import CountryFlag from '@/components/country-flag'
 import RaceTimes from '@/components/race-times'
+import { getMyGroups } from '@/actions/get-my-groups'
 
 export default async function RaceFormPage({
   params,
@@ -34,6 +35,7 @@ export default async function RaceFormPage({
   const { userId } = await verifySession()
 
   const currentGroupId = await getCurrentGroupId()
+  const allGroups = await getMyGroups()
 
   if (!currentGroupId) {
     return <AlertNoGroup />
@@ -123,6 +125,7 @@ export default async function RaceFormPage({
         <TipForm
           drivers={drivers}
           constructors={constructors}
+          userGroups={allGroups.map(({ group }) => group)}
           isSprint={isSprint}
           disabledFields={closedFields}
           defaultValues={{

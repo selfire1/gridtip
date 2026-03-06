@@ -1,5 +1,6 @@
 'use client'
 
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -13,9 +14,9 @@ import {
 } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { SelectDriver } from '@/components/select-driver'
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useMemo, useState, useTransition } from 'react'
 import { submitChanges } from '../actions/submit-tip'
-import { Loader2Icon, LucideCheck } from 'lucide-react'
+import { LucideCheck } from 'lucide-react'
 import { toast } from 'sonner'
 import { Database } from '@/db/types'
 import { submitTipSchema } from '../actions/schema'
@@ -26,10 +27,14 @@ import { getFormFields } from '@/lib/utils/tip-fields'
 import posthog from 'posthog-js'
 import { AnalyticsEvent } from '@/lib/posthog/events'
 import * as Sentry from '@sentry/nextjs'
+import { Spinner } from '@/components/ui/spinner'
+import { Label } from '@/components/ui/label'
+import { cn } from '@/lib/utils'
 
 const formSchema = submitTipSchema.partial()
 export type Schema = z.infer<typeof formSchema>
 
+type UserGroup = Pick<Database.Group, 'id' | 'name'>
 export default function TipForm({
   drivers,
   constructors,
@@ -38,6 +43,7 @@ export default function TipForm({
   defaultValues,
   isFormDisabled,
   race,
+  userGroups,
 }: {
   drivers: DriverOption[]
   constructors: ConstructorProps[]
@@ -46,10 +52,17 @@ export default function TipForm({
   defaultValues: Schema
   isFormDisabled: boolean
   race: Pick<Database.Race, 'id' | 'raceName'>
+  userGroups: UserGroup[]
 }) {
+  const hasMoreThanOneGroup = useMemo(() => userGroups.length > 1, [userGroups])
+
   const form = useForm<Schema>({
     resolver: zodResolver(formSchema),
-    defaultValues,
+    defaultValues: {
+      ...defaultValues,
+      groupTarget:
+        defaultValues.groupTarget ?? (hasMoreThanOneGroup ? 'all' : 'this'),
+    },
   })
 
   const fields = getFormFields(isSprint)
@@ -129,15 +142,26 @@ export default function TipForm({
             />
           ))}
         </div>
-        <Button
-          className='mt-10 w-full'
-          type='submit'
-          disabled={isFormDisabled || isPending}
-        >
-          {isPending && <Spinner />}
-          {isShouldShowSaved && !isPending && <LucideCheck />}
-          {isPending ? 'Saving…' : isShouldShowSaved ? 'Saved' : 'Submit'}
-        </Button>
+        <div className='mt-10 w-full grid sm:grid-cols-12 gap-4'>
+          {hasMoreThanOneGroup && (
+            <div className='col-span-4 row-start-1'>
+              <SelectGroupTargetField />
+            </div>
+          )}
+          <Button
+            className={cn(
+              hasMoreThanOneGroup
+                ? 'row-start-2 col-span-8 sm:row-start-1'
+                : 'col-span-full',
+            )}
+            type='submit'
+            disabled={isFormDisabled || isPending}
+          >
+            {isPending && <Spinner />}
+            {isShouldShowSaved && !isPending && <LucideCheck />}
+            {isPending ? 'Saving…' : isShouldShowSaved ? 'Saved' : 'Submit'}
+          </Button>
+        </div>
       </form>
     </Form>
   )
@@ -154,8 +178,7 @@ export default function TipForm({
   function runSubmit(data: Schema) {
     startTransition(async () => {
       try {
-        await submitChanges(data)
-
+        await saveTips(userGroups, data, race.raceName)
         const filledFieldsCount = Object.values(data).filter((v) => v).length
         posthog.capture(
           isEditMode
@@ -166,13 +189,10 @@ export default function TipForm({
             race_name: race.raceName,
             is_sprint: isSprint,
             fields_filled: filledFieldsCount,
+            group_target: data.groupTarget,
           },
         )
 
-        toast.success('Tips saved', {
-          description: `Your tips for the ${race.raceName} have been saved. Good luck!`,
-          duration: 2_000,
-        })
         setShouldShowSaved(true)
       } catch (err) {
         const error = err as Error
@@ -188,4 +208,82 @@ export default function TipForm({
       }
     })
   }
+
+  function SelectGroupTargetField() {
+    return (
+      <FormField
+        control={form.control}
+        name='groupTarget'
+        render={({ field, fieldState }) => (
+          <FormItem>
+            <RadioGroup
+              name={field.name}
+              value={field.value}
+              onValueChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            >
+              <div className='flex items-center gap-3'>
+                <RadioGroupItem value='all' id='all' />
+                <Label htmlFor='all'>
+                  <span>
+                    Save to <span className='font-semibold'>all</span> groups
+                  </span>
+                </Label>
+              </div>
+              <div className='flex items-center gap-3'>
+                <RadioGroupItem value='this' id='this' />
+                <Label htmlFor='this'>
+                  <span>
+                    Save to <span className='font-semibold'>this</span> group
+                  </span>
+                </Label>
+              </div>
+            </RadioGroup>
+          </FormItem>
+        )}
+      />
+    )
+  }
+}
+
+async function saveTipsToAllUserGroups(groups: UserGroup[], data: Schema) {
+  await Promise.all(
+    groups.map(async (group) => {
+      try {
+        const updatedData: Schema = {
+          ...data,
+          groupId: group.id,
+        }
+        console.log({ updatedData })
+
+        await submitChanges(updatedData)
+        toast.success(`${group.name}: Tips saved`, {
+          description: 'Good Luck!',
+        })
+      } catch (error) {
+        toast.error(`${group.name}: Error saving`, {
+          description: (error as Error).message,
+        })
+      } finally {
+        return null
+      }
+    }),
+  )
+}
+
+async function saveTips(
+  userGroups: UserGroup[],
+  data: Schema,
+  raceName: string,
+) {
+  if (data.groupTarget === 'all') {
+    await saveTipsToAllUserGroups(userGroups, data)
+    return
+  }
+  // save for this group
+  await submitChanges(data)
+  toast.success('Tips saved', {
+    description: `Your tips for the ${raceName} have been saved. Good luck!`,
+    duration: 2_000,
+  })
 }
