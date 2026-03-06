@@ -9,8 +9,10 @@ import {
   ResultsMap,
   getPredictionsOfRacesAfterCutoff,
 } from '@/lib/utils/race-results'
-import { getGroupMembers } from '@/lib/utils/groups'
+import { getGroupMembers, GetGroupMembersData } from '@/lib/utils/groups'
 import { Leaderboard, LeaderBoard } from './leaderboard'
+import { verifySession } from '@/lib/dal'
+import { GLOBAL_GROUP_ID } from '@/constants/group'
 
 export async function LeaderboardWrapper({
   groupId,
@@ -27,7 +29,17 @@ export async function LeaderboardWrapper({
     return <Alert icon={LucideListX} title='Leaderboard is empty' />
   }
 
-  return <LeaderBoard leaderboard={leaderboard} />
+  const isGlobalGroup = groupId === GLOBAL_GROUP_ID
+
+  return (
+    <LeaderBoard
+      leaderboard={
+        isGlobalGroup
+          ? await getTruncatedLeaderboard(leaderboard, groupMembers)
+          : leaderboard
+      }
+    />
+  )
 
   function getLeaderboardInfo() {
     if (
@@ -254,4 +266,24 @@ export async function LeaderboardWrapper({
       return acc
     }, [] as number[])
   }
+}
+
+async function getTruncatedLeaderboard(
+  leaderboard: Leaderboard,
+  groupMembers: GetGroupMembersData,
+) {
+  const topTen = leaderboard.slice(0, 10)
+  const { user } = await verifySession()
+  const myMemberId = groupMembers.find(
+    (member) => member.user.id === user.id,
+  )?.id
+  const myIndex = leaderboard.findIndex(
+    (entry) => entry.member.id === myMemberId,
+  )
+
+  if (myIndex !== -1 && myIndex < 10) {
+    topTen.push(leaderboard[myIndex])
+    return topTen
+  }
+  return topTen
 }

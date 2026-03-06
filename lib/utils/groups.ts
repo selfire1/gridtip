@@ -90,16 +90,25 @@ export async function getConstructorOptions() {
   )()
 }
 
+export type GetGroupMembersData = Awaited<ReturnType<typeof getGroupMembers>>
 export async function getGroupMembers(groupId: string) {
   return (
     await db.query.groupMembersTable.findMany({
       where: (member, { eq }) => eq(member.groupId, groupId),
+      with: {
+        user: {
+          columns: {
+            id: true,
+          },
+        },
+      },
     })
   ).map((member) => {
     return {
       name: member.userName,
       id: member.id,
       profileImageUrl: member.profileImage,
+      user: member.user,
     }
   })
 }
