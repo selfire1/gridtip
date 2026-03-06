@@ -5,6 +5,7 @@ import { LeaderboardWrapper } from './_components/leaderboard-wrapper'
 import PastRacesServer from './_components/PastRacesServer'
 import { Separator } from '@/components/ui/separator'
 import EmptyGroup from '@/components/empty-group'
+import { GLOBAL_GROUP_ID } from '@/constants/group'
 
 export const metadata: Metadata = {
   title: 'Leaderboard',
@@ -24,13 +25,17 @@ export default async function LeaderboardPage() {
         <h1 className='sr-only'>Leaderboard</h1>
         <LeaderboardWrapper groupId={groupId} />
       </section>
-      <div className='-mx-4'>
-        <Separator className='my-12' />
-      </div>
-      <section>
-        <h2 className='title-2'>Race Results</h2>
-        <PastRacesServer groupId={groupId} />
-      </section>
+      {groupId === GLOBAL_GROUP_ID ? undefined : (
+        <>
+          <div className='-mx-4'>
+            <Separator className='my-12' />
+          </div>
+          <section>
+            <h2 className='title-2'>Race Results</h2>
+            <PastRacesServer groupId={groupId} />
+          </section>
+        </>
+      )}
     </>
   )
 }
