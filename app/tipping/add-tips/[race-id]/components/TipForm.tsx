@@ -134,7 +134,7 @@ export default function TipForm({
           type='submit'
           disabled={isFormDisabled || isPending}
         >
-          {isPending && <Loader2Icon className='animate-spin' />}
+          {isPending && <Spinner />}
           {isShouldShowSaved && !isPending && <LucideCheck />}
           {isPending ? 'Saving…' : isShouldShowSaved ? 'Saved' : 'Submit'}
         </Button>
