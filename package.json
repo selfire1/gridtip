@@ -93,5 +93,9 @@
     "typescript-eslint": "^8.53.1",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
+  },
+  "overrides": {
+    "jsdom": "25.0.1",
+    "jsdom>parse5": "7.3.0"
   }
 }
