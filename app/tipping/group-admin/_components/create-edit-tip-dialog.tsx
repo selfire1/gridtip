@@ -149,7 +149,7 @@ export default function CreateOrEditTipDialog({
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>{button}</DialogTrigger>
-      <DialogContent>
+      <DialogContent className='max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>{copy.title[mode]}</DialogTitle>
           <DialogDescription>{copy.description[mode]}</DialogDescription>
