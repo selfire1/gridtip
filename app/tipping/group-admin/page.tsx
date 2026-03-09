@@ -120,7 +120,7 @@ async function PredictionTab({ group }: { group: Pick<Database.Group, 'id'> }) {
   })
 
   const formProps: TipFormData = {
-    users: members,
+    members,
     races,
     constructors,
     drivers,

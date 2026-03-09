@@ -1,12 +1,16 @@
 'use server'
 
 import { verifyIsAdmin, verifySession } from '@/lib/dal'
-import { getCurrentGroup, getGroupMembership } from '@/lib/utils/groups'
+import {
+  getCurrentGroup,
+  getGroupMembership,
+  getGroupMembershipByMemberId,
+} from '@/lib/utils/groups'
 import { ServerResponse } from '@/types'
 import { db } from '@/db'
 import { Database } from '@/db/types'
 import { predictionEntriesTable, predictionsTable } from '@/db/schema/schema'
-import { Schema, formSchema } from './schema'
+import { AdminTipSchema, formSchema } from './schema'
 import { revalidateTag } from 'next/cache'
 import { CacheTag } from '@/constants/cache'
 import { eq } from 'drizzle-orm'
@@ -14,15 +18,15 @@ import { RacePredictionField } from '@/constants'
 import { getTipTypeFromPosition } from '@/lib/utils/prediction-fields'
 import * as Sentry from '@sentry/nextjs'
 
-export async function createTip(data: Schema): Promise<ServerResponse> {
+export async function createTip(data: AdminTipSchema): Promise<ServerResponse> {
   const result = await verifyRequest(data)
   if (!result.ok) {
     return result
   }
   const { group, parsed } = result
-  const groupMembership = await getGroupMembership({
+  const groupMembership = await getGroupMembershipByMemberId({
     groupId: group.id,
-    userId: data.userId,
+    memberId: data.memberId,
   })
   if (!groupMembership) {
     return {
@@ -61,7 +65,7 @@ export async function createTip(data: Schema): Promise<ServerResponse> {
         context: 'server-action',
       },
       extra: {
-        userId: data.userId,
+        memberId: data.memberId,
         groupId: group.id,
         raceId: data.raceId,
       },
@@ -79,7 +83,7 @@ export async function createTip(data: Schema): Promise<ServerResponse> {
     memberId,
   }: {
     predictionIdInput: Database.PredictionId | undefined
-    data: Schema
+    data: AdminTipSchema
     groupId: Database.GroupId
     memberId: Database.GroupMember['id']
   }) {
@@ -136,7 +140,7 @@ export async function createTip(data: Schema): Promise<ServerResponse> {
   }
 }
 
-async function verifyRequest(data: Schema) {
+async function verifyRequest(data: AdminTipSchema) {
   const { userId: adminUserId } = await verifySession()
   const group = await getCurrentGroup(adminUserId)
   if (!group) {
@@ -161,7 +165,7 @@ async function verifyRequest(data: Schema) {
     } as const
   }
 
-  const { userId } = parsed.data
+  const { memberId: memberId } = parsed.data
 
   const isTargetUserMember = await getUserIsMemberOfGroup(group.id)
   if (!isTargetUserMember) {
@@ -176,16 +180,20 @@ async function verifyRequest(data: Schema) {
     group,
     message: '',
     parsed,
-    userId,
+    memberId,
   }
 
   async function getUserIsMemberOfGroup(groupId: Database.Group['id']) {
+    console.log({ groupId, memberId: memberId })
     return !!(await db.query.groupMembersTable.findFirst({
       columns: {
         id: true,
       },
-      where(table, { and, eq }) {
-        return and(eq(table.userId, userId), eq(table.groupId, groupId))
+      where(groupMember, { and, eq }) {
+        return and(
+          eq(groupMember.id, memberId),
+          eq(groupMember.groupId, groupId),
+        )
       },
     }))
   }
@@ -193,7 +201,7 @@ async function verifyRequest(data: Schema) {
 
 export async function updateTip(
   predictionEntryId: Database.PredictionEntryId,
-  data: Schema,
+  data: AdminTipSchema,
 ): Promise<ServerResponse> {
   const result = await verifyRequest(data)
   if (!result.ok) {
@@ -233,7 +241,7 @@ export async function updateTip(
   }
 }
 
-function getValueObject(data: Schema) {
+function getValueObject(data: AdminTipSchema) {
   const isForDriver = getTipTypeFromPosition(data.position) === 'driver'
   return isForDriver
     ? {
@@ -262,7 +270,7 @@ async function getPrediction({
   })
 }
 
-function getOverwrite(overwrite: Schema['overwriteTo']) {
+function getOverwrite(overwrite: AdminTipSchema['overwriteTo']) {
   if (!overwrite) {
     return null
   }

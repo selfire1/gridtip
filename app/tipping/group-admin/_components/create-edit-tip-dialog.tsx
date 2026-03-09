@@ -48,7 +48,7 @@ import {
 import { createTip, updateTip } from '../_utils/create-tip-action'
 import { toast } from 'sonner'
 import AppButton from '@/components/button'
-import { formSchema, Schema } from '../_utils/schema'
+import { formSchema, AdminTipSchema } from '../_utils/schema'
 import { useRouter } from 'next/navigation'
 import { SelectUser } from './select-user'
 import { TIP_OVERWRITE_OPTIONS } from '@/db/schema/schema'
@@ -61,20 +61,20 @@ type RaceOption = Pick<
 >
 
 export type TipFormData = {
-  users: PredictionMember[]
+  members: PredictionMember[]
   drivers: DriverOptionProps[]
   constructors: ConstructorProps[]
   races: RaceOption[]
 }
 
 type TipFormProps = TipFormData & {
-  defaultValues?: Partial<Schema>
+  defaultValues?: Partial<AdminTipSchema>
   button?: React.ReactNode
   predictionEntryId?: Database.PredictionEntryId
 }
 
 export default function CreateOrEditTipDialog({
-  users,
+  members,
   races,
   drivers,
   constructors,
@@ -89,7 +89,7 @@ export default function CreateOrEditTipDialog({
     />
   ),
 }: TipFormProps) {
-  const form = useForm<Schema>({
+  const form = useForm<AdminTipSchema>({
     resolver: zodResolver(formSchema),
     defaultValues,
   })
@@ -340,12 +340,12 @@ export default function CreateOrEditTipDialog({
   function SelectTipper() {
     return (
       <FormField
-        name='userId'
+        name='memberId'
         label='Tipper'
         renderItem={({ field }) => {
           return (
             <SelectUser
-              users={users}
+              members={members}
               value={field.value}
               onSelect={field.onChange}
               disabled={isEditing}
@@ -356,7 +356,7 @@ export default function CreateOrEditTipDialog({
     )
   }
 
-  function FormField<TKey extends keyof Schema>({
+  function FormField<TKey extends keyof AdminTipSchema>({
     name,
     label,
     description,
@@ -366,7 +366,7 @@ export default function CreateOrEditTipDialog({
     label: string
     description?: string
     renderItem: (formContext: {
-      field: ControllerRenderProps<Schema, TKey>
+      field: ControllerRenderProps<AdminTipSchema, TKey>
       fieldState: ControllerFieldState
     }) => React.ReactNode
   }) {
@@ -416,7 +416,7 @@ export default function CreateOrEditTipDialog({
     )
   }
 
-  async function onSubmit(data: Schema) {
+  async function onSubmit(data: AdminTipSchema) {
     setMessage(undefined)
     startTransition(async () => {
       const response = await getResponse()

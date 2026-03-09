@@ -4,19 +4,19 @@ import { Database } from '@/db/types'
 import { PredictionMember } from '../types/prediction-member'
 
 export function SelectUser({
-  users,
+  members,
   value,
   onSelect,
   disabled = false,
 }: {
-  users: PredictionMember[]
+  members: PredictionMember[]
   value: Database.UserId
   onSelect: (value: Database.UserId | undefined) => void
   disabled?: boolean
 }) {
   return (
     <Combobox
-      items={users}
+      items={members}
       value={value}
       onSelect={onSelect}
       getSearchValue={(user) => user.name}

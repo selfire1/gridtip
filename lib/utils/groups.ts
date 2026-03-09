@@ -126,6 +126,22 @@ export async function getGroupMembership({
   })
 }
 
+export async function getGroupMembershipByMemberId({
+  memberId,
+  groupId,
+}: {
+  memberId: string
+  groupId: string
+}) {
+  return await db.query.groupMembersTable.findFirst({
+    where: (groupMemberTable, { eq, and }) =>
+      and(
+        eq(groupMemberTable.groupId, groupId),
+        eq(groupMemberTable.id, memberId),
+      ),
+  })
+}
+
 export async function getFirstRace() {
   function getRaceUncached() {
     return db.query.racesTable.findFirst({

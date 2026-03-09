@@ -35,7 +35,7 @@ export default function RowAction({ row }: { row: PredictionRow }) {
             {...context}
             predictionEntryId={row.id}
             defaultValues={{
-              userId: row.member.id,
+              memberId: row.member.id,
               raceId: row.race.id,
               position: row.position,
               valueId: row.value.id,
