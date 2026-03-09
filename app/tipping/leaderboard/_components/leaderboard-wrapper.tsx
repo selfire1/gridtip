@@ -286,8 +286,9 @@ async function getTruncatedLeaderboard(
   const myIndex = leaderboard.findIndex(
     (entry) => entry.member.id === myMemberId,
   )
+  console.log({ myIndex })
 
-  if (myIndex !== -1 && myIndex < 10) {
+  if (myIndex !== -1 && myIndex > 10) {
     topTen.push(leaderboard[myIndex])
     return topTen
   }
