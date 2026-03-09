@@ -51,6 +51,7 @@
     "dompurify": "^3.3.2",
     "dotenv": "^17.2.2",
     "drizzle-orm": "^0.44.5",
+    "facehash": "^0.1.0",
     "lucide-react": "^0.542.0",
     "marked": "^16.4.0",
     "motion": "^12.29.2",
