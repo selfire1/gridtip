@@ -24,10 +24,10 @@ export default async function LeaderboardPage() {
   const title = !isGlobalGroup ? (
     <h1 className='sr-only'>Leaderboard</h1>
   ) : (
-    <span className='flex flex-col sm:flex-row items-center gap-2 justify-center'>
-      <WreathSide side='left' className='shrink-0 hidden sm:block' />
+    <span className='flex flex-row items-center gap-2 justify-center'>
+      <WreathSide side='left' className='shrink-0' />
       <h1 className='page-title'>Global Top Ten</h1>
-      <WreathSide side='right' className='shrink-0 hidden sm:block' />
+      <WreathSide side='right' className='shrink-0' />
     </span>
   )
 
