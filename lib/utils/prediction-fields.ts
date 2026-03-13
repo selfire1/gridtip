@@ -19,7 +19,7 @@ export function getIsSprint(race: Pick<Database.Race, 'sprintQualifyingDate'>) {
   return !!race.sprintQualifyingDate
 }
 
-export function getTipsDue(race: Database.Race, cutoff: number) {
+export function getDueDatesForTips(race: Database.Race, cutoff: number) {
   const isSprint = getIsSprint(race)
   return {
     sprint:
@@ -36,7 +36,7 @@ export function getClosedFields(
   baseDate = new Date(),
 ): Set<RacePredictionField> {
   const isSprint = getIsSprint(race)
-  const tipsDue = getTipsDue(race, cutoff)
+  const tipsDue = getDueDatesForTips(race, cutoff)
 
   const disabledFields = new Set<RacePredictionField>()
   if (isSprint && tipsDue.sprint && isPastForBaseDate(tipsDue.sprint)) {

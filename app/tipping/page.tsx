@@ -44,7 +44,7 @@ import {
   getGroupMembers,
   getGroupMembership,
 } from '@/lib/utils/groups'
-import { getIsSprint, getTipsDue } from '@/lib/utils/prediction-fields'
+import { getIsSprint, getDueDatesForTips } from '@/lib/utils/prediction-fields'
 import ChampionshipImage from '@/public/img/championship.jpg'
 import CopyLink from './groups/_components/copy-link'
 import { getRaces } from '@/lib/utils/races'
@@ -293,7 +293,7 @@ export default async function DashboardPage() {
       return
     }
     const isSprint = getIsSprint(race)
-    const tipsDue = getTipsDue(race, cutoff)
+    const tipsDue = getDueDatesForTips(race, cutoff)
     const hasTipped = await getHasTipped()
 
     return (

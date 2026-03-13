@@ -1,5 +1,5 @@
 import { Database } from '@/db/types'
-import { getIsSprint, getTipsDue } from '@/lib/utils/prediction-fields'
+import { getIsSprint, getDueDatesForTips } from '@/lib/utils/prediction-fields'
 import { isFuture, isPast } from 'date-fns'
 import { TimeTile } from './time-tile'
 
@@ -10,7 +10,7 @@ export default function RaceTimes({
   race: Database.Race
   cutoff: number
 }) {
-  const tipsDue = getTipsDue(race, cutoff)
+  const tipsDue = getDueDatesForTips(race, cutoff)
   const isSprint = getIsSprint(race)
   return (
     <section className='flex snap-x gap-2 overflow-x-auto'>
