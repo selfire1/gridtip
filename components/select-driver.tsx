@@ -3,21 +3,16 @@
 import * as React from 'react'
 
 import { useMediaQuery } from '@/hooks/use-media-query'
-import { Button } from '@/components/ui/button'
+import { Button, ShadButtonProps } from '@/components/ui/button'
 import {
   Command,
+  CommandDialog,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
 } from '@/components/ui/command'
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetTitle,
-} from '@/components/ui/sheet'
 import {
   Popover,
   PopoverContent,
@@ -26,7 +21,6 @@ import {
 import { ChevronsUpDown } from 'lucide-react'
 import { FormControl } from '@/components/ui/form'
 import DriverOption, { DriverOptionProps } from '@/components/driver-option'
-// import DriverOption from '@/components/driver-option'
 
 export function SelectDriver({
   drivers,
@@ -53,7 +47,9 @@ export function SelectDriver({
   if (isDesktop) {
     return (
       <Popover open={open} onOpenChange={setOpen}>
-        <TriggerButton type='popover' disabled={disabled} />
+        <PopoverTrigger asChild>
+          <TriggerButton onClick={() => setOpen(true)} disabled={disabled} />
+        </PopoverTrigger>
         <PopoverContent className='w-[300px] p-0' align='start'>
           <DriverList setOpen={setOpen} />
         </PopoverContent>
@@ -62,13 +58,12 @@ export function SelectDriver({
   }
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <TriggerButton type='sheet' disabled={disabled} />
-      <SheetContent side='bottom'>
-        <SheetTitle className='sr-only'>Select Driver</SheetTitle>
+    <>
+      <TriggerButton onClick={() => setOpen(true)} disabled={disabled} />
+      <CommandDialog open={open} onOpenChange={setOpen}>
         <DriverList setOpen={setOpen} />
-      </SheetContent>
-    </Sheet>
+      </CommandDialog>
+    </>
   )
 
   function DriverList({ setOpen }: { setOpen: (open: boolean) => void }) {
@@ -107,30 +102,28 @@ export function SelectDriver({
   }
 
   function TriggerButton({
-    type,
     disabled,
+    ...props
   }: {
-    type: 'sheet' | 'popover'
     disabled?: boolean
-  }) {
-    const Trigger = type === 'sheet' ? SheetTrigger : PopoverTrigger
+  } & ShadButtonProps) {
     return (
-      <Trigger asChild>
-        <FormControl>
-          <Button
-            disabled={disabled}
-            variant='outline'
-            className='justify-between flex'
-          >
-            {selected ? (
-              <DriverOption driver={selected} isSelected={false} />
-            ) : (
-              <EmptyState />
-            )}
-            <ChevronsUpDown className='opacity-50' />
-          </Button>
-        </FormControl>
-      </Trigger>
+      <FormControl>
+        <Button
+          type='button'
+          disabled={disabled}
+          variant='outline'
+          className='justify-between flex'
+          {...props}
+        >
+          {selected ? (
+            <DriverOption driver={selected} isSelected={false} />
+          ) : (
+            <EmptyState />
+          )}
+          <ChevronsUpDown className='opacity-50' />
+        </Button>
+      </FormControl>
     )
     function EmptyState() {
       return <span>Select driver</span>
