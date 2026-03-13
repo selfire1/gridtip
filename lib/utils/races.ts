@@ -4,7 +4,7 @@ import { db } from '@/db'
 import { cache } from 'react'
 
 export async function getNextRace() {
-  const undeduplicated = await unstable_cache(
+  const undeduplicated = unstable_cache(
     async () =>
       await db.query.racesTable.findFirst({
         orderBy: (race) => race.round,
@@ -20,7 +20,7 @@ export async function getNextRace() {
     },
   )
 
-  return cache(undeduplicated)()
+  return await cache(undeduplicated)()
 }
 
 export async function getRaces() {
