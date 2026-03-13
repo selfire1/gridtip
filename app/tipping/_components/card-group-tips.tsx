@@ -179,7 +179,7 @@ export async function CardEveryonesTips(props: CardOngoingProps) {
 
     const teamBg = isDriver
       ? {
-          ...getStyleForDriver(tip.id, tip.constructorId, false),
+          ...getStyleForDriver(tip.id, tip.constructorId),
         }
       : {}
 
@@ -232,30 +232,22 @@ export async function CardEveryonesTips(props: CardOngoingProps) {
   function getStyleForDriver(
     driverId: string,
     constructorId: string,
-    isCurrentUser: boolean,
   ): React.CSSProperties {
     if (!seenDriverMap.has(driverId)) {
       const isConstructorSeen = seenConstructors.has(constructorId)
       seenDriverMap.set(driverId, !isConstructorSeen ? 'first' : 'second')
       seenConstructors.add(constructorId)
     }
-    const GRADIENT_CONFIG = {
-      default: {
-        start: 0.01,
-        end: 0.1,
-      },
-      current: {
-        start: 0.2,
-        end: 0.4,
-      },
+    const GRADIENT = {
+      start: 0.01,
+      end: 0.1,
     } as const
 
-    const gradient = GRADIENT_CONFIG[isCurrentUser ? 'current' : 'default']
     const colourStart = getConstructorCssVariable(constructorId, {
-      opacity: gradient.start,
+      opacity: GRADIENT.start,
     })
     const colourEnd = getConstructorCssVariable(constructorId, {
-      opacity: gradient.end,
+      opacity: GRADIENT.end,
     })
     const style = {
       backgroundImage: `linear-gradient(to ${seenDriverMap.get(driverId) === 'first' ? 'left' : 'right'}, ${colourStart} , ${colourEnd})`,
