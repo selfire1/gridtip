@@ -301,8 +301,8 @@ export default async function DashboardPage() {
         <RaceHeader
           race={race}
           title={
-            <span className='flex flex-col gap-2'>
-              <div className='flex items-center gap-2'>
+            <span className='flex flex-col gap-3'>
+              <div className='flex flex-row flex-wrap gap-y-1 gap-x-2'>
                 {isSprint && tipsDue.sprint && isFuture(tipsDue.sprint) && (
                   <Badge variant={getBadgeVariant(tipsDue.sprint)}>
                     Sprint tips due in{' '}
