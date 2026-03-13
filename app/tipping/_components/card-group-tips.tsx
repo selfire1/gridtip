@@ -17,21 +17,28 @@ import { verifySession } from '@/lib/dal'
 import UserAvatar from '@/components/user-avatar'
 import { and, eq, inArray } from 'drizzle-orm'
 import { predictionEntriesTable, predictionsTable } from '@/db/schema/schema'
+import { Database } from '@/db/types'
 
 type CardOngoingProps = {
   raceId: string
   groupId: string
   collapsed?: boolean
 }
-export async function CardEveryonesTips(props: CardOngoingProps) {
+
+type PredictionEntry = Awaited<ReturnType<typeof getPredictionEntries>>[number]
+export async function CardEveryonesTips({
+  raceId,
+  groupId,
+  collapsed,
+}: CardOngoingProps) {
   const { userId } = await verifySession()
-  const predictionEntries = await getPredictionEntries()
+  const predictionEntries = await getPredictionEntries({ raceId, groupId })
   const positionToTips = reduceIntoObject(predictionEntries)
 
   const seenDriverMap = new Map<string, 'first' | 'second'>()
   const seenConstructors = new Set<string>()
 
-  const race = await getRaceInfo(props.raceId)
+  const race = await getRaceInfo(raceId)
   const positionTips = getTipsOnPosition()
 
   const usersByTip = getUsersByTip(positionTips)
@@ -86,9 +93,7 @@ export async function CardEveryonesTips(props: CardOngoingProps) {
           tip: NonNullable<
             (typeof positionTips)[number]['tips'][number]['value']
           >
-          members: Array<
-            (typeof predictionEntries)[number]['prediction']['member']
-          >
+          members: Array<PredictionEntry['prediction']['member']>
         }>,
       )
       return {
@@ -110,7 +115,7 @@ export async function CardEveryonesTips(props: CardOngoingProps) {
         <Accordion
           type='single'
           collapsible={true}
-          defaultValue={props.collapsed ? undefined : positionTips[0].position}
+          defaultValue={collapsed ? undefined : positionTips[0].position}
         >
           {usersByTip.map(({ position, tipsByValue }) => {
             return (
@@ -162,10 +167,8 @@ export async function CardEveryonesTips(props: CardOngoingProps) {
     tip,
     members,
   }: {
-    members: (typeof predictionEntries)[number]['prediction']['member'][]
-    tip:
-      | (typeof predictionEntries)[number]['constructor']
-      | (typeof predictionEntries)[number]['driver']
+    members: PredictionEntry['prediction']['member'][]
+    tip: PredictionEntry['constructor'] | PredictionEntry['driver']
   }) {
     if (!tip) {
       return
@@ -255,59 +258,7 @@ export async function CardEveryonesTips(props: CardOngoingProps) {
     return style
   }
 
-  function getPredictionEntries() {
-    return db.query.predictionEntriesTable.findMany({
-      where: inArray(
-        predictionEntriesTable.predictionId,
-        db
-          .select({ id: predictionsTable.id })
-          .from(predictionsTable)
-          .where(
-            and(
-              eq(predictionsTable.groupId, props.groupId),
-              eq(predictionsTable.raceId, props.raceId),
-            ),
-          ),
-      ),
-      columns: {
-        id: true,
-        position: true,
-      },
-      with: {
-        prediction: {
-          columns: {
-            raceId: true,
-          },
-          with: {
-            member: {
-              columns: {
-                id: true,
-                userName: true,
-                profileImage: true,
-              },
-            },
-          },
-        },
-        constructor: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-        driver: {
-          columns: {
-            constructorId: true,
-            givenName: true,
-            permanentNumber: true,
-            familyName: true,
-            id: true,
-          },
-        },
-      },
-    })
-  }
-
-  function reduceIntoObject(entries: typeof predictionEntries) {
+  function reduceIntoObject(entries: PredictionEntry[]) {
     type ReturnObject = Record<
       RacePredictionField,
       {
@@ -318,9 +269,7 @@ export async function CardEveryonesTips(props: CardOngoingProps) {
           profileImageUrl: string | undefined | null
         }
         position: RacePredictionField
-        value:
-          | (typeof predictionEntries)[number]['driver']
-          | (typeof predictionEntries)[number]['constructor']
+        value: PredictionEntry['driver'] | PredictionEntry['constructor']
       }[]
     >
 
@@ -354,4 +303,62 @@ export async function CardEveryonesTips(props: CardOngoingProps) {
 
     return sorted
   }
+}
+
+async function getPredictionEntries({
+  groupId,
+  raceId,
+}: {
+  groupId: Database.GroupId
+  raceId: Database.RaceId
+}) {
+  return await db.query.predictionEntriesTable.findMany({
+    where: inArray(
+      predictionEntriesTable.predictionId,
+      db
+        .select({ id: predictionsTable.id })
+        .from(predictionsTable)
+        .where(
+          and(
+            eq(predictionsTable.groupId, groupId),
+            eq(predictionsTable.raceId, raceId),
+          ),
+        ),
+    ),
+    columns: {
+      id: true,
+      position: true,
+    },
+    with: {
+      prediction: {
+        columns: {
+          raceId: true,
+        },
+        with: {
+          member: {
+            columns: {
+              id: true,
+              userName: true,
+              profileImage: true,
+            },
+          },
+        },
+      },
+      constructor: {
+        columns: {
+          id: true,
+          name: true,
+        },
+      },
+      driver: {
+        columns: {
+          constructorId: true,
+          givenName: true,
+          permanentNumber: true,
+          familyName: true,
+          id: true,
+        },
+      },
+    },
+  })
 }
