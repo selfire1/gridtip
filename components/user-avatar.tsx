@@ -25,9 +25,6 @@ export default function UserAvatar(
         <HashAvatarImageFallback
           name={props.name}
           facehashProps={{
-            // onRenderMouth: () => (
-            //   <span className='text-[26cqw] leading-none'>{props.name[0]}</span>
-            // ),
             colorClasses: [
               'bg-pink-500',
               'bg-blue-500',
