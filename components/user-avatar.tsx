@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import type { User } from '@/db/schema/schema'
 import {
   Avatar as HashAvatar,
@@ -17,10 +18,20 @@ export default function UserAvatar(
   return (
     <>
       <HashAvatar className={props.className || 'rounded-lg'}>
+        {props.profileImageUrl && (
+          <Image
+            src={props.profileImageUrl}
+            alt={props.name}
+            sizes='100px'
+            width={200}
+            height={200}
+            className='object-cover h-full w-full'
+          />
+        )}
         <HashAvatarImage
           src={props.profileImageUrl || undefined}
           alt={props.name}
-          className='object-cover'
+          className='hidden'
         />
         <HashAvatarImageFallback
           name={props.name}

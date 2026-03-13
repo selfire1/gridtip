@@ -4,6 +4,7 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   images: {
     qualities: [80, 100],
+    domains: ['96xwetbiw2.ufs.sh'],
   },
 }
 
