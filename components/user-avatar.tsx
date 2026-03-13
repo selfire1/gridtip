@@ -7,6 +7,7 @@ import {
   AvatarImage as HashAvatarImage,
   AvatarFallback as HashAvatarImageFallback,
 } from 'facehash'
+import { cn } from '@/lib/utils'
 
 export default function UserAvatar(
   props: {
@@ -17,7 +18,7 @@ export default function UserAvatar(
   // TODO: pass an id to make this always the same
   return (
     <>
-      <HashAvatar className={props.className || 'rounded-lg'}>
+      <HashAvatar className={cn('rounded-lg', props.className)}>
         {props.profileImageUrl && (
           <Image
             src={props.profileImageUrl}
