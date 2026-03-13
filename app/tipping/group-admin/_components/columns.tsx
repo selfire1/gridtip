@@ -31,11 +31,11 @@ export const columns: ColumnDef<PredictionRow>[] = [
       },
     }) {
       return (
-        <div className='flex items-center gap-1'>
+        <div className='flex items-center gap-2'>
           <UserAvatar
             name={name}
             profileImageUrl={imageSrc}
-            className='size-4'
+            className='size-5 rounded-md'
           />
           <p>{name}</p>
         </div>
