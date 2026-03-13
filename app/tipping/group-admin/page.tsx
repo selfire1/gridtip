@@ -11,9 +11,6 @@ import {
 import { createGetAllPredictions } from '@/lib/utils/race-results'
 import { redirect } from 'next/navigation'
 import { formatPredictionsToRows } from './_utils/rows'
-import { unstable_cache } from 'next/cache'
-import { db } from '@/db'
-import { CacheTag } from '@/constants/cache'
 import CreateOrEditTipDialog, {
   TipFormData,
 } from './_components/create-edit-tip-dialog'
@@ -23,6 +20,7 @@ import { ChampionshipRevealDate } from './_components/championship-reveal-date'
 import { PredictionMember } from './types/prediction-member'
 import { Database } from '@/db/types'
 import { ChampionshipPoints } from './_components/championship-points'
+import { getRaces } from '@/lib/utils/races'
 
 export default async function GroupSettings() {
   const { userId } = await verifySession()
@@ -142,22 +140,4 @@ async function PredictionTab({ group }: { group: Pick<Database.Group, 'id'> }) {
       </TipFormProvider>
     </section>
   )
-  function getRaces() {
-    return unstable_cache(
-      async () =>
-        await db.query.racesTable.findMany({
-          columns: {
-            id: true,
-            locality: true,
-            country: true,
-            grandPrixDate: true,
-            sprintQualifyingDate: true,
-          },
-        }),
-      [],
-      {
-        tags: [CacheTag.Races],
-      },
-    )()
-  }
 }

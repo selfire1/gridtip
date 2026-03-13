@@ -22,3 +22,24 @@ export async function getNextRace() {
 
   return cache(undeduplicated)()
 }
+
+export async function getRaces() {
+  return unstable_cache(
+    async () =>
+      await db.query.racesTable.findMany({
+        columns: {
+          id: true,
+          locality: true,
+          country: true,
+          grandPrixDate: true,
+          sprintQualifyingDate: true,
+          qualifyingDate: true,
+          round: true,
+        },
+      }),
+    [],
+    {
+      tags: [CacheTag.Races],
+    },
+  )()
+}
