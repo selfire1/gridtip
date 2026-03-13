@@ -4,6 +4,8 @@ import {
   differenceInDays,
   differenceInHours,
   formatDistanceToNowStrict,
+  isAfter,
+  isBefore,
   isFuture,
   isPast,
   isWithinInterval,
@@ -63,6 +65,7 @@ import {
 } from '@/lib/utils/prediction-fields'
 import ChampionshipImage from '@/public/img/championship.jpg'
 import CopyLink from './groups/_components/copy-link'
+import { getRaces } from '@/lib/utils/races'
 
 export default async function DashboardPage() {
   const { userId, user } = await verifySession()
@@ -325,6 +328,7 @@ export default async function DashboardPage() {
                   {isSprint ? 'GP tips due in ' : 'Due in '}
                   {formatDistanceToNowStrict(tipsDue.grandPrix)}
                 </Badge>
+                <pre>{tipsDue.grandPrix.toLocaleTimeString()}</pre>
               </div>
               <span>Predict the next race</span>
             </span>
@@ -407,29 +411,31 @@ export default async function DashboardPage() {
     if (!currentUserGroup) {
       return
     }
-    const cutoff = await getCutoff({ groupId: currentUserGroup, userId })
-    if (cutoff === undefined) {
+    const cutoffInMinutes = await getCutoff({
+      groupId: currentUserGroup,
+      userId,
+    })
+    if (cutoffInMinutes === undefined) {
       return
     }
 
-    const racesInFuture = await db.query.racesTable.findFirst({
-      where(race, { gt, lt, and }) {
-        const referenceDate = new Date()
-        const cutoffDate = subMinutes(referenceDate, cutoff)
+    const allRaces = await getRaces()
+    const now = new Date()
 
-        const isAfterQualyCutoff = lt(race.qualifyingDate, cutoffDate)
-        const isBeforeEndOfGrandPrixPlusDay = gt(
-          race.grandPrixDate,
-          subDays(referenceDate, config.plusDay),
+    const ongoingRaces = allRaces
+      .filter((race) => {
+        const cutoffDate = subMinutes(race.qualifyingDate, cutoffInMinutes)
+        const isAfterQualyCutoff = isAfter(now, cutoffDate)
+        const isBeforeEndOfGrandPrixWithCustomExtension = isBefore(
+          now,
+          addDays(race.grandPrixDate, config.plusDay),
         )
-        return and(isAfterQualyCutoff, isBeforeEndOfGrandPrixPlusDay)
-      },
-      orderBy: (race) => race.round,
-      columns: {
-        id: true,
-      },
-    })
-    return racesInFuture
+
+        return isAfterQualyCutoff && isBeforeEndOfGrandPrixWithCustomExtension
+      })
+      .sort((a, b) => a.round - b.round)
+
+    return ongoingRaces[0]
   }
 
   async function getCutoffUncached(info: { groupId: string; userId: string }) {
