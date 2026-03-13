@@ -61,10 +61,11 @@ export function isRaceAbleToBeTipped(
 ) {
   const closedFields = getClosedFields(race, cutoff, baseDate)
   const positionsToTip = getPositionsStillToTip()
-  const areAllPositionsClosed = positionsToTip.every(
+  const openPositions = positionsToTip.filter(
     (position) => !isPositionClosed(position),
   )
-  return areAllPositionsClosed
+  const areThereAnyOpenPositions = Boolean(openPositions.length)
+  return areThereAnyOpenPositions
 
   function getPositionsStillToTip() {
     if (getIsSprint(race)) {
