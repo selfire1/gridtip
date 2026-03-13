@@ -54,7 +54,7 @@ async function getCurrentGroup(userId: string) {
 }
 
 export async function getDriverOptions() {
-  const drivers = await unstable_cache(
+  return await unstable_cache(
     async () =>
       db.query.driversTable.findMany({
         columns: {
@@ -71,13 +71,6 @@ export async function getDriverOptions() {
       tags: [CacheTag.Drivers],
     },
   )()
-
-  const filteredDrivers = drivers.filter((driver) => {
-    const isNotInitialLindblad = driver.id !== 'lindblad' // HACK: Before Melbourne 2026, Lindblad was stored under the `lindblad` id. Now he is stored under the `arvid_lindblad` id. This data comes from Jolpica. We need to remove this duplicate for future races.
-    return isNotInitialLindblad
-  })
-
-  return filteredDrivers
 }
 
 export async function getConstructorOptions() {
