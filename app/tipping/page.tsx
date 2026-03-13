@@ -313,7 +313,6 @@ export default async function DashboardPage() {
                   {isSprint ? 'GP tips due in ' : 'Due in '}
                   {formatDistanceToNowStrict(tipsDue.grandPrix)}
                 </Badge>
-                <pre>{tipsDue.grandPrix.toLocaleTimeString()}</pre>
               </div>
               <span>Predict the next race</span>
             </span>
