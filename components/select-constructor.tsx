@@ -3,7 +3,6 @@
 import * as React from 'react'
 
 import { useMediaQuery } from '@/hooks/use-media-query'
-import { Button, ShadButtonProps } from '@/components/ui/button'
 import {
   Command,
   CommandDialog,
@@ -18,11 +17,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { ChevronsUpDown } from 'lucide-react'
-import { FormControl } from '@/components/ui/form'
 import ConstructorOption, {
   type ConstructorProps,
 } from '@/components/constructor'
+import { TriggerButton } from './select-trigger-button'
 
 export function SelectConstructor({
   constructors,
@@ -45,11 +43,19 @@ export function SelectConstructor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
 
+  const triggerButtonProps = {
+    selectedItem: selected,
+    renderSelected: renderSelected,
+    emptyLabel: 'Select constructor',
+    onClick: () => setOpen(true),
+    disabled,
+  }
+
   if (isDesktop) {
     return (
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <TriggerButton onClick={() => setOpen(true)} disabled={disabled} />
+          <TriggerButton {...triggerButtonProps} />
         </PopoverTrigger>
         <PopoverContent className='w-[300px] p-0' align='start'>
           <ConstructorsList setOpen={setOpen} />
@@ -60,12 +66,16 @@ export function SelectConstructor({
 
   return (
     <>
-      <TriggerButton onClick={() => setOpen(true)} disabled={disabled} />
+      <TriggerButton {...triggerButtonProps} />
       <CommandDialog open={open} onOpenChange={setOpen}>
         <ConstructorsList setOpen={setOpen} />
       </CommandDialog>
     </>
   )
+
+  function renderSelected(selected: ConstructorProps) {
+    return <ConstructorOption constructor={selected} isSelected={false} />
+  }
 
   function ConstructorsList({ setOpen }: { setOpen: (open: boolean) => void }) {
     return (
@@ -97,36 +107,5 @@ export function SelectConstructor({
         </CommandList>
       </Command>
     )
-  }
-}
-
-function TriggerButton({
-  selected,
-  disabled,
-  ...props
-}: {
-  selected: ConstructorProps | undefined
-  disabled?: boolean
-} & ShadButtonProps) {
-  return (
-    <FormControl>
-      <Button
-        type='button'
-        variant='outline'
-        className='justify-between flex'
-        disabled={disabled}
-        {...props}
-      >
-        {selected ? (
-          <ConstructorOption constructor={selected} isSelected={false} />
-        ) : (
-          <EmptyState />
-        )}
-        <ChevronsUpDown className='opacity-50' />
-      </Button>
-    </FormControl>
-  )
-  function EmptyState() {
-    return <span>Select constructor</span>
   }
 }

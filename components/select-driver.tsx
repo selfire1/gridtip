@@ -3,7 +3,6 @@
 import * as React from 'react'
 
 import { useMediaQuery } from '@/hooks/use-media-query'
-import { Button, ShadButtonProps } from '@/components/ui/button'
 import {
   Command,
   CommandDialog,
@@ -18,9 +17,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { ChevronsUpDown } from 'lucide-react'
-import { FormControl } from '@/components/ui/form'
 import DriverOption, { DriverOptionProps } from '@/components/driver-option'
+import { TriggerButton } from './select-trigger-button'
 
 export function SelectDriver({
   drivers,
@@ -44,11 +42,20 @@ export function SelectDriver({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
 
+    const triggerButtonProps = {
+    selectedItem: selected,
+    renderSelected: renderSelected,
+    emptyLabel: 'Select driver',
+    onClick: () => setOpen(true),
+    disabled,
+  }
+
+
   if (isDesktop) {
     return (
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <TriggerButton onClick={() => setOpen(true)} disabled={disabled} />
+      <TriggerButton {...triggerButtonProps} />
         </PopoverTrigger>
         <PopoverContent className='w-[300px] p-0' align='start'>
           <DriverList setOpen={setOpen} />
@@ -59,12 +66,17 @@ export function SelectDriver({
 
   return (
     <>
-      <TriggerButton onClick={() => setOpen(true)} disabled={disabled} />
+      <TriggerButton {...triggerButtonProps} />
       <CommandDialog open={open} onOpenChange={setOpen}>
         <DriverList setOpen={setOpen} />
       </CommandDialog>
     </>
   )
+
+    function renderSelected(selected: DriverOptionProps) {
+    return <DriverOption driver={selected} isSelected={false} />
+  }
+
 
   function DriverList({ setOpen }: { setOpen: (open: boolean) => void }) {
     return (
@@ -101,32 +113,32 @@ export function SelectDriver({
     }
   }
 
-  function TriggerButton({
-    disabled,
-    ...props
-  }: {
-    disabled?: boolean
-  } & ShadButtonProps) {
-    return (
-      <FormControl>
-        <Button
-          type='button'
-          disabled={disabled}
-          variant='outline'
-          className='justify-between flex'
-          {...props}
-        >
-          {selected ? (
-            <DriverOption driver={selected} isSelected={false} />
-          ) : (
-            <EmptyState />
-          )}
-          <ChevronsUpDown className='opacity-50' />
-        </Button>
-      </FormControl>
-    )
-    function EmptyState() {
-      return <span>Select driver</span>
-    }
-  }
-}
+//   function TriggerButton({
+//     disabled,
+//     ...props
+//   }: {
+//     disabled?: boolean
+//   } & ShadButtonProps) {
+//     return (
+//       <FormControl>
+//         <Button
+//           type='button'
+//           disabled={disabled}
+//           variant='outline'
+//           className='justify-between flex'
+//           {...props}
+//         >
+//           {selected ? (
+//             <DriverOption driver={selected} isSelected={false} />
+//           ) : (
+//             <EmptyState />
+//           )}
+//           <ChevronsUpDown className='opacity-50' />
+//         </Button>
+//       </FormControl>
+//     )
+//     function EmptyState() {
+//       return <span>Select driver</span>
+//     }
+//   }
+// }
