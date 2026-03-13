@@ -24,7 +24,7 @@ type CardOngoingProps = {
   collapsed?: boolean
 }
 export async function CardEveryonesTips(props: CardOngoingProps) {
-  const { userId, user } = await verifySession()
+  const { userId } = await verifySession()
   const predictionEntries = await getPredictionEntries()
   const positionToTips = reduceIntoObject(predictionEntries)
 
@@ -339,7 +339,7 @@ export async function CardEveryonesTips(props: CardOngoingProps) {
         member: {
           name: entry.prediction.member.userName,
           id: entry.prediction.member.id,
-          profileImageUrl: user.profileImageUrl,
+          profileImageUrl: entry.prediction.member.profileImage,
         },
         position,
         value: entry.driver || entry.constructor,
