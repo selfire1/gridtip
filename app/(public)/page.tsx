@@ -456,7 +456,7 @@ function HeroImage() {
               member: {
                 id: '1',
                 userName: 'Marcus',
-                profileImage: null,
+                profileImage: '/people/marcus-avatar.png',
               },
             },
           ]}
