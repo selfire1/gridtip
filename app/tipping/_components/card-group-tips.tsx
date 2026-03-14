@@ -226,7 +226,7 @@ export async function CardEveryonesTips({
             )}
           </div>
         </div>
-        <div className='space-y-3 p-3'>
+        <div className='space-y-3 p-3 bg-background'>
           {members.map((member) => (
             <div
               className={cn(
