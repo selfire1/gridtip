@@ -203,7 +203,7 @@ export async function CardEveryonesTips({
       : {}
 
     return (
-      <div className='bg-background/50 overflow-hidden rounded-lg border'>
+      <div className='bg-background overflow-hidden rounded-lg border'>
         <div
           className={cn(
             'relative isolate p-3 border-b',
