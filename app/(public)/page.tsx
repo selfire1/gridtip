@@ -870,7 +870,7 @@ function SpeechBubble({
       <div
         style={{ '--offset': `${offset}%` } as React.CSSProperties}
         className={cn(
-          'rounded-md px-3 py-2 bg-gradient-to-b from-background/90 to-blue-50/90 font-medium text-foreground/90 relative backdrop-blur-md overflow-hidden',
+          'rounded-md px-3 py-2 bg-gradient-to-b from-background/90 to-blue-50/90 dark:to-blue-950/90 dark:from-blue-900/90 font-medium text-foreground/90 relative backdrop-blur-md overflow-hidden',
         )}
       >
         <div className='space-y-1'>
@@ -880,7 +880,7 @@ function SpeechBubble({
         </div>
       </div>
       <div
-        className='speech-bubble-tail bg-blue-50/90 backdrop-blur-md'
+        className='speech-bubble-tail bg-blue-50/90 dark:bg-blue-950 backdrop-blur-md'
         style={{ '--offset': `${offset}%` } as React.CSSProperties}
       />
     </motion.div>
