@@ -18,6 +18,7 @@ import UserAvatar from '@/components/user-avatar'
 import { and, eq, inArray } from 'drizzle-orm'
 import { predictionEntriesTable, predictionsTable } from '@/db/schema/schema'
 import { Database } from '@/db/types'
+import { GLOBAL_GROUP_ID } from '@/constants/group'
 
 type CardOngoingProps = {
   raceId: string
@@ -42,6 +43,21 @@ export async function CardEveryonesTips({
   const positionTips = getTipsOnPosition()
 
   const usersByTip = getUsersByTip(positionTips)
+
+  if (groupId === GLOBAL_GROUP_ID) {
+    return (
+      <FlagBackgroundCard race={race}>
+        {race && <RaceHeader title='Race Weekend ongoing' race={race} />}
+
+        <CardContent>
+          <p>
+            Your standing in the Global Group will be updated after the Grand
+            Prix.
+          </p>
+        </CardContent>
+      </FlagBackgroundCard>
+    )
+  }
 
   return (
     <FlagBackgroundCard race={race}>
