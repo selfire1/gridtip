@@ -19,8 +19,24 @@ import { serverSubmitTipSchema as schema } from './schema'
 import { revalidateTag } from 'next/cache'
 import { CacheTag } from '@/constants/cache'
 import { getTargetGroupAndMembership } from '@/lib/utils/groups'
+import { ServerResponse } from '@/types'
 
 export async function submitChanges(input: Record<string, unknown>) {
+  try {
+    await submitChangesThrows(input)
+    return {
+      ok: true,
+      message: '',
+    } satisfies ServerResponse
+  } catch (error) {
+    return {
+      ok: false,
+      message: (error as Error).message,
+    } satisfies ServerResponse
+  }
+}
+
+async function submitChangesThrows(input: Record<string, unknown>) {
   type Schema = z.infer<typeof schema>
 
   const { userId } = await verifySession()

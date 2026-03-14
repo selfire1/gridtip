@@ -249,24 +249,22 @@ export default function TipForm({
 async function saveTipsToAllUserGroups(groups: UserGroup[], data: Schema) {
   await Promise.all(
     groups.map(async (group) => {
-      try {
-        const updatedData: Schema = {
-          ...data,
-          groupId: group.id,
-        }
-        console.log({ updatedData })
-
-        await submitChanges(updatedData)
-        toast.success(`${group.name}: Tips saved`, {
-          description: 'Good Luck!',
-        })
-      } catch (error) {
+      const updatedData: Schema = {
+        ...data,
+        groupId: group.id,
+      }
+      const result = await submitChanges(updatedData)
+      if (!result.ok) {
         toast.error(`${group.name}: Error saving`, {
-          description: (error as Error).message,
+          description: result.message,
+          duration: 2_000,
         })
-      } finally {
         return null
       }
+      toast.success(`${group.name}: Tips saved`, {
+        description: 'Good Luck!',
+      })
+      return null
     }),
   )
 }
@@ -281,7 +279,14 @@ async function saveTips(
     return
   }
   // save for this group
-  await submitChanges(data)
+  const result = await submitChanges(data)
+  if (!result.ok) {
+    toast.error('Tips not saved', {
+      description: result.message,
+      duration: 2_000,
+    })
+    return
+  }
   toast.success('Tips saved', {
     description: `Your tips for the ${raceName} have been saved. Good luck!`,
     duration: 2_000,
