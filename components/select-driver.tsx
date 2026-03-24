@@ -4,6 +4,7 @@ import * as React from 'react'
 
 import DriverOption, { DriverOptionProps } from '@/components/driver-option'
 import { ResponsiveSelect } from './responsive-select'
+import { getDriverName } from '@/lib/driver'
 
 export function SelectDriver({
   drivers,
@@ -20,6 +21,15 @@ export function SelectDriver({
     <ResponsiveSelect
       items={drivers}
       value={value}
+      filter={(id, query) => {
+        const driver = drivers.find((d) => d.id === id)
+        const name = driver ? getDriverName(driver) : ''
+        const isMatch = name.toLowerCase().includes(query.toLowerCase())
+        if (!isMatch) {
+          return 0
+        }
+        return 1
+      }}
       onSelect={onSelect}
       disabled={disabled}
       selectLabel='Select driver'

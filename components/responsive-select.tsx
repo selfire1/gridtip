@@ -30,6 +30,7 @@ export function ResponsiveSelect<TItem extends { id: string }>({
   searchLabel,
   renderSelected,
   renderItem,
+  filter,
 }: {
   items: TItem[]
   selectLabel: string
@@ -38,6 +39,7 @@ export function ResponsiveSelect<TItem extends { id: string }>({
   onSelect: (item: TItem | undefined) => void
   disabled?: boolean
   renderSelected: (item: TItem) => React.ReactNode
+  filter?: (value: string, search: string) => number
   renderItem: (item: TItem, isSelected: boolean) => React.ReactNode
 }) {
   const [open, setOpen] = React.useState(false)
@@ -82,7 +84,7 @@ export function ResponsiveSelect<TItem extends { id: string }>({
 
   function ItemList({ setOpen }: { setOpen: (open: boolean) => void }) {
     return (
-      <Command>
+      <Command filter={filter}>
         <CommandInput placeholder={searchLabel} />
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>

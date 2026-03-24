@@ -24,6 +24,15 @@ export function SelectConstructor({
       value={value}
       onSelect={onSelect}
       disabled={disabled}
+      filter={(id, query) => {
+        const constructor = constructors.find((d) => d.id === id)
+        const name = constructor?.name || ''
+        const isMatch = name.toLowerCase().includes(query.toLowerCase())
+        if (!isMatch) {
+          return 0
+        }
+        return 1
+      }}
       selectLabel='Select constructor'
       searchLabel='Search constructors…'
       renderSelected={(constructor) => (
