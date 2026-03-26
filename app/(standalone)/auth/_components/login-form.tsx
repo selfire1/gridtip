@@ -40,7 +40,13 @@ export function LoginForm({
   className,
   placeholder,
   onLogin,
+  title,
+  description: providedDescription,
+  buttonLabel = 'Login',
 }: {
+  title: string
+  description: string
+  buttonLabel?: string
   className?: string
   placeholder: Placeholder
   onLogin: (data: LoginData, redirect?: string | null) => Promise<void>
@@ -88,7 +94,7 @@ export function LoginForm({
     >
       <FieldGroup>
         <div className='flex flex-col items-center gap-1 text-center'>
-          <h1 className='text-2xl font-bold'>Login to your account</h1>
+          <h1 className='text-2xl font-bold'>{title}</h1>
           <p className='text-muted-foreground text-sm text-balance'>
             {description}
           </p>
@@ -126,7 +132,7 @@ export function LoginForm({
         </Field>
         <Field>
           <Button type='submit' disabled={isAnyPending}>
-            {isLoginPending && <Spinner />} Login
+            {isLoginPending && <Spinner />} {buttonLabel}
           </Button>
         </Field>
         <FieldSeparator>Or continue with</FieldSeparator>
@@ -138,7 +144,7 @@ export function LoginForm({
             onClick={() => signInWithGoogle(searchParams.get('redirect'))}
           >
             {isGooglePending ? <Spinner /> : <GIcon />}
-            Login with Google
+            {buttonLabel} with Google
           </Button>
           <FieldDescription className='text-center'>
             Don’t have an account?{' '}
@@ -211,7 +217,7 @@ export function LoginForm({
       case QueryOrigin.Join:
         return 'Login or create an account first before joining this group.'
       default:
-        return 'Enter your email below to login to your account'
+        return providedDescription
     }
   }
 }

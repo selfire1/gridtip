@@ -3,19 +3,18 @@
 import { authClient } from '@/lib/auth-client'
 import { LoginForm } from '../../_components/login-form'
 import { getPlaceholder } from '../../_lib/placeholder'
-import { Path } from '@/lib/utils/path'
 import { toast } from 'sonner'
 
-export default function LoginPageForm() {
+export default function MobileLoginForm() {
   return (
     <LoginForm
-      title='Login to your account'
-      description='Enter your email below to login to your account'
-      onLogin={async (value, redirect) => {
+      title='Login to continue'
+      description='Enter your account details to continue to the app'
+      onLogin={async (value) => {
         const signInContext = await authClient.signIn.email({
           email: value.email,
           password: value.password,
-          callbackURL: redirect || Path.Dashboard,
+          callbackURL: '', // TODO: app
         })
         if (signInContext.error) {
           const isInvalidCredentialsError =
