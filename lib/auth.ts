@@ -1,4 +1,5 @@
 import { betterAuth } from 'better-auth'
+import { bearer } from 'better-auth/plugins'
 import { createAuthMiddleware } from 'better-auth/api'
 import { hoursToSeconds } from 'date-fns'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
@@ -8,6 +9,7 @@ import { Resend } from 'resend'
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 export const auth = betterAuth({
+  plugins: [bearer()],
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
