@@ -1,11 +1,10 @@
 import SpaImage from '@/public/img/spa.jpg'
 import Image from 'next/image'
-import { LoginForm } from '@/app/(standalone)/auth/_components/login-form'
-import { getPlaceholder } from '../_lib/placeholder'
 import AuthLayout from '../_components/auth-layout'
 import { Metadata } from 'next'
 import { Suspense } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
+import LoginPageForm from './_components/login-form-wrapper'
 
 export const metadata: Metadata = {
   title: 'Log in',
@@ -16,7 +15,7 @@ export default function LoginPage() {
     <AuthLayout
       slotPrimary={
         <Suspense fallback={<Skeleton className='h-full w-full' />}>
-          <LoginForm placeholder={getPlaceholder()} />
+          <LoginPageForm />
         </Suspense>
       }
       slotSecondary={

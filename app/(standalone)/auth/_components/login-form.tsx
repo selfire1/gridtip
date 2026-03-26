@@ -29,12 +29,21 @@ import { Path } from '@/lib/utils/path'
 import z from 'zod'
 import { GIcon } from './google-icon'
 
+const LoginSchema = z.object({
+  email: z.email(),
+  password: z.string().trim().min(8),
+})
+
+type LoginData = z.infer<typeof LoginSchema>
+
 export function LoginForm({
   className,
   placeholder,
-  ...props
-}: React.ComponentProps<'form'> & {
+  onLogin,
+}: {
+  className?: string
   placeholder: Placeholder
+  onLogin: (data: LoginData, redirect?: string | null) => Promise<void>
 }) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -76,7 +85,6 @@ export function LoginForm({
     <form
       onSubmit={(e) => onSubmit(e, searchParams.get('redirect'))}
       className={cn('flex flex-col gap-6', className)}
-      {...props}
     >
       <FieldGroup>
         <div className='flex flex-col items-center gap-1 text-center'>
@@ -148,40 +156,18 @@ export function LoginForm({
     redirect: string | null,
   ) {
     startLoginTransition(async () => {
-      const schema = z.object({
-        email: z.email(),
-        password: z.string().trim().min(8),
-      })
       event.preventDefault()
       const target = event.target as HTMLFormElement
       const formState = Object.fromEntries(new FormData(target))
 
-      const result = schema.safeParse(formState)
+      const result = LoginSchema.safeParse(formState)
       if (!result.success) {
         console.warn(result.error.issues)
         toast.error(result.error.issues[0].message)
         return
       }
 
-      const value = result.data
-      const signInContext = await authClient.signIn.email({
-        email: value.email,
-        password: value.password,
-        callbackURL: redirect || Path.Dashboard,
-      })
-      if (signInContext.error) {
-        const isInvalidCredentialsError =
-          signInContext.error.status === 403 ? 'unverified' : 'other'
-
-        if (isInvalidCredentialsError) {
-          toast.error('Invalid Credentials')
-          return
-        }
-        toast.error('Something went wrong', {
-          description: signInContext.error.message,
-        })
-        console.error(signInContext.error)
-      }
+      await onLogin(result.data, redirect)
     })
   }
 
