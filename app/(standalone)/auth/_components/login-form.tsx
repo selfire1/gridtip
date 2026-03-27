@@ -34,7 +34,7 @@ const LoginSchema = z.object({
   password: z.string().trim().min(8),
 })
 
-type LoginData = z.infer<typeof LoginSchema>
+export type LoginData = z.infer<typeof LoginSchema>
 
 export function LoginForm({
   className,
@@ -42,11 +42,9 @@ export function LoginForm({
   onLogin,
   title,
   description: providedDescription,
-  buttonLabel = 'Login',
 }: {
   title: string
   description: string
-  buttonLabel?: string
   className?: string
   placeholder: Placeholder
   onLogin: (data: LoginData, redirect?: string | null) => Promise<void>
@@ -132,7 +130,7 @@ export function LoginForm({
         </Field>
         <Field>
           <Button type='submit' disabled={isAnyPending}>
-            {isLoginPending && <Spinner />} {buttonLabel}
+            {isLoginPending && <Spinner />} Login
           </Button>
         </Field>
         <FieldSeparator>Or continue with</FieldSeparator>
@@ -144,7 +142,7 @@ export function LoginForm({
             onClick={() => signInWithGoogle(searchParams.get('redirect'))}
           >
             {isGooglePending ? <Spinner /> : <GIcon />}
-            {buttonLabel} with Google
+            Login with Google
           </Button>
           <FieldDescription className='text-center'>
             Don’t have an account?{' '}
