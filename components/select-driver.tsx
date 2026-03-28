@@ -5,6 +5,7 @@ import * as React from 'react'
 import DriverOption, { DriverOptionProps } from '@/components/driver-option'
 import { ResponsiveSelect } from './responsive-select'
 import { getDriverName } from '@/lib/driver'
+import { getWithoutDiacritics } from '@/lib/remove-diacritics'
 
 export function SelectDriver({
   drivers,
@@ -24,7 +25,10 @@ export function SelectDriver({
       filter={(id, query) => {
         const driver = drivers.find((d) => d.id === id)
         const name = driver ? getDriverName(driver) : ''
-        const isMatch = name.toLowerCase().includes(query.toLowerCase())
+        const normalisedName = getWithoutDiacritics(name)
+        const isMatch = normalisedName
+          .toLocaleLowerCase()
+          .includes(query.toLocaleLowerCase())
         if (!isMatch) {
           return 0
         }
