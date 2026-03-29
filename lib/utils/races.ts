@@ -16,7 +16,6 @@ export async function getNextRace() {
     [],
     {
       tags: [CacheTag.Races],
-      revalidate: 60 * 10,
     },
   )
 
