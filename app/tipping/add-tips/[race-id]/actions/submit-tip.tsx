@@ -15,7 +15,7 @@ import {
 import { Database as Db } from '@/db/types'
 import { isPositionAfterCutoff as getIsAfterCutoff } from '@/lib/utils/prediction-fields'
 import { onConflictUpdateKeys } from '@/lib/utils/drizzle'
-import { serverSubmitTipSchema as schema } from './schema'
+import { serverSubmitTipSchema } from './schema'
 import { revalidateTag } from 'next/cache'
 import { CacheTag } from '@/constants/cache'
 import { getTargetGroupAndMembership } from '@/lib/utils/groups'
@@ -37,7 +37,7 @@ export async function submitChanges(input: Record<string, unknown>) {
 }
 
 async function submitChangesThrows(input: Record<string, unknown>) {
-  type Schema = z.infer<typeof schema>
+  type Schema = z.infer<typeof serverSubmitTipSchema>
 
   const { userId } = await verifySession()
 
@@ -276,7 +276,7 @@ async function submitChangesThrows(input: Record<string, unknown>) {
   }
 
   function validateInput() {
-    const result = schema.safeParse(input)
+    const result = serverSubmitTipSchema.safeParse(input)
     if (!result.success) {
       throw new Error(z.prettifyError(result.error))
     }

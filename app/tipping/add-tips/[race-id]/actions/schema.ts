@@ -18,7 +18,12 @@ export const submitTipSchema = z.object({
   groupTarget: z.literal('all').or(z.literal('this')),
 })
 
-export const serverSubmitTipSchema = submitTipSchema.partial().extend({
-  groupId: z.string('No group id'),
-  raceId: z.string('Invalid race id'),
-})
+export const serverSubmitTipSchema = submitTipSchema
+  .partial()
+  .extend({
+    groupId: z.string('No group id'),
+    raceId: z.string('Invalid race id'),
+  })
+  .omit({
+    groupTarget: true,
+  })

@@ -1,4 +1,5 @@
 import { Database } from '@/db/types'
+import { getConstructorImage } from '@/lib/utils/constructor'
 import clsx from 'clsx'
 import { LucideCheck } from 'lucide-react'
 import Image from 'next/image'
@@ -29,7 +30,7 @@ export default function Constructor({
         height={24}
         alt=''
         className={classNameImg}
-        src={`/img/constructors/${constructor.id}.webp`}
+        src={getConstructorImage(constructor.id)}
       />
       <span className='truncate'>{constructor.name}</span>
       {isSelected && <LucideCheck className='ml-auto' />}

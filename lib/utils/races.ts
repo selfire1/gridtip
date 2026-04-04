@@ -2,6 +2,9 @@ import { unstable_cache } from 'next/cache'
 import { CacheTag } from '@/constants/cache'
 import { db } from '@/db'
 import { cache } from 'react'
+import { Database } from '@/db/types'
+import { getCountryFlag } from './country-flag'
+import { getIsSprint } from './prediction-fields'
 
 export async function getNextRace() {
   const undeduplicated = unstable_cache(
@@ -21,6 +24,28 @@ export async function getNextRace() {
   )
 
   return await cache(undeduplicated)()
+}
+
+export async function getRaceDetails(id: Database.RaceId) {
+  return unstable_cache(
+    async () => {
+      const race = await db.query.racesTable.findFirst({
+        where: (race, { eq }) => eq(race.id, id),
+      })
+
+      if (!race) {
+        return undefined
+      }
+
+      return {
+        ...race,
+        image: getCountryFlag(race.country),
+        isSprint: getIsSprint(race),
+      }
+    },
+    [id],
+    { tags: [CacheTag.Races] },
+  )()
 }
 
 export async function getRaces() {
