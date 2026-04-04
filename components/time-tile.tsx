@@ -5,11 +5,12 @@ import { Icon } from './icon'
 
 export function TimeTile(props: {
   title: string
-  date: Date
+  date: Date | string
   isActive: boolean
   icon: keyof typeof Icon
   className?: string
 }) {
+  const date = new Date(props.date)
   return (
     <div
       className={clsx(
@@ -24,11 +25,9 @@ export function TimeTile(props: {
         <span className='whitespace-nowrap'>{props.title}</span>
       </p>
       <p className='flex flex-col font-medium leading-tight'>
-        <span className='whitespace-nowrap'>
-          {getLocalDateString(props.date)}
-        </span>
+        <span className='whitespace-nowrap'>{getLocalDateString(date)}</span>
         <span className='uppercase whitespace-nowrap'>
-          {getLocalTimeString(props.date)}
+          {getLocalTimeString(date)}
         </span>
       </p>
     </div>
