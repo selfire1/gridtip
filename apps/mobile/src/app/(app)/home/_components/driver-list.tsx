@@ -1,4 +1,4 @@
-import { getWithoutDiacritics } from '@/lib/remove-diacritics'
+import { getWithoutDiacritics } from '@gridtip/shared/remove-diacritics'
 import { Driver } from '@/types'
 import { useMemo } from 'react'
 import { Text } from '@/components/ui/text'

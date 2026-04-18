@@ -65,6 +65,7 @@
       "name": "f1-tipping-react",
       "version": "0.1.0",
       "dependencies": {
+        "@gridtip/shared": "workspace:*",
         "@hookform/resolvers": "^5.2.1",
         "@libsql/client": "^0.15.14",
         "@paralleldrive/cuid2": "^2.2.2",

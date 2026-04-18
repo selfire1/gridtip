@@ -1,5 +1,5 @@
 import { Database } from '@/db/types'
-import { getConstructorImage } from '@/lib/utils/constructor'
+import { getConstructorImage } from '@gridtip/shared/get-constructor-image'
 import clsx from 'clsx'
 import { LucideCheck } from 'lucide-react'
 import Image from 'next/image'

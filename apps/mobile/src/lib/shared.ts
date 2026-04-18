@@ -1,8 +1,7 @@
 import type { Constructor } from '@/types'
-import { apiBaseUrl } from './constants'
 import { getWebUrl } from './url'
+import { getConstructorImage as getAbsoluteConstructorImage } from '@gridtip/shared/get-constructor-image'
 
 export function getConstructorImage(id: Constructor['id']) {
-  const path = `/img/constructors/${id}.webp`
-  return getWebUrl(path)
+  return getWebUrl(getAbsoluteConstructorImage(id))
 }

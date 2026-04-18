@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Constructor, Driver } from '@/types'
 import DriverList from './driver-list'
 import ConstructorList from './constructor-list'
-import { Position } from './tip-form'
+import type { Position } from '@gridtip/shared/get-form-fields'
 
 export default function PositionModal({
   position,

@@ -9,8 +9,9 @@ import Spinner from '@/components/spinner'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { LucideAlertTriangle } from 'lucide-react-native'
 import { Constructor, Driver, Group, Race } from '@/types'
-import TipForm, { Position } from './_components/tip-form'
+import TipForm from './_components/tip-form'
 import Header from './_components/header'
+import type { Position } from '@gridtip/shared/get-form-fields'
 
 export default function HomeScreen() {
   const [nextRace, setNextRace] = useState<Race>()

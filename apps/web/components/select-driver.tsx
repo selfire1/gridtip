@@ -5,7 +5,7 @@ import * as React from 'react'
 import DriverOption, { DriverOptionProps } from '@/components/driver-option'
 import { ResponsiveSelect } from './responsive-select'
 import { getDriverName } from '@/lib/driver'
-import { getWithoutDiacritics } from '@/lib/remove-diacritics'
+import { getWithoutDiacritics } from '@gridtip/shared/remove-diacritics'
 
 export function SelectDriver({
   drivers,

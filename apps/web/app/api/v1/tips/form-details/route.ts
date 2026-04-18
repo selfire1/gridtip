@@ -1,6 +1,6 @@
 import { createResponse } from '@/app/api/utils'
 import { getMaybeSession } from '@/lib/dal'
-import { getConstructorImage } from '@/lib/utils/constructor'
+import { getConstructorImage } from '@gridtip/shared/get-constructor-image'
 import { getConstructorOptions, getDriverOptions } from '@/lib/utils/groups'
 import { getNextRace, getRaceDetails } from '@/lib/utils/races'
 import { NextRequest } from 'next/server'

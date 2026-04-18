@@ -1,5 +1,6 @@
-import type { RacePredictionField } from '@gridtip/shared/constants'
+import { RacePredictionField } from './constants'
 
+export type Position = ReturnType<typeof getFormFields>[number]
 export function getFormFields(isSprint = false) {
   const allFields = [
     {
@@ -34,16 +35,10 @@ export function getFormFields(isSprint = false) {
     },
     {
       label: 'Most constructor points',
-      description:
-        'Which constructor will haul the most points in the Grand Prix?',
+      description: 'Which constructor will haul the most points in the Grand Prix?',
       name: 'constructorWithMostPoints',
       type: 'constructor',
     },
-  ] as const satisfies ({ name: RacePredictionField } & Record<
-    string,
-    string
-  >)[]
-  return allFields.filter((field) =>
-    field.name !== 'sprintP1' ? true : isSprint,
-  )
+  ] as const satisfies ({ name: RacePredictionField } & Record<string, string>)[]
+  return allFields.filter((field) => (field.name !== 'sprintP1' ? true : isSprint))
 }
