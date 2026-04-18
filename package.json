@@ -1,0 +1,5 @@
+{
+  "name": "gridtip-mono",
+  "private": true,
+  "workspaces": ["packages/*", "apps/*"]
+}
