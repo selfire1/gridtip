@@ -3,6 +3,7 @@ import { AppHeader } from '../../components/app-header'
 import { Button } from '@ui/button'
 import { Path } from '@/lib/utils/path'
 import { getMaybeSession } from '@/lib/dal'
+import { webRoutes } from '@gridtip/shared/routes'
 
 export default async function DefaultLayout({
   children,
@@ -56,7 +57,7 @@ function AppFooter() {
   return (
     <div className='border-t py-2 flex items-center justify-between text-sm is-container text-muted-foreground'>
       <Button asChild variant='link' className='text-muted-foreground'>
-        <Link href='/privacy' title='Privacy Policy'>
+        <Link href={webRoutes.privacy} title='Privacy Policy'>
           Privacy
         </Link>
       </Button>
