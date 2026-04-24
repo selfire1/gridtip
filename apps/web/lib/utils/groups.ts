@@ -105,21 +105,6 @@ export async function getGroupMembershipByMemberId({
   })
 }
 
-export async function getFirstRace() {
-  function getRaceUncached() {
-    return db.query.racesTable.findFirst({
-      orderBy: (race, { asc }) => asc(race.qualifyingDate),
-      columns: {
-        qualifyingDate: true,
-      },
-    })
-  }
-
-  return await unstable_cache(getRaceUncached, [], {
-    tags: [CacheTag.Races],
-  })()
-}
-
 export async function getTargetGroupAndMembership({
   groupId,
   userId,

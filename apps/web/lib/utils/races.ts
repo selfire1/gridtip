@@ -5,6 +5,7 @@ import { cache } from 'react'
 import { Database } from '@/db/types'
 import { getCountryFlag } from './country-flag'
 import { getIsSprint } from './prediction-fields'
+import { getMostRecent } from './get-most-recent'
 
 export async function getNextRace() {
   const undeduplicated = unstable_cache(
@@ -86,4 +87,19 @@ export async function getLastUpdatedRaces() {
       tags: [CacheTag.Races],
     },
   )()
+}
+
+export async function getFirstRace() {
+  function getRaceUncached() {
+    return db.query.racesTable.findFirst({
+      orderBy: (race, { asc }) => asc(race.qualifyingDate),
+      columns: {
+        qualifyingDate: true,
+      },
+    })
+  }
+
+  return await unstable_cache(getRaceUncached, [], {
+    tags: [CacheTag.Races],
+  })()
 }

@@ -1,9 +1,6 @@
 import {
-  getConstructorOptions,
   getCurrentGroup,
   getCurrentGroupId,
-  getDriverOptions,
-  getFirstRace,
   getGroupMembership,
 } from '@/lib/utils/groups'
 import ChampionshipForm from './components/championship-form'
@@ -27,6 +24,7 @@ import { getConstructorCssVariable } from '@/lib/utils/constructor-css'
 import { Database } from '@/db/types'
 import EmptyGroup from '@/components/empty-group'
 import { ChampionshipsTipData } from './actions/schema'
+import { getFirstRace } from '@/lib/utils/races'
 
 export default async function ChampionshipPage() {
   const { userId } = await verifySession()
