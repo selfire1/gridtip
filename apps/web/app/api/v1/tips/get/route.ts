@@ -1,6 +1,7 @@
 import { db } from '@/db'
 import { getMaybeSession } from '@/lib/dal'
 import { getTips } from '@/lib/get-tips'
+import type { GetTipsResponse } from '@gridtip/shared/api-types'
 import { NextRequest } from 'next/server'
 import z from 'zod'
 
@@ -47,5 +48,5 @@ export async function GET(request: NextRequest) {
     raceId: validation.data.raceId,
   })
 
-  return Response.json(tips, { status: 200 })
+  return Response.json(tips satisfies GetTipsResponse, { status: 200 })
 }

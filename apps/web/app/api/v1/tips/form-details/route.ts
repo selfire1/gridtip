@@ -3,6 +3,7 @@ import { getMaybeSession } from '@/lib/dal'
 import { getConstructorImage } from '@gridtip/shared/get-constructor-image'
 import { getConstructorOptions, getDriverOptions } from '@/lib/utils/groups'
 import { getNextRace, getRaceDetails } from '@/lib/utils/races'
+import type { FormDetailsResponse } from '@gridtip/shared/api-types'
 import { NextRequest } from 'next/server'
 
 export async function GET(_request: NextRequest) {
@@ -26,7 +27,7 @@ export async function GET(_request: NextRequest) {
         ...constructor,
         image: getConstructorImage(constructor.id),
       })),
-    })
+    } satisfies FormDetailsResponse)
   } catch (error) {
     return createResponse(500, (error as Error).message)
   }

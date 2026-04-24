@@ -9,6 +9,7 @@ import Spinner from '@/components/spinner'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { LucideAlertTriangle } from 'lucide-react-native'
 import { Constructor, Driver, Group, Race } from '@/types'
+import type { FormDetailsResponse, MyGroupsResponse } from '@gridtip/shared/api-types'
 import TipForm from './_components/tip-form'
 import Header from './_components/header'
 import type { Position } from '@gridtip/shared/get-form-fields'
@@ -100,11 +101,8 @@ export default function HomeScreen() {
 
   async function loadInitialState() {
     const [{ race, constructors, drivers }, { groups }] = await Promise.all([
-      api<{ race: Race; constructors: Constructor[]; drivers: Driver[] }>(
-        'tips/form-details',
-        session,
-      ),
-      api<{ groups: Group[] }>('my/groups', session),
+      api<FormDetailsResponse>('tips/form-details', session),
+      api<MyGroupsResponse>('my/groups', session),
     ])
 
     const params = new URLSearchParams({

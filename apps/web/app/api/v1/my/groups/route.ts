@@ -1,6 +1,7 @@
 import { createResponse } from '@/app/api/utils'
 import { getMaybeSession } from '@/lib/dal'
 import { getGroupsForUser } from '@/lib/utils/groups'
+import type { MyGroupsResponse } from '@gridtip/shared/api-types'
 import { NextRequest } from 'next/server'
 
 export async function GET(_request: NextRequest) {
@@ -10,7 +11,7 @@ export async function GET(_request: NextRequest) {
   }
   try {
     const groups = await getGroupsForUser(result.user.id)
-    return createResponse(200, { groups })
+    return createResponse(200, { groups } satisfies MyGroupsResponse)
   } catch (error) {
     return createResponse(500, (error as Error).message)
   }

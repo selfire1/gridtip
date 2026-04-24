@@ -145,7 +145,7 @@ export default function TipForm({
             ...prev,
             [group.group.id]: {
               status: 'pending',
-              group: group.group,
+              ...group,
             },
           }))
           const submitObject = { ...(formState ?? {}), groupId: group.group.id, raceId: race.id }
@@ -158,7 +158,7 @@ export default function TipForm({
             ...prev,
             [group.group.id]: {
               status: response.ok ? 'success' : 'error',
-              group: group.group,
+              ...group,
             },
           }))
           return null
