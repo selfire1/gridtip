@@ -1,11 +1,11 @@
 import { createResponse } from '@/app/api/utils'
 import { getMaybeSession } from '@/lib/dal'
 import { getConstructorImage } from '@gridtip/shared/get-constructor-image'
-import { getConstructorOptions } from '@/lib/utils/groups'
 import { getNextRace, getRaceDetails } from '@/lib/utils/races'
 import type { FormDetailsResponse } from '@gridtip/shared/api-types'
 import { NextRequest } from 'next/server'
 import { getDriverOptions } from '@/lib/utils/drivers'
+import { getConstructorOptions } from '@/lib/utils/constructors'
 
 export async function GET(_request: NextRequest) {
   const result = await getMaybeSession()

@@ -53,43 +53,6 @@ async function getCurrentGroup(userId: string) {
   return userWithGroups.find(({ group }) => group.id === cookieGroupId)?.group
 }
 
-export async function getDriverOptions() {
-  return await unstable_cache(
-    async () =>
-      db.query.driversTable.findMany({
-        columns: {
-          id: true,
-          constructorId: true,
-          givenName: true,
-          familyName: true,
-          permanentNumber: true,
-        },
-        orderBy: (driver, { asc }) => asc(driver.familyName),
-      }),
-    [],
-    {
-      tags: [CacheTag.Drivers],
-    },
-  )()
-}
-
-export async function getConstructorOptions() {
-  return unstable_cache(
-    async () =>
-      await db.query.constructorsTable.findMany({
-        columns: {
-          id: true,
-          name: true,
-        },
-        orderBy: (constructor, { asc }) => asc(constructor.name),
-      }),
-    [],
-    {
-      tags: [CacheTag.Constructors],
-    },
-  )()
-}
-
 export type GetGroupMembersData = Awaited<ReturnType<typeof getGroupMembers>>
 export async function getGroupMembers(groupId: string) {
   return (
