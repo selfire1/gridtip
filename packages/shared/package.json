@@ -1,6 +1,7 @@
 {
   "name": "@gridtip/shared",
   "exports": {
-    "./constants": "./src/constants.ts"
+    "./constants": "./src/constants.ts",
+    "./routes": "./src/routes.ts"
   }
 }

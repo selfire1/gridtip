@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/sidebar'
 import { Database } from '@/db/types'
 import { Icon } from './icon'
+import { webRoutes } from '@gridtip/shared/routes'
 
 export const nav = [
   {
@@ -36,7 +37,7 @@ export const nav = [
       },
       {
         title: 'Championships',
-        url: '/tipping/championships',
+        url: webRoutes.championships,
       },
     ],
   },
@@ -48,11 +49,11 @@ export const nav = [
     items: [
       {
         title: 'Leaderboard',
-        url: '/tipping/leaderboard',
+        url: webRoutes.leaderboard,
       },
       {
         title: 'Rules & Scoring',
-        url: '/tipping/rules',
+        url: webRoutes.rules,
       },
     ],
   },
@@ -64,15 +65,15 @@ export const nav = [
     items: [
       {
         title: 'Groups',
-        url: '/tipping/groups',
+        url: webRoutes.groups,
       },
       {
         title: 'Feedback',
-        url: '/tipping/contact',
+        url: webRoutes.feedback,
       },
       {
         title: 'Settings',
-        url: '/tipping/settings',
+        url: webRoutes.settings,
       },
     ],
   },
