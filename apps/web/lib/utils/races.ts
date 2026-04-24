@@ -67,3 +67,23 @@ export async function getRaces() {
     },
   )()
 }
+
+export async function getLastUpdatedRaces() {
+  return unstable_cache(
+    async () => {
+      const races = await db.query.racesTable.findMany({
+        columns: {
+          lastUpdated: true,
+        },
+      })
+
+      const lastUpdated = getMostRecent(races, 'lastUpdated')
+
+      return lastUpdated
+    },
+    [],
+    {
+      tags: [CacheTag.Races],
+    },
+  )()
+}
