@@ -2,8 +2,6 @@ import { LucideHourglass, LucideList } from 'lucide-react'
 import { unstable_cache } from 'next/cache'
 import EmptyState from '@/components/empty-state'
 import { PREDICTION_FIELDS } from '@gridtip/shared/constants'
-import { CacheTag } from '@/constants/cache'
-import { db } from '@/db'
 import { Database } from '@/db/types'
 import {
   AllPredictions,
@@ -12,6 +10,7 @@ import {
   getRaceIdToResultMap,
 } from '@/lib/utils/race-results'
 import PastRacesClient from './PastRacesClient'
+import { getConstructors } from '@/lib/utils/constructors'
 
 export type RacesWithResults = Awaited<
   ReturnType<typeof getOnlyRacesWithResults>
@@ -33,10 +32,7 @@ export default async function PastRacesServer({
 }) {
   const getAllPredictions = createGetAllPredictions(groupId)
 
-  const constructors = await unstable_cache(() => getConstructors(), [], {
-    tags: [CacheTag.Constructors],
-  })()
-
+  const constructors = await getConstructors()
   const racesWithResults = await getOnlyRacesWithResults()
   const allPredictionsWithUser = await getAllPredictions()
 
