@@ -25,6 +25,8 @@ import { Database } from '@/db/types'
 import EmptyGroup from '@/components/empty-group'
 import { ChampionshipsTipData } from './actions/schema'
 import { getFirstRace } from '@/lib/utils/races'
+import { getDriverOptions } from '@/lib/utils/drivers'
+import { getConstructorOptions } from '@/lib/utils/constructors'
 
 export default async function ChampionshipPage() {
   const { userId } = await verifySession()
