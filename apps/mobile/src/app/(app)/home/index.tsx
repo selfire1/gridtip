@@ -1,6 +1,6 @@
-import { Stack } from 'expo-router'
+import { Link, Stack } from 'expo-router'
 import { Text } from '@/components/ui/text'
-import { ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, View } from 'react-native'
 import { useEffect, useState } from 'react'
 import { useSession } from '@/lib/ctx'
 import { api } from '@/lib/api'
@@ -91,6 +91,13 @@ export default function HomeScreen() {
         }}
       >
         <ScrollView>
+          <Link href="/race-header-preview" asChild>
+            <Pressable className="px-4 pt-3">
+              <Text className="text-xs text-muted-foreground underline">
+                Preview header designs →
+              </Text>
+            </Pressable>
+          </Link>
           <Content />
         </ScrollView>
       </View>
