@@ -14,7 +14,7 @@ import React from 'react'
 
 export default function Breadcrumbs() {
   const pathname = usePathname()
-  const parts = pathname.split('/').filter(Boolean)
+  const parts = pathname?.split('/').filter(Boolean)
   const hrefToTitleMap = nav.reduce((acc, item) => {
     item.items?.forEach((subItem) => {
       acc.set(subItem.url, subItem.title)
@@ -26,7 +26,7 @@ export default function Breadcrumbs() {
     <>
       <Breadcrumb>
         <BreadcrumbList>
-          {parts.map((part, index, parts) => {
+          {parts?.map((part, index, parts) => {
             const length = parts.length
             const isLast = index === length - 1
             const href = `/${parts.slice(0, index + 1).join('/')}`

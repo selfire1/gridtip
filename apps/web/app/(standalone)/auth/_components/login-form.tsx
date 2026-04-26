@@ -54,7 +54,7 @@ export function LoginForm({
   const router = useRouter()
 
   useEffect(() => {
-    switch (searchParams.get('origin')) {
+    switch (searchParams?.get('origin')) {
       case QueryOrigin.NotAllowed: {
         showSignInRequiredToast()
         removeSearchParam('origin')
@@ -87,7 +87,7 @@ export function LoginForm({
 
   return (
     <form
-      onSubmit={(e) => onSubmit(e, searchParams.get('redirect'))}
+      onSubmit={(e) => onSubmit(e, searchParams?.get('redirect'))}
       className={cn('flex flex-col gap-6', className)}
     >
       <FieldGroup>
@@ -133,7 +133,7 @@ export function LoginForm({
             variant='outline'
             type='button'
             disabled={isAnyPending}
-            onClick={() => signInWithGoogle(searchParams.get('redirect'))}
+            onClick={() => signInWithGoogle(searchParams?.get('redirect'))}
           >
             {isGooglePending ? <Spinner /> : <GIcon />}
             Login with Google
@@ -151,7 +151,7 @@ export function LoginForm({
 
   async function onSubmit(
     event: React.FormEvent<HTMLFormElement>,
-    redirect: string | null,
+    redirect: string | null | undefined,
   ) {
     startLoginTransition(async () => {
       event.preventDefault()
@@ -171,6 +171,9 @@ export function LoginForm({
 
   function removeSearchParam(param: string) {
     const url = pathname
+    if (!url) {
+      return
+    }
     const urlWithParamRemoved = filterQuery(url, (key: string) => key !== param)
     router.replace(urlWithParamRemoved)
   }
@@ -182,7 +185,7 @@ export function LoginForm({
     })
   }
 
-  async function signInWithGoogle(redirect: string | null) {
+  async function signInWithGoogle(redirect: string | null | undefined) {
     startGoogleTransition(async () => {
       const data = await authClient.signIn.social({
         provider: 'google',
@@ -204,8 +207,8 @@ export function LoginForm({
     })
   }
 
-  function getDescription(params: ReadonlyURLSearchParams) {
-    switch (params.get('origin')) {
+  function getDescription(params: ReadonlyURLSearchParams | null) {
+    switch (params?.get('origin')) {
       case QueryOrigin.Join:
         return 'Login or create an account first before joining this group.'
       default:

@@ -111,7 +111,7 @@ export function SignupForm({
             variant='outline'
             type='button'
             disabled={isAnyPending}
-            onClick={() => signInWithGoogle(searchParams.get('redirect'))}
+            onClick={() => signInWithGoogle(searchParams?.get('redirect'))}
           >
             {isGooglePending ? <Spinner /> : <GIcon />}
             Sign up with Google
@@ -181,7 +181,7 @@ export function SignupForm({
     })
   }
 
-  async function signInWithGoogle(redirect: string | null) {
+  async function signInWithGoogle(redirect: string | null | undefined) {
     startGoogleTransition(async () => {
       const data = await authClient.signIn.social({
         provider: 'google',
