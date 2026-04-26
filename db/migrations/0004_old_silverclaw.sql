@@ -1,1 +1,0 @@
-ALTER TABLE `groups` ADD `championship_tips_reval_date` integer;

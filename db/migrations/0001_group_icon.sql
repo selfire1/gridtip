@@ -1,1 +1,0 @@
-ALTER TABLE `groups` ADD `icon_name` text DEFAULT 'lucide:users' NOT NULL;
