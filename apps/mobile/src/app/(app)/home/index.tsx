@@ -91,7 +91,7 @@ export default function HomeScreen() {
         }}
       >
         <ScrollView>
-          <Link href="/race-header-preview" asChild>
+          <Link href="/home/race-header-preview" asChild>
             <Pressable className="px-4 pt-3">
               <Text className="text-xs text-muted-foreground underline">
                 Preview header designs →

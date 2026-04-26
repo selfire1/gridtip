@@ -1,5 +1,12 @@
 {
   "enabledPlugins": {
     "expo@claude-plugins-official": true
+  },
+  "permissions": {
+    "allow": [
+      "Read(//Users/joschuag/Developer/Public/gridtip/**)",
+      "Read(//Users/joschuag/Developer/Public/gridtip/apps/**)",
+      "Read(//Users/joschuag/Developer/Public/gridtip/packages/**)"
+    ]
   }
 }

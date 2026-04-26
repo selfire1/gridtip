@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { View, useColorScheme } from 'react-native'
 import { Image } from 'expo-image'
-import { LinearGradient } from 'expo-linear-gradient'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -67,20 +66,18 @@ export function CreativeHeader({ race }: { race: Race }) {
         <Image
           source={race.image}
           contentFit="cover"
-          blurRadius={60}
+          blurRadius={30}
           style={{ width: '100%', height: '100%' }}
         />
       </View>
-      <LinearGradient
-        colors={[bgFade, bg]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
+      <View
         style={{
           position: 'absolute',
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
+          experimental_backgroundImage: `linear-gradient(180deg, ${bgFade} 0%, ${bg} 100%)`,
         }}
       />
 

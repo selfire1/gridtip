@@ -2,16 +2,15 @@ import { Stack } from 'expo-router'
 import { ScrollView, View } from 'react-native'
 import { Text } from '@/components/ui/text'
 import { Race } from '@/types'
-import { BlurredFlagHeader } from './home/_components/race-header/blurred-flag'
-import { NativePolishHeader } from './home/_components/race-header/native-polish'
-import { CreativeHeader } from './home/_components/race-header/creative'
+import { BlurredFlagHeader } from './_components/race-header/blurred-flag'
+import { NativePolishHeader } from './_components/race-header/native-polish'
+import { CreativeHeader } from './_components/race-header/creative'
 
 const sampleRace: Race = {
   id: 'preview',
   country: 'Saudi Arabia',
   raceName: 'Saudi Arabian Grand Prix',
-  image:
-    'https://upload.wikimedia.org/wikipedia/commons/0/0d/Flag_of_Saudi_Arabia.svg',
+  image: 'https://www.flagcolorcodes.com/data/flag-of-saudi-arabia.png',
   isSprint: false,
 }
 
