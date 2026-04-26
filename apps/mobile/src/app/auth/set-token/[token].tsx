@@ -7,6 +7,7 @@ import { Loader2, LucideArrowLeft } from 'lucide-react-native'
 import { useEffect } from 'react'
 import { useSession } from '@/lib/ctx'
 import Spinner from '@/components/spinner'
+import { requestAndRegisterPushToken } from '@/lib/notifications'
 
 export default function SetTokenScreen() {
   const { token } = useLocalSearchParams<{ token: string }>()
@@ -21,6 +22,9 @@ export default function SetTokenScreen() {
       signIn(token)
     }
     if (session && !isLoading) {
+      requestAndRegisterPushToken(session).catch((error) => {
+        console.warn('push token registration failed', error)
+      })
       router.push('/(app)/home')
     }
   }, [session, isLoading, signIn, token, router])

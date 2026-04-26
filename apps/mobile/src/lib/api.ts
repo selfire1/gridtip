@@ -7,6 +7,7 @@ import {
   GetRaces,
   GetTipsResponse,
   MyGroupsResponse,
+  NotificationPreferencesResponse,
 } from '@gridtip/shared/api-types'
 import { type Position } from '@gridtip/shared/get-form-fields'
 
@@ -92,6 +93,27 @@ export async function getMyTips(
   const url = `my/tips?${params}`
 
   return api<GetTipsResponse>(url, session)
+}
+
+export async function getNotificationPreferences(session: Session) {
+  return api<NotificationPreferencesResponse>(
+    'notifications/preferences',
+    session,
+  )
+}
+
+export async function setNotificationPreferences(
+  session: Session,
+  enableNotifications: boolean,
+) {
+  return api<NotificationPreferencesResponse>(
+    'notifications/preferences',
+    session,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ enableNotifications }),
+    },
+  )
 }
 
 export async function submitTips(
