@@ -43,6 +43,7 @@ export default function TipForm({
   groups,
   defaultValues,
   session,
+  isPending,
 }: {
   race: Race
   constructors: Constructor[]
@@ -50,6 +51,7 @@ export default function TipForm({
   groups: Group[]
   defaultValues: TipFormDefaultValues
   session: Session
+  isPending: boolean
 }) {
   const formFields = getFormFields(getIsSprint(race))
   const [isPresented, setIsPresented] = useState(false)
@@ -123,13 +125,13 @@ export default function TipForm({
         {formFields.map((field) => (
           <View key={field.name} className="flex flex-col gap-2">
             <Label className="px-2">{field.label}</Label>
-            <Button onPress={() => openModal(field)} variant="outline">
+            <Button onPress={() => openModal(field)} variant="outline" disabled={isPending}>
               <FieldContent field={field} />
             </Button>
             <Text className="px-2 text-sm text-muted-foreground">{field.description}</Text>
           </View>
         ))}
-        <Button className="mt-4" onPress={onSubmit}>
+        <Button className="mt-4" onPress={onSubmit} disabled={isPending}>
           <Text>Submit</Text>
         </Button>
       </View>
@@ -179,6 +181,9 @@ export default function TipForm({
   }
 
   function FieldContent({ field }: { field: Position }) {
+    if (isPending) {
+      return <Text>Loading…</Text>
+    }
     const value = formState[field.name]?.value
     if (!value) {
       return <Text>Select {field.type}</Text>

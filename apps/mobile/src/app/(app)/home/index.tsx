@@ -101,25 +101,12 @@ function AuthentificatedHomeScreen({ session }: { session: Session }) {
     }),
   )
 
-  // Pending
-  const isAnyPending = useMemo(() => {
-    return [
-      lastUpdatedQuery.isPending,
-      racesQuery.isPending,
-      driversQuery.isPending,
-      constructorsQuery.isPending,
-      groupsQuery.isPending,
-      myTips.isFetching,
-    ].some(Boolean)
-  }, [
-    lastUpdatedQuery.isPending,
-    racesQuery.isPending,
-    driversQuery.isPending,
-    constructorsQuery.isPending,
-    groupsQuery.isPending,
-    myTips.isFetching,
-  ])
-  if (isAnyPending) return <LoadingState />
+  // Loading
+  if (lastUpdatedQuery.isPending) return <LoadingState message="Loading updates" />
+  if (racesQuery.isPending) return <LoadingState message="Loading races" />
+  if (driversQuery.isPending) return <LoadingState message="Loading drivers" />
+  if (constructorsQuery.isPending) return <LoadingState message="Loading constructors" />
+  if (groupsQuery.isPending) return <LoadingState message="Loading groups" />
 
   // Errors
   if (lastUpdatedQuery.isError) return <ErrorState message={lastUpdatedQuery.error.message} />
@@ -140,16 +127,17 @@ function AuthentificatedHomeScreen({ session }: { session: Session }) {
       constructors={constructorsQuery.data.constructors}
       groups={groupsQuery.data.groups}
       apiTips={myTips.data || undefined}
+      isTipsPending={myTips.isFetching}
     />
   )
 }
 
-function LoadingState() {
+function LoadingState({ message }: { message?: string }) {
   return (
     <View className="mx-4 py-16">
       <View className="flex items-center justify-center gap-2 flex-row">
         <Spinner />
-        <Text className="text-muted-foreground">Loading…</Text>
+        <Text className="text-muted-foreground">{message ? `${message}…` : 'Loading…'}</Text>
       </View>
     </View>
   )
