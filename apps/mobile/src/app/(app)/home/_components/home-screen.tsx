@@ -14,6 +14,7 @@ export default function HomeScreen({
   drivers,
   groups,
   session,
+  isTipsPending,
 }: {
   nextRace: Race
   apiTips: GetTipsResponse | undefined
@@ -21,6 +22,7 @@ export default function HomeScreen({
   drivers: Driver[]
   groups: Group[]
   session: Session
+  isTipsPending: boolean
 }) {
   const defaultValues = useMemo<TipFormDefaultValues>(() => {
     if (!apiTips) {
@@ -50,12 +52,14 @@ export default function HomeScreen({
     <View className="flex flex-col gap-8 pb-8">
       <Header race={nextRace} />
       <TipForm
+        key={isTipsPending ? 'pending' : 'loaded'}
         session={session}
         defaultValues={defaultValues}
         race={nextRace}
         constructors={constructors}
         drivers={drivers}
         groups={groups}
+        isPending={isTipsPending}
       />
     </View>
   )
