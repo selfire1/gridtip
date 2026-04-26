@@ -1,0 +1,6 @@
+{
+  "name": "@gridtip/shared",
+  "exports": {
+    "./*": "./src/*.ts"
+  }
+}

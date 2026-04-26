@@ -1,0 +1,180 @@
+'use server'
+
+import { captureException } from '@sentry/nextjs'
+import { OnboardingState } from '@/app/(onboarding)/tipping/onboarding/_lib/onboarding-context'
+import { verifySession } from '@/lib/dal'
+import { createGroup } from './create-group'
+import { joinGlobalGroup, joinGroup } from './join-group'
+
+export type Result = {
+  icon?: string
+  title: string
+  description?: string
+  ok: boolean
+  data: null | unknown
+}
+
+export async function joinOrCreateGroup(
+  input: (
+    | {
+        action: 'create'
+        groupData?: OnboardingState['createGroupScreenData']
+      }
+    | {
+        action: 'join'
+        groupData?: { id: string | undefined; name: string | undefined }
+      }
+  ) & {
+    userName: string
+  },
+) {
+  if (input.action === 'create' && input.groupData) {
+    const result = await createGroup({
+      ...input.groupData,
+      cutoff: 60,
+      userName: input.userName,
+    })
+    if (!result.ok) {
+      const log = {
+        ok: false as const,
+        title: `Did not create ${input.groupData.name || 'group'}`,
+        description: result.message,
+        data: null,
+      } satisfies Result
+      return log
+    }
+    return {
+      ok: true as const,
+      title: `Created ${input.groupData.name || 'your group'}`,
+      description: 'Invite some friends!',
+      data: { group: result.group },
+    } satisfies Result
+  }
+  if (input.action === 'join' && input.groupData?.id) {
+    const result = await joinGroup({
+      groupId: input.groupData.id,
+      userName: input.userName,
+    })
+    if (!result.ok) {
+      return {
+        ok: false as const,
+        title: `Could not join ${input.groupData.name || 'group'}`,
+        description: result.message,
+        data: null,
+      } satisfies Result
+    }
+    return {
+      ok: true,
+      title: `Joined ${input.groupData.name || 'group'}`,
+      description: 'Start tipping!',
+      data: {
+        group: result.group,
+      },
+    } satisfies Result
+  }
+  return {
+    ok: false as const,
+    title: 'Could not join group',
+    description: 'No group selected',
+    data: null,
+  } satisfies Result
+}
+
+export async function joinGlobalGroupWrapper(input: { profileName?: string }) {
+  await verifySession()
+  if (!input.profileName) {
+    captureException('No username set for global group')
+    return {
+      ok: false as const,
+      title: 'Could not join global group',
+      description: 'No username set',
+      data: null,
+    } satisfies Result
+  }
+
+  const joinGlobalResult = await joinGlobalGroup({
+    userName: input.profileName,
+  })
+  if (!joinGlobalResult.ok) {
+    console.error(joinGlobalResult)
+    return {
+      ok: false,
+      title: 'Could not join global group',
+      description: 'Please try joining manually later',
+      data: null,
+    } satisfies Result
+  }
+  return {
+    icon: joinGlobalResult.group.iconName,
+    title: 'Joined Global Group',
+    description: 'Good luck!',
+    data: {
+      group: joinGlobalResult.group,
+    },
+    ok: true as const,
+  } satisfies Result
+}
+
+export async function createOrJoinPrimaryGroup({
+  action,
+  name,
+  createData,
+  joinData,
+}: {
+  action: OnboardingState['welcomeScreenSelectedGroupStep']
+  name: string | undefined
+  createData: OnboardingState['createGroupScreenData']
+  joinData: OnboardingState['joinGroupScreenData']
+}) {
+  if (!action) {
+    return {
+      ok: false as const,
+      title: 'Could not join group',
+      description: 'No group selected',
+      data: null,
+    } satisfies Result
+  }
+
+  await verifySession()
+  const input = getInput()
+
+  if (!name) {
+    return {
+      ok: false as const,
+      title: 'Could not create group',
+      description: 'No username provided',
+      data: null,
+    } satisfies Result
+  }
+
+  const joinOrCreateResult = await joinOrCreateGroup({
+    userName: name,
+    ...input,
+  })
+  if (!joinOrCreateResult.ok) {
+    return joinOrCreateResult
+  }
+  return {
+    ...joinOrCreateResult,
+    data: {
+      input,
+      ...joinOrCreateResult.data,
+    },
+  }
+
+  function getInput() {
+    if (action === 'create') {
+      return {
+        action: 'create' as const,
+        groupData: createData,
+      }
+    }
+    return {
+      action: 'join' as const,
+      groupData: {
+        id: joinData?.id,
+        name: joinData?.name,
+      },
+    }
+  }
+}

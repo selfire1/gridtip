@@ -1,0 +1,1 @@
+ALTER TABLE `prediction_entries` ADD `overwrite_to` text;
