@@ -43,13 +43,14 @@ import {
   getGroupMembers,
   getGroupMembership,
 } from '@/lib/utils/groups'
-import { getIsSprint, getDueDatesForTips } from '@/lib/utils/prediction-fields'
+import { getDueDatesForTips } from '@/lib/utils/prediction-fields'
 import ChampionshipImage from '@/public/img/championship.jpg'
 import CopyLink from './groups/_components/copy-link'
 import { getFirstRace, getRaces } from '@/lib/utils/races'
 import { FlagBackgroundCard } from './_components/card-flag-background'
 import { CardEveryonesTips } from './_components/card-group-tips'
 import { RaceHeader } from './_components/race-header'
+import { getIsSprint } from '@gridtip/shared/is-sprint'
 
 export default async function DashboardPage() {
   const { userId, user: _ } = await verifySession()

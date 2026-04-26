@@ -1,9 +1,9 @@
 import {
   getClosedFields,
-  getIsSprint,
   isRaceAbleToBeTipped,
 } from '@/lib/utils/prediction-fields'
 import { describe, expect, it } from 'vitest'
+import { getIsSprint } from '@gridtip/shared/is-sprint'
 
 describe('sprint race', () => {
   const givenRace = {

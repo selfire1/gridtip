@@ -1,7 +1,8 @@
 import { Database } from '@/db/types'
-import { getIsSprint, getDueDatesForTips } from '@/lib/utils/prediction-fields'
+import { getDueDatesForTips } from '@/lib/utils/prediction-fields'
 import { isFuture, isPast } from 'date-fns'
 import { TimeTile } from './time-tile'
+import { getIsSprint } from '@gridtip/shared/is-sprint'
 
 export default function RaceTimes({
   race,

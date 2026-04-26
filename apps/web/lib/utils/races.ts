@@ -4,8 +4,8 @@ import { db } from '@/db'
 import { cache } from 'react'
 import { Database } from '@/db/types'
 import { getCountryFlag } from './country-flag'
-import { getIsSprint } from './prediction-fields'
 import { getMostRecent } from './get-most-recent'
+import { getIsSprint } from '@gridtip/shared/is-sprint'
 
 export async function getNextRace() {
   const undeduplicated = unstable_cache(
@@ -50,8 +50,8 @@ export async function getRaceDetails(id: Database.RaceId) {
 
 export async function getRaces() {
   return unstable_cache(
-    async () =>
-      await db.query.racesTable.findMany({
+    async () => {
+      const races = await db.query.racesTable.findMany({
         columns: {
           id: true,
           locality: true,
@@ -60,8 +60,15 @@ export async function getRaces() {
           sprintQualifyingDate: true,
           qualifyingDate: true,
           round: true,
+          raceName: true,
         },
-      }),
+      })
+
+      return races.map((race) => ({
+        ...race,
+        image: getCountryFlag(race.country),
+      }))
+    },
     [],
     {
       tags: [CacheTag.Races],

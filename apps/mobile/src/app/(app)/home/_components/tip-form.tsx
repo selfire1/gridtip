@@ -7,12 +7,11 @@ import { Text } from '@/components/ui/text'
 import PositionModal from './position-modal'
 import { DriverOption } from './driver-list'
 import { ConstructorOption } from './constructor-list'
-import { api } from '@/lib/api'
 import { type Position, getFormFields } from '@gridtip/shared/get-form-fields'
-import { useSession } from '@/lib/ctx'
 import Spinner from '@/components/spinner'
 import { Icon } from '@/components/ui/icon'
 import { LucideAlertTriangle, LucideCheck } from 'lucide-react-native'
+import { getIsSprint } from '@gridtip/shared/is-sprint'
 import {
   Dialog,
   DialogClose,
@@ -21,6 +20,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Session } from '@/hooks/use-dal'
+import { submitTips } from '@/lib/api'
 
 export type TipFormState = Record<
   Position['name'],
@@ -34,22 +35,23 @@ export type TipFormState = Record<
     }
 >
 
+export type TipFormDefaultValues = Record<Position['name'], Constructor | Driver> | undefined
 export default function TipForm({
   race,
   constructors,
   drivers,
   groups,
   defaultValues,
+  session,
 }: {
   race: Race
   constructors: Constructor[]
   drivers: Driver[]
   groups: Group[]
-  defaultValues: Record<Position['name'], Constructor | Driver> | undefined
+  defaultValues: TipFormDefaultValues
+  session: Session
 }) {
-  const { session } = useSession()
-
-  const formFields = getFormFields(race.isSprint)
+  const formFields = getFormFields(getIsSprint(race))
   const [isPresented, setIsPresented] = useState(false)
   const [submissionState, setSubmissionState] = useState<SavingState | null>(null)
   const [isSavingModalPresented, setIsSavingModalPresented] = useState(false)
@@ -149,10 +151,7 @@ export default function TipForm({
             },
           }))
           const submitObject = { ...(formState ?? {}), groupId: group.group.id, raceId: race.id }
-          const response = await api<{ ok: boolean; message: string }>('tips/submit', session, {
-            method: 'POST',
-            body: JSON.stringify(submitObject),
-          })
+          const response = await submitTips(session, submitObject)
 
           setSubmissionState((prev) => ({
             ...prev,

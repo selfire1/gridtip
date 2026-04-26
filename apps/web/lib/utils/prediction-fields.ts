@@ -1,7 +1,11 @@
-import { RACE_PREDICTION_FIELDS, type RacePredictionField } from '@gridtip/shared/constants'
+import {
+  RACE_PREDICTION_FIELDS,
+  type RacePredictionField,
+} from '@gridtip/shared/constants'
 import { CUTOFF_REFERENCE_KEY } from '@/constants'
 import { Database } from '@/db/types'
 import { isAfter, isBefore, subMinutes } from 'date-fns'
+import { getIsSprint } from '@gridtip/shared/is-sprint'
 
 /**
  * Is this position part of the tips for a race
@@ -10,10 +14,6 @@ export function isPredictionForRace(
   position: string,
 ): position is RacePredictionField {
   return RACE_PREDICTION_FIELDS.includes(position as RacePredictionField)
-}
-
-export function getIsSprint(race: Pick<Database.Race, 'sprintQualifyingDate'>) {
-  return !!race.sprintQualifyingDate
 }
 
 export function getDueDatesForTips(race: Database.Race, cutoff: number) {

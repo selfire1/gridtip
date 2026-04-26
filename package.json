@@ -1,5 +1,11 @@
 {
   "name": "gridtip-mono",
   "private": true,
-  "workspaces": ["packages/*", "apps/*"]
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "bun run --filter '*' dev"
+  }
 }

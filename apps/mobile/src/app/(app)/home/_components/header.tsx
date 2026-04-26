@@ -1,9 +1,9 @@
 import { View } from 'react-native'
 import { Image } from 'expo-image'
 import { Text } from '@/components/ui/text'
-import { Race } from '@/types'
+import { ApiRace } from '@gridtip/shared/api-types'
 
-export default function Header({ race }: { race: Race }) {
+export default function Header({ race }: { race: ApiRace }) {
   return (
     <View className="bg-background border border-border flex flex-row gap-6 items-center px-4 py-8 border-b justify-start relative">
       <View

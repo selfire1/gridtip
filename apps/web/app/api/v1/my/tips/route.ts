@@ -1,9 +1,13 @@
 import { db } from '@/db'
 import { getMaybeSession } from '@/lib/dal'
 import { getTips } from '@/lib/get-tips'
-import type { GetTipsResponse } from '@gridtip/shared/api-types'
-import { NextRequest } from 'next/server'
+import type {
+  GetTipsResponse,
+  SubmitTipsResponse,
+} from '@gridtip/shared/api-types'
 import z from 'zod'
+import { NextRequest, NextResponse } from 'next/server'
+import { submitChanges } from '@/app/tipping/add-tips/[race-id]/actions/submit-tip'
 
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams
@@ -49,4 +53,22 @@ export async function GET(request: NextRequest) {
   })
 
   return Response.json(tips satisfies GetTipsResponse, { status: 200 })
+}
+
+export async function POST(request: NextRequest) {
+  const session = await getMaybeSession()
+  if (!session) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const body = await request.json()
+  const response = await submitChanges(body)
+  if (!response.ok) {
+    return NextResponse.json(response satisfies SubmitTipsResponse, {
+      status: 400,
+    })
+  }
+  return NextResponse.json(response satisfies SubmitTipsResponse, {
+    status: 200,
+  })
 }

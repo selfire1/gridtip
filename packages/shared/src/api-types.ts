@@ -2,35 +2,48 @@ import type { RacePredictionField } from './constants'
 
 type DateOrString = Date | string
 
+type StringTimestamp = string
+export type GetLastUpdated = {
+  races: StringTimestamp
+  constructors: StringTimestamp
+  drivers: StringTimestamp
+}
+
+export type GetRaces = {
+  races: ApiRace[]
+}
+
 export type ApiRace = {
   id: string
   country: string
   round: number
-  circuitName: string
-  raceName: string
-  grandPrixDate: DateOrString
-  qualifyingDate: DateOrString
-  sprintDate: DateOrString | null
-  sprintQualifyingDate: DateOrString | null
+  grandPrixDate: Date
+  qualifyingDate: Date
+  sprintQualifyingDate: Date | null
   locality: string
-  lastUpdated: DateOrString
-  created: DateOrString
+  raceName: string
   image: string
-  isSprint: boolean
+}
+
+export type GetConstructors = {
+  constructors: ApiConstructor[]
+}
+
+export type ApiConstructor = {
+  name: string
+  id: string
+}
+
+export type GetDrivers = {
+  drivers: ApiDriver[]
 }
 
 export type ApiDriver = {
   id: string
-  constructorId: string
+  permanentNumber: string | null
   givenName: string
   familyName: string
-  permanentNumber: string | null
-}
-
-export type ApiConstructor = {
-  id: string
-  name: string
-  image: string
+  constructorId: string
 }
 
 export type ApiGroup = {

@@ -1,5 +1,4 @@
 import { LucideHourglass, LucideList } from 'lucide-react'
-import { unstable_cache } from 'next/cache'
 import EmptyState from '@/components/empty-state'
 import { PREDICTION_FIELDS } from '@gridtip/shared/constants'
 import { Database } from '@/db/types'
@@ -69,15 +68,6 @@ type GetTipsInfo = {
   forRace: Race
   allPredictionsWithUser: AllPredictions
   results: Results
-}
-
-function getConstructors() {
-  return db.query.constructorsTable.findMany({
-    columns: {
-      id: true,
-      name: true,
-    },
-  })
 }
 
 function getResultsMaps(

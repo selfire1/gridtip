@@ -1,8 +1,4 @@
-import {
-  getConstructorOptions,
-  getCurrentGroupId,
-  getDriverOptions,
-} from '@/lib/utils/groups'
+import { getCurrentGroupId } from '@/lib/utils/groups'
 import AlertNoGroup from '../components/alert-no-group'
 import { db } from '@/db'
 import { verifySession } from '@/lib/dal'
@@ -14,7 +10,6 @@ import TipForm from './components/TipForm'
 import { Database } from '@/db/types'
 import {
   getClosedFields,
-  getIsSprint,
   isRaceAbleToBeTipped,
 } from '@/lib/utils/prediction-fields'
 import { Separator } from '@/components/ui/separator'
@@ -23,6 +18,9 @@ import RaceTimes from '@/components/race-times'
 import { getMyGroups } from '@/actions/get-my-groups'
 import { getRaceDetails } from '@/lib/utils/races'
 import { getTips } from '@/lib/get-tips'
+import { getIsSprint } from '@gridtip/shared/is-sprint'
+import { getDriverOptions } from '@/lib/utils/drivers'
+import { getConstructorOptions } from '@/lib/utils/constructors'
 
 export default async function RaceFormPage({
   params,
