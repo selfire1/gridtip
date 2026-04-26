@@ -208,6 +208,8 @@ export function GroupDetailsPage({
     SUPPORTED_ICON_NAMES[0],
   )
 
+  const [formErrors, setFormErrors] = useState<GroupFieldsProps['errors']>()
+
   useEffect(() => {
     if (!open) {
       setTimeout(() => {
@@ -217,8 +219,6 @@ export function GroupDetailsPage({
       }, 400)
     }
   }, [isOpen])
-
-  const [formErrors, setFormErrors] = useState<GroupFieldsProps['errors']>()
 
   const formRef = useRef<HTMLFormElement>(null)
   return (
