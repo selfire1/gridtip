@@ -1,4 +1,4 @@
-name: Run tests and linter
+name: Run tests and linter (web)
 
 on:
   push:
@@ -11,6 +11,9 @@ on:
 
 jobs:
   test:
+    defaults:
+      run:
+        working-directory: apps/web
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
