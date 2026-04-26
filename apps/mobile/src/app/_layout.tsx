@@ -9,6 +9,7 @@ import { NAV_THEME } from '@/lib/theme'
 import { QueryClient, focusManager } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { asyncStoragePersister } from '@/lib/persister'
+import { UnauthorizedError } from '@/lib/api'
 import { useEffect } from 'react'
 import type { AppStateStatus } from 'react-native'
 
@@ -16,7 +17,12 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       gcTime: 1000 * 60 * 60 * 24, // 24h
-      retry: 2,
+      retry: (failureCount, error) => {
+        if (error instanceof UnauthorizedError) {
+          return false
+        }
+        return failureCount < 2
+      },
     },
   },
 })

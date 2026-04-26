@@ -1,7 +1,10 @@
-import { use, createContext, type PropsWithChildren } from 'react'
+import { use, createContext, useEffect, type PropsWithChildren } from 'react'
+import { useRouter } from 'expo-router'
+import { useQueryClient } from '@tanstack/react-query'
 
 import { useStorageState } from '@/hooks/use-storage-state'
 import { MaybeSession } from '@/hooks/use-dal'
+import { setOnUnauthorized } from './api'
 
 const AuthContext = createContext<{
   signIn: (token: string) => void
@@ -26,6 +29,19 @@ export function useSession() {
 
 export function SessionProvider({ children }: PropsWithChildren) {
   const [[isLoading, token], setToken] = useStorageState('session')
+  const router = useRouter()
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    setOnUnauthorized(() => {
+      setToken(null)
+      queryClient.clear()
+      router.replace('/auth/sign-in')
+    })
+    return () => {
+      setOnUnauthorized(null)
+    }
+  }, [router, queryClient, setToken])
 
   return (
     <AuthContext.Provider

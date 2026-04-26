@@ -10,13 +10,26 @@ import {
 } from '@gridtip/shared/api-types'
 import { type Position } from '@gridtip/shared/get-form-fields'
 
+export class UnauthorizedError extends Error {
+  constructor(message = 'Unauthorized') {
+    super(message)
+    this.name = 'UnauthorizedError'
+  }
+}
+
+let onUnauthorized: (() => void) | null = null
+
+export function setOnUnauthorized(handler: (() => void) | null) {
+  onUnauthorized = handler
+}
+
 export async function api<TResult extends object>(
   path: string,
   session: MaybeSession,
   options?: Omit<RequestInit, 'headers'>,
 ) {
   if (!session) {
-    throw new Error('No session')
+    throw new UnauthorizedError('No session')
   }
   const apiBaseUrl = getWebUrl('/api/v1/')
   const url = new URL(path, apiBaseUrl)
@@ -26,6 +39,10 @@ export async function api<TResult extends object>(
     },
     ...options,
   })
+  if (response.status === 401) {
+    onUnauthorized?.()
+    throw new UnauthorizedError()
+  }
   const text = await response.text()
   if (!response.ok) {
     throw new Error(text)
