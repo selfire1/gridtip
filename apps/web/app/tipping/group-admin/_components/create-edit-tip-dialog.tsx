@@ -27,10 +27,12 @@ import {
   FieldGroup,
   FieldLabel,
 } from '@/components/ui/field'
-import { RACE_PREDICTION_FIELDS, type RacePredictionField } from '@gridtip/shared/constants'
+import {
+  RACE_PREDICTION_FIELDS,
+  type RacePredictionField,
+} from '@gridtip/shared/constants'
 import { Database } from '@/db/types'
 import {
-  getIsSprint,
   getLabel,
   getTipTypeFromPosition,
   TipType,
@@ -54,6 +56,7 @@ import { SelectUser } from './select-user'
 import { TIP_OVERWRITE_OPTIONS } from '@/db/schema/schema'
 import { Icon } from '@/components/icon'
 import { PredictionMember } from '../types/prediction-member'
+import { getIsSprint } from '@gridtip/shared/is-sprint'
 
 type RaceOption = Pick<
   Database.Race,

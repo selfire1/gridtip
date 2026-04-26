@@ -2,12 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import EmptyGroup from '@/components/empty-group'
 import { verifyIsAdmin, verifySession } from '@/lib/dal'
 import { PredictionsTableWrapper } from './_components/predictions-table-wrapper'
-import {
-  getConstructorOptions,
-  getCurrentGroup,
-  getDriverOptions,
-  getGroupMembers,
-} from '@/lib/utils/groups'
+import { getCurrentGroup, getGroupMembers } from '@/lib/utils/groups'
 import { createGetAllPredictions } from '@/lib/utils/race-results'
 import { redirect } from 'next/navigation'
 import { formatPredictionsToRows } from './_utils/rows'
@@ -21,6 +16,8 @@ import { PredictionMember } from './types/prediction-member'
 import { Database } from '@/db/types'
 import { ChampionshipPoints } from './_components/championship-points'
 import { getRaces } from '@/lib/utils/races'
+import { getConstructorOptions } from '@/lib/utils/constructors'
+import { getDriverOptions } from '@/lib/utils/drivers'
 
 export default async function GroupSettings() {
   const { userId } = await verifySession()

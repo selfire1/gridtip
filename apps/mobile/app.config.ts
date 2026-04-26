@@ -7,6 +7,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   version: '1.0.0',
   orientation: 'portrait',
   userInterfaceStyle: 'automatic',
+  owner: 'glau-digital',
   ios: {
     icon: './assets/app.icon',
     bundleIdentifier: 'com.gridtipapp',
