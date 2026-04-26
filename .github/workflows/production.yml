@@ -8,6 +8,7 @@ on:
       - 'apps/web/**'
       - 'packages/shared/**'
       - 'bun.lock'
+      - '.github'
 
 jobs:
   test:
