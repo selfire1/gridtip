@@ -124,21 +124,44 @@ async function main() {
     return
   }
 
-  console.log(`sending ${notifications.length} notification(s)`)
-
-  const results = await sendNotifications(notifications)
-
-  const successful = results.filter((r) => r.ok)
-  if (successful.length > 0) {
-    await db.insert(raceNotificationsTable).values(
-      successful.map((r) => ({
-        userId: r.notification.userId,
-        raceId: r.notification.raceId,
-        tipType: r.notification.tipType,
-        reminderType: r.notification.reminderType,
+  // Claim ledger rows up front so an overlapping cron run can't double-send.
+  // Failed sends are accepted as lost reminders; the next cutoff window will
+  // still fire if applicable.
+  const claimed = await db
+    .insert(raceNotificationsTable)
+    .values(
+      notifications.map((n) => ({
+        userId: n.userId,
+        raceId: n.raceId,
+        tipType: n.tipType,
+        reminderType: n.reminderType,
       })),
     )
+    .onConflictDoNothing()
+    .returning({
+      userId: raceNotificationsTable.userId,
+      raceId: raceNotificationsTable.raceId,
+      tipType: raceNotificationsTable.tipType,
+      reminderType: raceNotificationsTable.reminderType,
+    })
+
+  const claimedKey = new Set(
+    claimed.map(
+      (c) => `${c.userId}|${c.raceId}|${c.tipType}|${c.reminderType}`,
+    ),
+  )
+  const toSend = notifications.filter((n) =>
+    claimedKey.has(`${n.userId}|${n.raceId}|${n.tipType}|${n.reminderType}`),
+  )
+
+  if (toSend.length === 0) {
+    console.log('all notifications already claimed by a prior run')
+    return
   }
+
+  console.log(`sending ${toSend.length} notification(s)`)
+
+  const results = await sendNotifications(toSend)
 
   const failed = results.filter((r) => !r.ok)
   if (failed.length > 0) {
@@ -150,6 +173,7 @@ async function main() {
     }
   }
 
+  const successful = results.filter((r) => r.ok)
   console.log(`sent ${successful.length}, failed ${failed.length}`)
 }
 
