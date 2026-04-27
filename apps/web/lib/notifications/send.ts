@@ -1,4 +1,4 @@
-import { Expo, ExpoPushMessage, ExpoPushTicket } from 'expo-server-sdk'
+import { Expo, type ExpoPushMessage, type ExpoPushTicket } from 'expo-server-sdk'
 import type { NotificationToSend } from './compute-notifications'
 
 const expo = new Expo()
