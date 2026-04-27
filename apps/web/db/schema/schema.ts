@@ -325,6 +325,16 @@ export const userPushTokensTable = sqliteTable(
   (table) => [index('user_push_tokens_user_id_idx').on(table.userId)],
 )
 
+export const userPushTokensRelations = relations(
+  userPushTokensTable,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [userPushTokensTable.userId],
+      references: [user.id],
+    }),
+  }),
+)
+
 export type UserPushToken = typeof userPushTokensTable.$inferSelect
 export type InsertUserPushToken = typeof userPushTokensTable.$inferInsert
 
@@ -355,6 +365,20 @@ export const raceNotificationsTable = sqliteTable(
     ),
     index('race_notifications_user_id_idx').on(table.userId),
   ],
+)
+
+export const raceNotificationsRelations = relations(
+  raceNotificationsTable,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [raceNotificationsTable.userId],
+      references: [user.id],
+    }),
+    race: one(racesTable, {
+      fields: [raceNotificationsTable.raceId],
+      references: [racesTable.id],
+    }),
+  }),
 )
 
 export type RaceNotification = typeof raceNotificationsTable.$inferSelect
