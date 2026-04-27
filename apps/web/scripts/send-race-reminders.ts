@@ -5,6 +5,7 @@ import {
   predictionsTable,
   raceNotificationsTable,
   racesTable,
+  userPushTokensTable,
 } from '@/db/schema/schema'
 import {
   computeNotificationsToSend,
@@ -15,7 +16,7 @@ import {
 } from '@/lib/notifications/compute-notifications'
 import { sendNotifications } from '@/lib/notifications/send'
 import { addHours, subHours } from 'date-fns'
-import { and, eq, gte } from 'drizzle-orm'
+import { and, eq, gte, inArray } from 'drizzle-orm'
 
 async function main() {
   const now = new Date()
@@ -161,7 +162,14 @@ async function main() {
 
   console.log(`sending ${toSend.length} notification(s)`)
 
-  const results = await sendNotifications(toSend)
+  const { results, invalidTokens } = await sendNotifications(toSend)
+
+  if (invalidTokens.length > 0) {
+    await db
+      .delete(userPushTokensTable)
+      .where(inArray(userPushTokensTable.token, invalidTokens))
+    console.log(`pruned ${invalidTokens.length} unregistered push token(s)`)
+  }
 
   const failed = results.filter((r) => !r.ok)
   if (failed.length > 0) {
