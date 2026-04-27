@@ -73,6 +73,7 @@ async function main() {
         tipType: true,
         reminderType: true,
       },
+      where: gte(raceNotificationsTable.sentAt, subHours(now, 48)),
     }),
   ])
 
