@@ -1,4 +1,8 @@
-import { Expo, type ExpoPushMessage, type ExpoPushTicket } from 'expo-server-sdk'
+import {
+  Expo,
+  type ExpoPushMessage,
+  type ExpoPushTicket,
+} from 'expo-server-sdk'
 import type { NotificationToSend } from './compute-notifications'
 
 const expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN })
@@ -91,7 +95,8 @@ export async function sendNotifications(
       aggregate.ok = true
     } else {
       aggregate.errors.push(ticket?.message ?? 'no ticket')
-      const errorCode = ticket?.status === 'error' ? ticket.details?.error : undefined
+      const errorCode =
+        ticket?.status === 'error' ? ticket.details?.error : undefined
       if (errorCode === 'DeviceNotRegistered') {
         invalidTokens.add(item.token)
       }
