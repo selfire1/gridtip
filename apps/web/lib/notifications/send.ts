@@ -1,7 +1,7 @@
 import { Expo, type ExpoPushMessage, type ExpoPushTicket } from 'expo-server-sdk'
 import type { NotificationToSend } from './compute-notifications'
 
-const expo = new Expo()
+const expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN })
 
 export type SendResult = {
   notification: NotificationToSend
