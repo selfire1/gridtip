@@ -5,6 +5,7 @@ import { LoginData, LoginForm } from '../../_components/login-form'
 import { getPlaceholder } from '../../_lib/placeholder'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { enableNotificationsIfUnset } from '@/actions/enable-notifications-if-unset'
 
 export default function MobileLoginForm() {
   const router = useRouter()
@@ -25,10 +26,7 @@ export default function MobileLoginForm() {
       password: value.password,
     })
     if (signInContext.error) {
-      const isInvalidCredentialsError =
-        signInContext.error.status === 403 ? 'unverified' : 'other'
-
-      if (isInvalidCredentialsError) {
+      if (signInContext.error.status === 401) {
         toast.error('Invalid Credentials')
         return
       }
@@ -38,6 +36,8 @@ export default function MobileLoginForm() {
       console.error(signInContext.error)
       return
     }
+
+    await enableNotificationsIfUnset()
 
     const url = `gridtip://auth/set-token/${signInContext.data.token}`
     router.push(url)

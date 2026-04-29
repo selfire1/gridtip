@@ -17,6 +17,11 @@ export const TIP_OVERWRITE_OPTIONS = [
   'countAsIncorrect',
 ] as const
 
+export const PUSH_TOKEN_PLATFORMS = ['ios'] as const
+export const NOTIFICATION_TIP_TYPES = ['race', 'sprint'] as const
+export const NOTIFICATION_REMINDER_TYPES = ['24h', '3h'] as const
+export const NOTIFICATION_VARIANTS = ['standard', 'last-chance'] as const
+
 export const groupsTable = sqliteTable('groups', {
   id: text().primaryKey().$defaultFn(createId),
   name: text().notNull(),
@@ -299,3 +304,82 @@ export type InsertResult = typeof resultsTable.$inferInsert
 
 export type User = typeof user.$inferSelect
 export type UserId = User['id']
+
+export const userPushTokensTable = sqliteTable(
+  'user_push_tokens',
+  {
+    id: text('id').primaryKey().$defaultFn(createId),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    token: text('token').notNull().unique(),
+    platform: text('platform', { enum: PUSH_TOKEN_PLATFORMS }).notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+      .default(sql`(unixepoch())`)
+      .notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp' })
+      .default(sql`(unixepoch())`)
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index('user_push_tokens_user_id_idx').on(table.userId)],
+)
+
+export const userPushTokensRelations = relations(
+  userPushTokensTable,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [userPushTokensTable.userId],
+      references: [user.id],
+    }),
+  }),
+)
+
+export type UserPushToken = typeof userPushTokensTable.$inferSelect
+export type InsertUserPushToken = typeof userPushTokensTable.$inferInsert
+
+export const raceNotificationsTable = sqliteTable(
+  'race_notifications',
+  {
+    id: text('id').primaryKey().$defaultFn(createId),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    raceId: text('race_id')
+      .notNull()
+      .references(() => racesTable.id, { onDelete: 'cascade' }),
+    tipType: text('tip_type', { enum: NOTIFICATION_TIP_TYPES }).notNull(),
+    reminderType: text('reminder_type', {
+      enum: NOTIFICATION_REMINDER_TYPES,
+    }).notNull(),
+    sentAt: integer('sent_at', { mode: 'timestamp' })
+      .default(sql`(unixepoch())`)
+      .notNull(),
+  },
+  (table) => [
+    unique('race_notifications_uq').on(
+      table.userId,
+      table.raceId,
+      table.tipType,
+      table.reminderType,
+    ),
+    index('race_notifications_user_id_idx').on(table.userId),
+  ],
+)
+
+export const raceNotificationsRelations = relations(
+  raceNotificationsTable,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [raceNotificationsTable.userId],
+      references: [user.id],
+    }),
+    race: one(racesTable, {
+      fields: [raceNotificationsTable.raceId],
+      references: [racesTable.id],
+    }),
+  }),
+)
+
+export type RaceNotification = typeof raceNotificationsTable.$inferSelect
+export type InsertRaceNotification = typeof raceNotificationsTable.$inferInsert

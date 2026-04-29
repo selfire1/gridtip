@@ -18,7 +18,8 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest",
-    "update-tips": "bun run --env-file=.env.production scripts/_local/add-tips"
+    "update-tips": "bun run --env-file=.env.production scripts/_local/add-tips",
+    "send-reminders": "bun run scripts/send-race-reminders.ts"
   },
   "dependencies": {
     "@gridtip/shared": "workspace:*",
@@ -53,6 +54,7 @@
     "dompurify": "^3.3.2",
     "dotenv": "^17.2.2",
     "drizzle-orm": "^0.44.5",
+    "expo-server-sdk": "^6.1.0",
     "facehash": "^0.1.0",
     "lucide-react": "^0.542.0",
     "marked": "^16.4.0",

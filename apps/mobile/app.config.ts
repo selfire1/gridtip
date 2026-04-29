@@ -16,6 +16,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     config: {
       usesNonExemptEncryption: false,
     },
+    entitlements: {
+      'aps-environment':
+        process.env.ENVIRONMENT === 'development' ? 'development' : 'production',
+    },
   },
   web: {
     output: 'static',
@@ -54,6 +58,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-image',
     'expo-secure-store',
     'expo-web-browser',
+    [
+      'expo-notifications',
+      {
+        icon: './assets/images/splash-icon-light.png',
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,
