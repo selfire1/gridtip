@@ -5,7 +5,6 @@ import { LoginData, LoginForm } from '../../_components/login-form'
 import { getPlaceholder } from '../../_lib/placeholder'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { enableNotificationsIfUnset } from '@/actions/enable-notifications-if-unset'
 
 export default function MobileLoginForm() {
   const router = useRouter()
@@ -36,8 +35,6 @@ export default function MobileLoginForm() {
       console.error(signInContext.error)
       return
     }
-
-    await enableNotificationsIfUnset()
 
     const url = `gridtip://auth/set-token/${signInContext.data.token}`
     router.push(url)
