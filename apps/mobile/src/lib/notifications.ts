@@ -5,31 +5,28 @@ import { Platform } from 'react-native'
 import type { Session } from '@/hooks/use-dal'
 import { api } from './api'
 
-export async function requestAndRegisterPushToken(session: Session) {
+export type PermissionStatus = Notifications.PermissionStatus
+
+export type RegistrationResult =
+  | { ok: true; status: 'granted'; token: string }
+  | { ok: false; status: 'denied' | 'undetermined'; reason: 'permission-not-granted' }
+  | { ok: false; status: null; reason: 'not-ios' | 'not-physical-device' | 'no-project-id' }
+
+function preconditionFailure(): RegistrationResult | null {
   if (Platform.OS !== 'ios') {
-    return { ok: false, reason: 'not-ios' as const }
+    return { ok: false, status: null, reason: 'not-ios' }
   }
   if (!Device.isDevice) {
-    return { ok: false, reason: 'not-physical-device' as const }
+    return { ok: false, status: null, reason: 'not-physical-device' }
   }
+  return null
+}
 
-  const existing = await Notifications.getPermissionsAsync()
-  let status = existing.status
-  if (status !== 'granted') {
-    const requested = await Notifications.requestPermissionsAsync({
-      ios: { allowAlert: true, allowBadge: true, allowSound: true },
-    })
-    status = requested.status
-  }
-  if (status !== 'granted') {
-    return { ok: false, reason: 'permission-denied' as const }
-  }
-
+async function registerToken(session: Session): Promise<RegistrationResult> {
   const projectId =
-    Constants.expoConfig?.extra?.eas?.projectId ??
-    Constants.easConfig?.projectId
+    Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId
   if (!projectId) {
-    return { ok: false, reason: 'no-project-id' as const }
+    return { ok: false, status: null, reason: 'no-project-id' }
   }
 
   const tokenResult = await Notifications.getExpoPushTokenAsync({ projectId })
@@ -40,5 +37,38 @@ export async function requestAndRegisterPushToken(session: Session) {
     body: JSON.stringify({ token, platform: 'ios' }),
   })
 
-  return { ok: true as const, token }
+  return { ok: true, status: 'granted', token }
+}
+
+export async function registerPushTokenIfGranted(
+  session: Session,
+): Promise<RegistrationResult> {
+  const failure = preconditionFailure()
+  if (failure) return failure
+
+  const { status } = await Notifications.getPermissionsAsync()
+  if (status !== 'granted') {
+    return { ok: false, status, reason: 'permission-not-granted' }
+  }
+  return registerToken(session)
+}
+
+export async function requestPermissionAndRegisterPushToken(
+  session: Session,
+): Promise<RegistrationResult> {
+  const failure = preconditionFailure()
+  if (failure) return failure
+
+  const existing = await Notifications.getPermissionsAsync()
+  let status = existing.status
+  if (status === 'undetermined') {
+    const requested = await Notifications.requestPermissionsAsync({
+      ios: { allowAlert: true, allowBadge: true, allowSound: true },
+    })
+    status = requested.status
+  }
+  if (status !== 'granted') {
+    return { ok: false, status, reason: 'permission-not-granted' }
+  }
+  return registerToken(session)
 }
