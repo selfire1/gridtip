@@ -1,11 +1,11 @@
 import { Stack } from 'expo-router'
-import VariantAGrouped from './_components/variant-a-grouped'
+import SettingsScreenContent from './_components/settings-screen-content'
 
 export default function SettingsScreen() {
   return (
     <>
       <Stack.Screen options={{ title: 'Settings' }} />
-      <VariantAGrouped />
+      <SettingsScreenContent />
     </>
   )
 }

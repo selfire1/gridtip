@@ -45,10 +45,9 @@ export default function ProfileSummary() {
     <View className="flex-row items-center gap-3 px-4 py-3">
       <Image
         source={imageUrl}
-        style={{ width: AVATAR_SIZE, height: AVATAR_SIZE, borderRadius: 8 }}
+        style={{ width: AVATAR_SIZE, height: AVATAR_SIZE, borderRadius: 999 }}
         contentFit="cover"
         accessibilityLabel={name}
-        className="rounded-full overflow-hidden"
       />
       <View className="flex-1">
         <Text className="text-base font-semibold" numberOfLines={1}>

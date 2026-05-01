@@ -5,7 +5,7 @@ import NotificationToggle from './notification-toggle'
 import ProfileSummary from './profile-summary'
 import GroupsList from './groups-list'
 
-export default function VariantAGrouped() {
+export default function SettingsScreenContent() {
   const { signOut } = useSession()
 
   return (
@@ -36,10 +36,7 @@ export default function VariantAGrouped() {
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <View className="mt-4">
-      <Text
-        variant="muted"
-        className="text-xs uppercase tracking-wider px-5 mb-1.5"
-      >
+      <Text variant="muted" className="text-xs uppercase tracking-wider px-5 mb-1.5">
         {label}
       </Text>
       <View className="mx-4 rounded-xl bg-card border border-border overflow-hidden">
