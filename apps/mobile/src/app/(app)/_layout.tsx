@@ -39,9 +39,13 @@ export default function TabLayout() {
         <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="house.fill" md="home" />
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="other">
-        <NativeTabs.Trigger.Icon sf="link" md="settings" />
-        <NativeTabs.Trigger.Label>Other</NativeTabs.Trigger.Label>
+      <NativeTabs.Trigger name="links">
+        <NativeTabs.Trigger.Icon sf="link" md="link" />
+        <NativeTabs.Trigger.Label>Links</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="settings">
+        <NativeTabs.Trigger.Icon sf="gearshape.fill" md="settings" />
+        <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   )

@@ -6,6 +6,7 @@ import {
   GetLastUpdated,
   GetRaces,
   GetTipsResponse,
+  MeResponse,
   MyGroupsResponse,
   NotificationPreferencesResponse,
 } from '@gridtip/shared/api-types'
@@ -58,6 +59,12 @@ export async function api<TResult extends object>(
 
 export async function getMyGroups(session: Session) {
   return await api<MyGroupsResponse>('my/groups', session)
+}
+
+export async function getMe(session: Session) {
+  const response = await api<MeResponse>('me', session)
+  console.log({ response })
+  return response
 }
 
 export function getRaces(session: Session) {

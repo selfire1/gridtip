@@ -18,6 +18,7 @@ export default function LoginPageForm() {
           callbackURL: redirect || Path.Dashboard,
         })
         if (signInContext.error) {
+          console.log(signInContext.error)
           if (signInContext.error.status === 401) {
             toast.error('Invalid Credentials')
             return

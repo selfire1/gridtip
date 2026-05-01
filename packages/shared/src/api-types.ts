@@ -79,6 +79,13 @@ export type NotificationPreferencesResponse = {
   enableNotifications: boolean | null
 }
 
+export type MeResponse = {
+  id: string
+  name: string
+  email: string
+  avatarUrl: string | null
+}
+
 export type RegisterPushTokenRequest = {
   token: string
   platform?: 'ios'
