@@ -35,10 +35,9 @@ export default function PositionModal({
       navigationBarTranslucent={true}
       statusBarTranslucent={true}
       presentationStyle="formSheet"
-      className="bg-background"
     >
       <SafeAreaProvider>
-        <SafeAreaView>
+        <SafeAreaView className="flex-1 bg-background">
           <ModalHeader position={position} dismiss={dismiss} />
           <ModalBody
             position={position}
