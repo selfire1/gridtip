@@ -74,3 +74,12 @@ export type SubmitTipsResponse = {
   ok: boolean
   message: string
 }
+
+export type NotificationPreferencesResponse = {
+  enableNotifications: boolean | null
+}
+
+export type RegisterPushTokenRequest = {
+  token: string
+  platform?: 'ios'
+}

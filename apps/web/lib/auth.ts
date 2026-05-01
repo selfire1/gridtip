@@ -59,6 +59,10 @@ Click this link below to verify your email: <a href="${url}">${url}</a>`.trim(),
         type: 'string',
         required: false,
       },
+      enableNotifications: {
+        type: 'boolean',
+        required: false,
+      },
     },
   },
 

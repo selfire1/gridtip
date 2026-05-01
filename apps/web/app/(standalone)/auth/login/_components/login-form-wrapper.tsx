@@ -18,10 +18,7 @@ export default function LoginPageForm() {
           callbackURL: redirect || Path.Dashboard,
         })
         if (signInContext.error) {
-          const isInvalidCredentialsError =
-            signInContext.error.status === 403 ? 'unverified' : 'other'
-
-          if (isInvalidCredentialsError) {
+          if (signInContext.error.status === 401) {
             toast.error('Invalid Credentials')
             return
           }

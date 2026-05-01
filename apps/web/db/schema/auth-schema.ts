@@ -20,6 +20,7 @@ export const user = sqliteTable('user', {
     mode: 'boolean',
   }).default(false),
   profileImageUrl: text('profile_image_url'),
+  enableNotifications: integer('enable_notifications', { mode: 'boolean' }),
 })
 
 export const session = sqliteTable(
