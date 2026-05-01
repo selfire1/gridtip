@@ -31,6 +31,9 @@ jobs:
       - name: Run test
         run: bun run test
   lint:
+    defaults:
+      run:
+        working-directory: apps/web
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
