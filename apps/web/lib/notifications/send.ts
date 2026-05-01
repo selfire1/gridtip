@@ -42,6 +42,7 @@ export async function sendNotifications(
           body,
           sound: 'default',
           data: {
+            url: '/home',
             raceId: n.raceId,
             tipType: n.tipType,
             reminderType: n.reminderType,
