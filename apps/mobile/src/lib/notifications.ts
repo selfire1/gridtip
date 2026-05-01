@@ -23,8 +23,7 @@ function preconditionFailure(): RegistrationResult | null {
 }
 
 async function registerToken(session: Session): Promise<RegistrationResult> {
-  const projectId =
-    Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId
+  const projectId = Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId
   if (!projectId) {
     return { ok: false, status: null, reason: 'no-project-id' }
   }
@@ -40,9 +39,7 @@ async function registerToken(session: Session): Promise<RegistrationResult> {
   return { ok: true, status: 'granted', token }
 }
 
-export async function registerPushTokenIfGranted(
-  session: Session,
-): Promise<RegistrationResult> {
+export async function registerPushTokenIfGranted(session: Session): Promise<RegistrationResult> {
   const failure = preconditionFailure()
   if (failure) return failure
 

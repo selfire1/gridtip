@@ -17,8 +17,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       usesNonExemptEncryption: false,
     },
     entitlements: {
-      'aps-environment':
-        process.env.ENVIRONMENT === 'development' ? 'development' : 'production',
+      'aps-environment': process.env.ENVIRONMENT === 'development' ? 'development' : 'production',
     },
   },
   web: {

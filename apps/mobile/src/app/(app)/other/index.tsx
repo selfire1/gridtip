@@ -1,10 +1,7 @@
 import { Text } from '@/components/ui/text'
 import { useSession } from '@/lib/ctx'
 import { getWebUrl } from '@/lib/url'
-import {
-  getNotificationPreferences,
-  setNotificationPreferences,
-} from '@/lib/api'
+import { getNotificationPreferences, setNotificationPreferences } from '@/lib/api'
 import { requestPermissionAndRegisterPushToken } from '@/lib/notifications'
 import { webRoutes, type WebRouteKey } from '@gridtip/shared/routes'
 import { Stack } from 'expo-router'
@@ -13,12 +10,7 @@ import * as Notifications from 'expo-notifications'
 import { Alert, Linking, Pressable, ScrollView, Switch, View } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
 import { useCallback } from 'react'
-import {
-  queryOptions,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query'
+import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 type LinkItem = {
   title: string
@@ -67,7 +59,7 @@ function NotificationToggle() {
   const queryClient = useQueryClient()
 
   const prefsOpts = queryOptions({
-    queryKey: ['notification-preferences', session?.token],
+    queryKey: ['notification-preferences', session],
     queryFn: () => getNotificationPreferences(session!),
     enabled: !!session,
   })
@@ -102,9 +94,7 @@ function NotificationToggle() {
       ;(async () => {
         const { status } = await Notifications.getPermissionsAsync()
         if (cancelled) return
-        const prefs = queryClient.getQueryData<{ enableNotifications: boolean }>(
-          prefsOpts.queryKey,
-        )
+        const prefs = queryClient.getQueryData<{ enableNotifications: boolean }>(prefsOpts.queryKey)
         if (status !== 'granted' && prefs?.enableNotifications) {
           mutate(false)
         }
@@ -159,11 +149,7 @@ function NotificationToggle() {
       }}
     >
       <Text>Race reminders</Text>
-      <Switch
-        value={value}
-        onValueChange={handleToggle}
-        disabled={prefsQuery.isLoading}
-      />
+      <Switch value={value} onValueChange={handleToggle} disabled={prefsQuery.isLoading} />
     </View>
   )
 }

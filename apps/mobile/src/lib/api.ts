@@ -96,24 +96,14 @@ export async function getMyTips(
 }
 
 export async function getNotificationPreferences(session: Session) {
-  return api<NotificationPreferencesResponse>(
-    'notifications/preferences',
-    session,
-  )
+  return api<NotificationPreferencesResponse>('notifications/preferences', session)
 }
 
-export async function setNotificationPreferences(
-  session: Session,
-  enableNotifications: boolean,
-) {
-  return api<NotificationPreferencesResponse>(
-    'notifications/preferences',
-    session,
-    {
-      method: 'PATCH',
-      body: JSON.stringify({ enableNotifications }),
-    },
-  )
+export async function setNotificationPreferences(session: Session, enableNotifications: boolean) {
+  return api<NotificationPreferencesResponse>('notifications/preferences', session, {
+    method: 'PATCH',
+    body: JSON.stringify({ enableNotifications }),
+  })
 }
 
 export async function submitTips(
