@@ -2,7 +2,7 @@ import { Stack } from 'expo-router'
 import { Pressable, ScrollView, View } from 'react-native'
 import { ChevronRight } from 'lucide-react-native'
 import { Text } from '@/components/ui/text'
-import { linkItems, openLink } from './_components/link-items'
+import { linkItems, openLink } from '../../../lib/link-items'
 
 export default function LinksScreen() {
   return (
