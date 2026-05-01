@@ -1,60 +1,14 @@
 import { Text } from '@/components/ui/text'
 import { useSession } from '@/lib/ctx'
-import { getWebUrl } from '@/lib/url'
 import { getNotificationPreferences, setNotificationPreferences } from '@/lib/api'
 import { requestPermissionAndRegisterPushToken } from '@/lib/notifications'
-import { webRoutes, type WebRouteKey } from '@gridtip/shared/routes'
-import { Stack } from 'expo-router'
-import * as WebBrowser from 'expo-web-browser'
 import * as Notifications from 'expo-notifications'
-import { Alert, Linking, Pressable, ScrollView, Switch, View } from 'react-native'
+import { Alert, Linking, Switch, View } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
 import { useCallback } from 'react'
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-type LinkItem = {
-  title: string
-  routeKey: WebRouteKey
-}
-
-const links: LinkItem[] = [
-  { title: 'Leaderboard', routeKey: 'leaderboard' },
-  { title: 'Championships', routeKey: 'championships' },
-  { title: 'Groups', routeKey: 'groups' },
-  { title: 'Rules & Scoring', routeKey: 'rules' },
-  { title: 'Settings', routeKey: 'settings' },
-  { title: 'Feedback', routeKey: 'feedback' },
-  { title: 'Privacy', routeKey: 'privacy' },
-]
-
-export default function Other() {
-  const { session, signOut } = useSession()
-
-  function openLink(routeKey: WebRouteKey) {
-    WebBrowser.openBrowserAsync(getWebUrl(webRoutes[routeKey]))
-  }
-
-  return (
-    <>
-      <Stack.Screen options={{ title: 'Other' }} />
-      <ScrollView>
-        <View>
-          {session ? <NotificationToggle /> : null}
-          {links.map((link) => (
-            <Pressable key={link.routeKey} onPress={() => openLink(link.routeKey)}>
-              <Text>{link.title}</Text>
-            </Pressable>
-          ))}
-          <Pressable onPress={signOut}>
-            <Text>Sign out</Text>
-          </Pressable>
-        </View>
-      </ScrollView>
-    </>
-  )
-}
-
-function NotificationToggle() {
+export default function NotificationToggle() {
   const { session } = useSession()
   const queryClient = useQueryClient()
 
@@ -140,15 +94,13 @@ function NotificationToggle() {
   }
 
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: 16,
-      }}
-    >
-      <Text>Race reminders</Text>
+    <View className="flex-row items-center justify-between px-4 py-3">
+      <View className="flex-1 pr-3">
+        <Text className="text-base">Race reminders</Text>
+        <Text variant="muted" className="text-xs mt-0.5">
+          Notify me before qualifying and the race
+        </Text>
+      </View>
       <Switch value={value} onValueChange={handleToggle} disabled={prefsQuery.isLoading} />
     </View>
   )

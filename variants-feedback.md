@@ -1,0 +1,5 @@
+- links: use va. Remove "Privacy"
+- settings: use va.
+  - if the avatar url is not set, can we please fall back to the facehash? see https://www.facehash.dev/ This must match exactly the setup in useravatar. If that doesn't work, please let me know
+    - the group icons are currently broken. we are receiving the lucide string, and we need to turn that into an icon. you can copy the component from the web app if possible
+    - "25 championship points" doesn't make sense. Remove the byline
