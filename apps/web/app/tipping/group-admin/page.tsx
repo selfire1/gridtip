@@ -18,6 +18,13 @@ import { ChampionshipPoints } from './_components/championship-points'
 import { getRaces } from '@/lib/utils/races'
 import { getConstructorOptions } from '@/lib/utils/constructors'
 import { getDriverOptions } from '@/lib/utils/drivers'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Group Admin',
+  description:
+    'Manage tips and championship points for members of your tipping group.',
+}
 
 export default async function GroupSettings() {
   const { userId } = await verifySession()
