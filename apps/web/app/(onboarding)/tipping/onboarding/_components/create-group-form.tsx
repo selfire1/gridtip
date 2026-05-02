@@ -50,7 +50,7 @@ export default function CreateGroupForm() {
   return (
     <div className='space-y-6'>
       <form
-        onSubmit={form.handleSubmit(onSubmit, (errors) =>
+        onSubmit={form.handleSubmit(onSubmit, () =>
           toast.error('Invalid form'),
         )}
       >

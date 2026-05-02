@@ -1,4 +1,4 @@
-import { IconName, SUPPORTED_ICON_NAMES } from '@/constants/icon-names'
+import { IconName } from '@/constants/icon-names'
 import {
   CircleUserRound,
   LucideAccessibility,

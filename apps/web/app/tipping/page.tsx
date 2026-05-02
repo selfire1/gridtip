@@ -483,6 +483,8 @@ export default async function DashboardPage() {
       <Card className='relative isolate overflow-hidden'>
         <div className='absolute inset-0 overflow-hidden z-[-1] blur-3xl'>
           <div className='absolute inset-0 bg-gradient-to-br from-card/85 to-card' />
+          {/* Decorative blurred background; remote Wikimedia source not worth a remotePatterns config */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img alt='' src={getCountryFlag(race.country)} />
         </div>
         <RaceHeader

@@ -57,7 +57,7 @@ export async function submitChampionship(input: ChampionshipsTipData) {
           })
           .returning()
 
-        const result = await tx
+        await tx
           .insert(predictionEntriesTable)
           .values([
             {
@@ -78,7 +78,7 @@ export async function submitChampionship(input: ChampionshipsTipData) {
     }
 
     await db.transaction(async (tx) => {
-      const result = await tx
+      await tx
         .update(predictionEntriesTable)
         .set({
           constructorId: data.constructorChampion.id,

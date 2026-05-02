@@ -3,7 +3,6 @@
 import { verifyIsAdmin, verifySession } from '@/lib/dal'
 import {
   getCurrentGroup,
-  getGroupMembership,
   getGroupMembershipByMemberId,
 } from '@/lib/utils/groups'
 import { ServerResponse } from '@/types'

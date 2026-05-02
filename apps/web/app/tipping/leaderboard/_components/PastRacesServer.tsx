@@ -1,4 +1,4 @@
-import { LucideHourglass, LucideList } from 'lucide-react'
+import { LucideHourglass } from 'lucide-react'
 import EmptyState from '@/components/empty-state'
 import { PREDICTION_FIELDS } from '@gridtip/shared/constants'
 import { Database } from '@/db/types'
