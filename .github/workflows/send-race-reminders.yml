@@ -1,8 +1,6 @@
 name: Send race reminder notifications
 
 on:
-  schedule:
-    - cron: '*/30 * * * *'
   workflow_dispatch:
 
 concurrency:
