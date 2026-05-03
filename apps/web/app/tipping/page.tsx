@@ -56,7 +56,7 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Dashboard',
   description:
-    'Your tipping dashboard – see the next race, group tips, and championship reveals.',
+    'Your tipping dashboard – see the next race and group tips.',
 }
 
 export default async function DashboardPage() {

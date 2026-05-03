@@ -36,8 +36,8 @@ export async function generateMetadata({
   }
 
   return {
-    title: `Tip the ${race.raceName}`,
-    description: `Predict pole, P1, P10, last and the constructor with the most points for the ${race.raceName} at ${race.circuitName}.`,
+    title: race.raceName,
+    description: `Tip the ${race.raceName}.`,
   }
 }
 
