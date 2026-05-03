@@ -51,6 +51,13 @@ import { FlagBackgroundCard } from './_components/card-flag-background'
 import { CardEveryonesTips } from './_components/card-group-tips'
 import { RaceHeader } from './_components/race-header'
 import { getIsSprint } from '@gridtip/shared/is-sprint'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Dashboard',
+  description:
+    'Your tipping dashboard – see the next race and group tips.',
+}
 
 export default async function DashboardPage() {
   const { userId, user: _ } = await verifySession()

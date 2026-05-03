@@ -4,6 +4,15 @@ import { Button } from '@ui/button'
 import { Path } from '@/lib/utils/path'
 import { getMaybeSession } from '@/lib/dal'
 import { webRoutes } from '@gridtip/shared/routes'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: {
+    absolute: 'GridTip – F1 Tipping with Friends',
+  },
+  description:
+    'Predict the outcome of every Formula One race weekend with your friends. Join a group, tip the podium, and battle for the tipping championship.',
+}
 
 export default async function DefaultLayout({
   children,

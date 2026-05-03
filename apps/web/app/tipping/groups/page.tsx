@@ -25,6 +25,13 @@ import { Badge } from '@/components/ui/badge'
 import { Suspense } from 'react'
 import EditGroup from './_components/edit-group'
 import { MemberStatus } from '@/types'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Groups',
+  description:
+    'Manage your tipping groups, invite friends, or join an existing group.',
+}
 
 export default async function GroupsPage() {
   const { userId, user } = await verifySession()

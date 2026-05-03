@@ -21,6 +21,25 @@ import { getTips } from '@/lib/get-tips'
 import { getIsSprint } from '@gridtip/shared/is-sprint'
 import { getDriverOptions } from '@/lib/utils/drivers'
 import { getConstructorOptions } from '@/lib/utils/constructors'
+import type { Metadata } from 'next'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ 'race-id': string }>
+}): Promise<Metadata> {
+  const { 'race-id': raceId } = await params
+  const race = await getRaceDetails(raceId)
+
+  if (!race) {
+    return { title: 'Enter tips' }
+  }
+
+  return {
+    title: race.raceName,
+    description: `Tip the ${race.raceName}.`,
+  }
+}
 
 export default async function RaceFormPage({
   params,
