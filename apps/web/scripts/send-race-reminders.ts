@@ -15,6 +15,7 @@ import {
   type SchedulerUser,
 } from '@/lib/notifications/compute-notifications'
 import { sendNotifications } from '@/lib/notifications/send'
+import { withRetry } from '@/lib/utils/with-retry'
 import { addHours, subHours } from 'date-fns'
 import { and, eq, gte, inArray } from 'drizzle-orm'
 
@@ -31,52 +32,56 @@ async function main() {
     rawRaces,
     rawPredictions,
     rawSent,
-  ] = await Promise.all([
-    db.query.user.findMany({
-      where: eq(user.enableNotifications, true),
-      columns: { id: true, enableNotifications: true },
-    }),
-    db.query.userPushTokensTable.findMany({
-      columns: { userId: true, token: true },
-    }),
-    db.query.groupMembersTable.findMany({
-      columns: { userId: true, groupId: true },
-      with: {
-        group: { columns: { cutoffInMinutes: true } },
-      },
-    }),
-    db.query.racesTable.findMany({
-      columns: {
-        id: true,
-        qualifyingDate: true,
-        sprintQualifyingDate: true,
-      },
-      where: and(
-        gte(racesTable.qualifyingDate, horizonStart),
-        // grandPrixDate guard not needed; we filter on qualifying horizon
-      ),
-    }),
-    db
-      .select({
-        userId: groupMembersTable.userId,
-        raceId: predictionsTable.raceId,
-      })
-      .from(predictionsTable)
-      .innerJoin(
-        groupMembersTable,
-        eq(predictionsTable.memberId, groupMembersTable.id),
-      )
-      .where(eq(predictionsTable.isForChampionship, false)),
-    db.query.raceNotificationsTable.findMany({
-      columns: {
-        userId: true,
-        raceId: true,
-        tipType: true,
-        reminderType: true,
-      },
-      where: gte(raceNotificationsTable.sentAt, subHours(now, 48)),
-    }),
-  ])
+  ] = await withRetry(
+    () =>
+      Promise.all([
+        db.query.user.findMany({
+          where: eq(user.enableNotifications, true),
+          columns: { id: true, enableNotifications: true },
+        }),
+        db.query.userPushTokensTable.findMany({
+          columns: { userId: true, token: true },
+        }),
+        db.query.groupMembersTable.findMany({
+          columns: { userId: true, groupId: true },
+          with: {
+            group: { columns: { cutoffInMinutes: true } },
+          },
+        }),
+        db.query.racesTable.findMany({
+          columns: {
+            id: true,
+            qualifyingDate: true,
+            sprintQualifyingDate: true,
+          },
+          where: and(
+            gte(racesTable.qualifyingDate, horizonStart),
+            // grandPrixDate guard not needed; we filter on qualifying horizon
+          ),
+        }),
+        db
+          .select({
+            userId: groupMembersTable.userId,
+            raceId: predictionsTable.raceId,
+          })
+          .from(predictionsTable)
+          .innerJoin(
+            groupMembersTable,
+            eq(predictionsTable.memberId, groupMembersTable.id),
+          )
+          .where(eq(predictionsTable.isForChampionship, false)),
+        db.query.raceNotificationsTable.findMany({
+          columns: {
+            userId: true,
+            raceId: true,
+            tipType: true,
+            reminderType: true,
+          },
+          where: gte(raceNotificationsTable.sentAt, subHours(now, 48)),
+        }),
+      ]),
+    { label: 'load reminder data' },
+  )
 
   const tokensByUser = new Map<string, string[]>()
   for (const t of rawTokens) {
@@ -128,23 +133,27 @@ async function main() {
   // Claim ledger rows up front so an overlapping cron run can't double-send.
   // Failed sends are accepted as lost reminders; the next cutoff window will
   // still fire if applicable.
-  const claimed = await db
-    .insert(raceNotificationsTable)
-    .values(
-      notifications.map((n) => ({
-        userId: n.userId,
-        raceId: n.raceId,
-        tipType: n.tipType,
-        reminderType: n.reminderType,
-      })),
-    )
-    .onConflictDoNothing()
-    .returning({
-      userId: raceNotificationsTable.userId,
-      raceId: raceNotificationsTable.raceId,
-      tipType: raceNotificationsTable.tipType,
-      reminderType: raceNotificationsTable.reminderType,
-    })
+  const claimed = await withRetry(
+    () =>
+      db
+        .insert(raceNotificationsTable)
+        .values(
+          notifications.map((n) => ({
+            userId: n.userId,
+            raceId: n.raceId,
+            tipType: n.tipType,
+            reminderType: n.reminderType,
+          })),
+        )
+        .onConflictDoNothing()
+        .returning({
+          userId: raceNotificationsTable.userId,
+          raceId: raceNotificationsTable.raceId,
+          tipType: raceNotificationsTable.tipType,
+          reminderType: raceNotificationsTable.reminderType,
+        }),
+    { label: 'claim notification rows' },
+  )
 
   const claimedKey = new Set(
     claimed.map(
@@ -165,9 +174,13 @@ async function main() {
   const { results, invalidTokens } = await sendNotifications(toSend)
 
   if (invalidTokens.length > 0) {
-    await db
-      .delete(userPushTokensTable)
-      .where(inArray(userPushTokensTable.token, invalidTokens))
+    await withRetry(
+      () =>
+        db
+          .delete(userPushTokensTable)
+          .where(inArray(userPushTokensTable.token, invalidTokens)),
+      { label: 'prune push tokens' },
+    )
     console.log(`pruned ${invalidTokens.length} unregistered push token(s)`)
   }
 
