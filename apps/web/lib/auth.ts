@@ -37,7 +37,7 @@ Click this link below to verify your email: <a href="${url}">${url}</a>`.trim(),
   },
 
   session: {
-    expiresIn: hoursToSeconds(24 * 7),
+    expiresIn: hoursToSeconds(24 * 90),
     updateAge: hoursToSeconds(24 * 1),
     cookieCache: {
       enabled: true,
