@@ -1,7 +1,5 @@
 import { Metadata } from 'next'
 import { marked } from 'marked'
-import { JSDOM } from 'jsdom'
-import DOMPurify from 'dompurify'
 import 'server-only'
 import { verifySession } from '@/lib/dal'
 import { getCurrentGroup } from '@/lib/utils/groups'
@@ -13,9 +11,6 @@ export const metadata: Metadata = {
 export default async function RulesPage() {
   const { user } = await verifySession()
   const group = await getCurrentGroup(user.id)
-
-  const window = new JSDOM('').window
-  const purify = DOMPurify(window)
 
   return (
     <div className='typography'>
@@ -30,8 +25,7 @@ export default async function RulesPage() {
 
   async function getHtmlFromMarkdown(markdown: string) {
     const html = await marked.parse(markdown)
-    const clean = purify.sanitize(html)
-    return clean
+    return html
   }
 
   function getContents() {
