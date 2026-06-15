@@ -8,6 +8,7 @@ import { driversTable } from '@/db/schema/schema'
 import { sql } from 'drizzle-orm'
 import { Database } from '@/db/types'
 import * as Sentry from '@sentry/nextjs'
+import { withRetry } from '@/lib/utils/with-retry'
 
 export const GET = async (_request: NextRequest) => {
   const validationResponse = await validateToken()
@@ -153,11 +154,15 @@ export const GET = async (_request: NextRequest) => {
   async function getJolpicaDrivers() {
     const getConstructorsIds = unstable_cache(
       async () =>
-        await db.query.constructorsTable.findMany({
-          columns: {
-            id: true,
-          },
-        }),
+        await withRetry(
+          () =>
+            db.query.constructorsTable.findMany({
+              columns: {
+                id: true,
+              },
+            }),
+          { label: 'load constructor ids' },
+        ),
       [],
       {
         tags: [CacheTag.Constructors],
@@ -200,24 +205,28 @@ export const GET = async (_request: NextRequest) => {
   }
 
   async function setDriversInDatabase(drivers: JolpicaDrivers) {
-    const returning = await db
-      .insert(driversTable)
-      .values(drivers)
-      .onConflictDoUpdate({
-        target: driversTable.id,
-        set: {
-          permanentNumber: sql`excluded.permanent_number`,
-          fullName: sql`excluded.full_name`,
-          givenName: sql`excluded.given_name`,
-          familyName: sql`excluded.family_name`,
-          nationality: sql`excluded.nationality`,
-          constructorId: sql`excluded.constructor_id`,
-          lastUpdated: sql`excluded.last_updated`,
-        },
-      })
-      .returning({
-        id: driversTable.id,
-      })
+    const returning = await withRetry(
+      () =>
+        db
+          .insert(driversTable)
+          .values(drivers)
+          .onConflictDoUpdate({
+            target: driversTable.id,
+            set: {
+              permanentNumber: sql`excluded.permanent_number`,
+              fullName: sql`excluded.full_name`,
+              givenName: sql`excluded.given_name`,
+              familyName: sql`excluded.family_name`,
+              nationality: sql`excluded.nationality`,
+              constructorId: sql`excluded.constructor_id`,
+              lastUpdated: sql`excluded.last_updated`,
+            },
+          })
+          .returning({
+            id: driversTable.id,
+          }),
+      { label: 'upsert drivers' },
+    )
     return returning
   }
 }

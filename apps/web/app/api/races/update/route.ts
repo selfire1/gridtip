@@ -13,6 +13,7 @@ import { racesTable } from '@/db/schema/schema'
 import { sql } from 'drizzle-orm'
 import { Database } from '@/db/types'
 import * as Sentry from '@sentry/nextjs'
+import { withRetry } from '@/lib/utils/with-retry'
 
 export const GET = async (_request: NextRequest) => {
   const validationResponse = await validateToken()
@@ -57,7 +58,10 @@ export const GET = async (_request: NextRequest) => {
 
   async function getIsThereDifferenceInRaces(newItems: JolpicaRaces) {
     const getStoredRaces = unstable_cache(
-      async () => await db.query.racesTable.findMany(),
+      async () =>
+        await withRetry(() => db.query.racesTable.findMany(), {
+          label: 'load stored races',
+        }),
       [],
       {
         tags: [CacheTag.Races],
@@ -147,27 +151,31 @@ export const GET = async (_request: NextRequest) => {
   }
 
   async function setRacesInDatabase(races: JolpicaRaces) {
-    const returning = await db
-      .insert(racesTable)
-      .values(races)
-      .onConflictDoUpdate({
-        target: racesTable.id,
-        set: {
-          country: sql`excluded.country`,
-          round: sql`excluded.round`,
-          circuitName: sql`excluded.circuit_name`,
-          raceName: sql`excluded.race_name`,
-          grandPrixDate: sql`excluded.grand_prix_date`,
-          qualifyingDate: sql`excluded.qualifying_date`,
-          sprintDate: sql`excluded.sprint_date`,
-          sprintQualifyingDate: sql`excluded.sprint_qualifying_date`,
-          locality: sql`excluded.locality`,
-          lastUpdated: sql`excluded.last_updated`,
-        },
-      })
-      .returning({
-        id: racesTable.id,
-      })
+    const returning = await withRetry(
+      () =>
+        db
+          .insert(racesTable)
+          .values(races)
+          .onConflictDoUpdate({
+            target: racesTable.id,
+            set: {
+              country: sql`excluded.country`,
+              round: sql`excluded.round`,
+              circuitName: sql`excluded.circuit_name`,
+              raceName: sql`excluded.race_name`,
+              grandPrixDate: sql`excluded.grand_prix_date`,
+              qualifyingDate: sql`excluded.qualifying_date`,
+              sprintDate: sql`excluded.sprint_date`,
+              sprintQualifyingDate: sql`excluded.sprint_qualifying_date`,
+              locality: sql`excluded.locality`,
+              lastUpdated: sql`excluded.last_updated`,
+            },
+          })
+          .returning({
+            id: racesTable.id,
+          }),
+      { label: 'upsert races' },
+    )
     return returning
   }
 }

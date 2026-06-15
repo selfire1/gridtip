@@ -13,6 +13,7 @@ import { db } from '@/db'
 import { resultsTable } from '@/db/schema/schema'
 import { Database } from '@/db/types'
 import * as Sentry from '@sentry/nextjs'
+import { withRetry } from '@/lib/utils/with-retry'
 
 export const GET = async (_request: NextRequest) => {
   const validationResponse = await validateToken()
@@ -57,7 +58,10 @@ export const GET = async (_request: NextRequest) => {
 
   async function getIsThereDifferenceInResults(newItems: JolpicaResults) {
     const getStoredResults = unstable_cache(
-      async () => await db.query.resultsTable.findMany(),
+      async () =>
+        await withRetry(() => db.query.resultsTable.findMany(), {
+          label: 'load stored results',
+        }),
       [],
       {
         tags: [CacheTag.Results],
@@ -255,10 +259,19 @@ export const GET = async (_request: NextRequest) => {
   }
 
   async function setResultsInDatabase(results: JolpicaResults) {
-    await db.delete(resultsTable) // we're being a bit lazy here and just dropping the whole table instead of checking which results actually changed. something to optimise later
-    const returning = await db.insert(resultsTable).values(results).returning({
-      id: resultsTable.id,
-    })
+    // we're being a bit lazy here and just dropping the whole table instead of
+    // checking which results actually changed. something to optimise later.
+    // delete + insert are retried together: the delete is idempotent, so a retry
+    // of the pair after a transient failure is safe.
+    const returning = await withRetry(
+      async () => {
+        await db.delete(resultsTable)
+        return db.insert(resultsTable).values(results).returning({
+          id: resultsTable.id,
+        })
+      },
+      { label: 'replace results' },
+    )
     return returning
   }
 }

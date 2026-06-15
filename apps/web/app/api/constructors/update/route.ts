@@ -11,6 +11,7 @@ import { ConstructorsResponse } from '@/types/ergast'
 import { db } from '@/db'
 import { constructorsTable } from '@/db/schema/schema'
 import { sql } from 'drizzle-orm'
+import { withRetry } from '@/lib/utils/with-retry'
 
 export const GET = async (_request: NextRequest) => {
   const validationResponse = await validateToken()
@@ -46,13 +47,17 @@ export const GET = async (_request: NextRequest) => {
   ) {
     const getStoredConstructors = unstable_cache(
       async () =>
-        await db.query.constructorsTable.findMany({
-          columns: {
-            id: true,
-            name: true,
-            nationality: true,
-          },
-        }),
+        await withRetry(
+          () =>
+            db.query.constructorsTable.findMany({
+              columns: {
+                id: true,
+                name: true,
+                nationality: true,
+              },
+            }),
+          { label: 'load stored constructors' },
+        ),
       [],
       {
         tags: [CacheTag.Constructors],
@@ -107,33 +112,35 @@ export const GET = async (_request: NextRequest) => {
   }
 
   async function setConstructorsInDatabase(constructors: JolpicaConstructors) {
-    const returning = await db
-      .insert(constructorsTable)
-      .values(
-        constructors.map((constructor) => {
-          if (!constructor.constructorId) {
-            throw new Error('No constructorId included')
-          }
-          return {
-            id: constructor.constructorId,
-            name: constructor.name,
-            nationality: constructor.nationality ?? '',
-            lastUpdated: new Date(),
-          }
-        }),
-      )
-      .onConflictDoUpdate({
-        target: constructorsTable.id,
-        set: {
-          name: sql`excluded.name`,
-          nationality: sql`excluded.nationality`,
-          lastUpdated: sql`excluded.last_updated`,
-        },
-      })
-
-      .returning({
-        id: constructorsTable.id,
-      })
+    const values = constructors.map((constructor) => {
+      if (!constructor.constructorId) {
+        throw new Error('No constructorId included')
+      }
+      return {
+        id: constructor.constructorId,
+        name: constructor.name,
+        nationality: constructor.nationality ?? '',
+        lastUpdated: new Date(),
+      }
+    })
+    const returning = await withRetry(
+      () =>
+        db
+          .insert(constructorsTable)
+          .values(values)
+          .onConflictDoUpdate({
+            target: constructorsTable.id,
+            set: {
+              name: sql`excluded.name`,
+              nationality: sql`excluded.nationality`,
+              lastUpdated: sql`excluded.last_updated`,
+            },
+          })
+          .returning({
+            id: constructorsTable.id,
+          }),
+      { label: 'upsert constructors' },
+    )
     return returning
   }
 }
