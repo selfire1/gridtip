@@ -29,7 +29,7 @@ export function getFormFields(isSprint = false) {
     },
     {
       label: 'Last place',
-      description: 'Which driver is last to finish? Excluding early DNFs.',
+      description: 'Which driver is last to finish? (Excluding unclassified finishers)',
       name: 'last',
       type: 'driver',
     },
