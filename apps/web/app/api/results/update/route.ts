@@ -10,8 +10,9 @@ import {
 } from '../../utils'
 import { ResultsResponse, SprintResultsResponse } from '@/types/ergast'
 import { db } from '@/db'
-import { resultsTable } from '@/db/schema/schema'
+import { driversTable, resultsTable } from '@/db/schema/schema'
 import { Database } from '@/db/types'
+import { sql } from 'drizzle-orm'
 import * as Sentry from '@sentry/nextjs'
 import { withRetry } from '@/lib/utils/with-retry'
 
@@ -21,7 +22,14 @@ export const GET = async (_request: NextRequest) => {
     return validationResponse
   }
 
-  type JolpicaResults = Database.InsertResult[]
+  type JolpicaResults = {
+    results: Database.InsertResult[]
+    /**
+     * The drivers named in the results. Kept alongside them because
+     * `results.driver_id` references `drivers.id`.
+     */
+    drivers: Database.InsertDriver[]
+  }
   let jolpicaResults: JolpicaResults | undefined
   try {
     jolpicaResults = await getJolpicaResults()
@@ -38,11 +46,11 @@ export const GET = async (_request: NextRequest) => {
     )
   }
 
-  if (!jolpicaResults?.length) {
+  if (!jolpicaResults?.results.length) {
     return createResponse(404, 'No results found')
   }
 
-  const isDifferent = await getIsThereDifferenceInResults(jolpicaResults)
+  const isDifferent = await getIsThereDifferenceInResults(jolpicaResults.results)
 
   if (!isDifferent) {
     return createResponse(200, 'No update required')
@@ -50,13 +58,16 @@ export const GET = async (_request: NextRequest) => {
 
   const ids = await setResultsInDatabase(jolpicaResults)
   revalidateTag(CacheTag.Results)
+  revalidateTag(CacheTag.Drivers)
 
   return createResponse(201, {
     updated: ids.length,
-    received: jolpicaResults.length,
+    received: jolpicaResults.results.length,
   })
 
-  async function getIsThereDifferenceInResults(newItems: JolpicaResults) {
+  async function getIsThereDifferenceInResults(
+    newItems: Database.InsertResult[],
+  ) {
     const getStoredResults = unstable_cache(
       async () =>
         await withRetry(() => db.query.resultsTable.findMany(), {
@@ -157,8 +168,13 @@ export const GET = async (_request: NextRequest) => {
       return sprintResultsMap
     }
 
-    async function getResults(sprintResultsMap: SprintResultsMap) {
+    async function getResults(
+      sprintResultsMap: SprintResultsMap,
+    ): Promise<JolpicaResults> {
       const results: Database.InsertResult[] = []
+      // keyed by driver id so a driver who changed teams mid-season keeps the
+      // constructor from their most recent result
+      const driversById = new Map<Database.Driver['id'], Database.InsertDriver>()
       let offset = 0
       let total: null | number = null
       const limit = 100
@@ -188,6 +204,18 @@ export const GET = async (_request: NextRequest) => {
               const driverId = result.Driver.driverId
               const sprintPosition = sprintResultsMap.get(raceId)?.get(driverId)
 
+              driversById.set(driverId, {
+                id: driverId,
+                permanentNumber: result.Driver.permanentNumber,
+                fullName:
+                  result.Driver.givenName + ' ' + result.Driver.familyName,
+                givenName: result.Driver.givenName,
+                familyName: result.Driver.familyName,
+                nationality: result.Driver.nationality,
+                constructorId: result.Constructor.constructorId,
+                lastUpdated: new Date(),
+              })
+
               const item: Database.InsertResult = {
                 raceId,
                 driverId,
@@ -209,7 +237,7 @@ export const GET = async (_request: NextRequest) => {
       }
 
       const withOverwrites = getResultsWithOverwrite(results)
-      return withOverwrites
+      return { results: withOverwrites, drivers: [...driversById.values()] }
 
       function getResultsWithOverwrite(
         results: Database.InsertResult[],
@@ -258,18 +286,37 @@ export const GET = async (_request: NextRequest) => {
     await wait(ms) // NOTE: to keep within API burst limit
   }
 
-  async function setResultsInDatabase(results: JolpicaResults) {
+  async function setResultsInDatabase({ results, drivers }: JolpicaResults) {
     // we're being a bit lazy here and just dropping the whole table instead of
     // checking which results actually changed. something to optimise later.
-    // delete + insert are retried together: the delete is idempotent, so a retry
-    // of the pair after a transient failure is safe.
-    const returning = await withRetry(
-      async () => {
-        await db.delete(resultsTable)
-        return db.insert(resultsTable).values(results).returning({
-          id: resultsTable.id,
-        })
-      },
+    // the drivers are upserted first because results.driver_id references
+    // drivers.id, and a mid-season line-up change reaches the results before
+    // /api/drivers/update has picked the driver up. batching runs all three
+    // statements in one transaction, so a rejected insert can't leave us with
+    // an emptied results table (and makes the whole thing safe to retry).
+    const [, , returning] = await withRetry(
+      () =>
+        db.batch([
+          db
+            .insert(driversTable)
+            .values(drivers)
+            .onConflictDoUpdate({
+              target: driversTable.id,
+              set: {
+                permanentNumber: sql`excluded.permanent_number`,
+                fullName: sql`excluded.full_name`,
+                givenName: sql`excluded.given_name`,
+                familyName: sql`excluded.family_name`,
+                nationality: sql`excluded.nationality`,
+                constructorId: sql`excluded.constructor_id`,
+                lastUpdated: sql`excluded.last_updated`,
+              },
+            }),
+          db.delete(resultsTable),
+          db.insert(resultsTable).values(results).returning({
+            id: resultsTable.id,
+          }),
+        ]),
       { label: 'replace results' },
     )
     return returning
