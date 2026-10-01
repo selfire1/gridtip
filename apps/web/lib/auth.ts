@@ -5,6 +5,7 @@ import { hoursToSeconds } from 'date-fns'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { db } from '@/db'
 import { Resend } from 'resend'
+import { sendResetPasswordEmail } from '@/lib/emails/send-reset-password'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -13,6 +14,8 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    revokeSessionsOnPasswordReset: true,
+    sendResetPassword: sendResetPasswordEmail,
   },
   emailVerification: {
     autoSignInAfterVerification: true,

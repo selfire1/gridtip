@@ -9,7 +9,7 @@ import { authClient } from '@/lib/auth-client'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useTransition } from 'react'
-import { LucideTrash } from 'lucide-react'
+import { LucideCheck, LucideTrash } from 'lucide-react'
 import { QueryOrigin } from '@/constants'
 import { Spinner } from '../../../../components/ui/spinner'
 import { filterQuery } from 'ufo'
@@ -70,6 +70,16 @@ export function LoginForm({
         break
       }
 
+      case QueryOrigin.PasswordReset: {
+        toast.success('Password changed', {
+          description: 'Sign in with your new password.',
+          icon: <LucideCheck size={16} />,
+          duration: 6_000,
+        })
+        removeSearchParam('origin')
+        break
+      }
+
       default:
         break
     }
@@ -112,6 +122,12 @@ export function LoginForm({
         <Field>
           <div className='flex items-center'>
             <FieldLabel htmlFor='password'>Password</FieldLabel>
+            <Link
+              href={Path.ForgotPassword}
+              className='ml-auto text-sm underline-offset-4 hover:underline'
+            >
+              Forgot password?
+            </Link>
           </div>
           <Input
             disabled={isAnyPending}
