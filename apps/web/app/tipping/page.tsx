@@ -373,6 +373,7 @@ export default async function DashboardPage() {
       return
     }
     return await db.query.racesTable.findFirst({
+      orderBy: (race, { asc }) => asc(race.round),
       where(race, { gt, or }) {
         const referenceDate = new Date()
         const cutoffDate = subMinutes(referenceDate, cutoff)
