@@ -26,6 +26,8 @@ export function getCountryFlag(countryCode: string) {
       'https://upload.wikimedia.org/wikipedia/commons/2/20/Flag_of_the_Netherlands.svg',
     Azerbaijan:
       'https://upload.wikimedia.org/wikipedia/commons/d/dd/Flag_of_Azerbaijan.svg',
+    Malaysia:
+      'https://upload.wikimedia.org/wikipedia/commons/6/66/Flag_of_Malaysia.svg',
     Singapore:
       'https://upload.wikimedia.org/wikipedia/commons/4/48/Flag_of_Singapore.svg',
     Mexico:

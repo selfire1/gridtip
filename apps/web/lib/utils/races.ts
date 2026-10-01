@@ -52,6 +52,7 @@ export async function getRaces() {
   return unstable_cache(
     async () => {
       const races = await db.query.racesTable.findMany({
+        orderBy: (race, { asc }) => asc(race.round),
         columns: {
           id: true,
           locality: true,
