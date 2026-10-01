@@ -26,6 +26,10 @@ export enum QueryOrigin {
    * User deleted account
    */
   Deleted = 'deleted',
+  /**
+   * User reset their password
+   */
+  PasswordReset = 'password-reset',
 }
 
 export const GROUP_ID_COOKIE_NAME = 'grid-tip-group-id' as const
