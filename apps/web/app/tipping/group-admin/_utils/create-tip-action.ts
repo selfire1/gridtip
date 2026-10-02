@@ -148,11 +148,11 @@ async function verifyRequest(data: AdminTipSchema) {
       message: 'No group selected',
     } as const
   }
-  const isAdmin = await verifyIsAdmin(group?.id)
+  const { isAdmin, message } = await verifyIsAdmin(group.id)
   if (!isAdmin) {
     return {
       ok: false,
-      message: 'Only admins can create a new tip',
+      message: message ?? 'Only admins can create a new tip',
     } as const
   }
 
