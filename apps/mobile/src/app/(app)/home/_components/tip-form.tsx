@@ -12,6 +12,7 @@ import Spinner from '@/components/spinner'
 import { Icon } from '@/components/ui/icon'
 import { LucideAlertTriangle, LucideCheck } from 'lucide-react-native'
 import { getIsSprint } from '@gridtip/shared/is-sprint'
+import { getClosedFields, omitClosedFields } from '@gridtip/shared/closed-fields'
 import {
   Dialog,
   DialogClose,
@@ -54,6 +55,9 @@ export default function TipForm({
   isPending: boolean
 }) {
   const formFields = getFormFields(getIsSprint(race))
+  const closedFieldsPerGroup = groups.map((group) => {
+    return getClosedFields(race, group.group.cutoffInMinutes)
+  })
   const [isPresented, setIsPresented] = useState(false)
   const [submissionState, setSubmissionState] = useState<SavingState | null>(null)
   const [isSavingModalPresented, setIsSavingModalPresented] = useState(false)
@@ -125,7 +129,11 @@ export default function TipForm({
         {formFields.map((field) => (
           <View key={field.name} className="flex flex-col gap-2">
             <Label className="px-2">{field.label}</Label>
-            <Button onPress={() => openModal(field)} variant="outline" disabled={isPending}>
+            <Button
+              onPress={() => openModal(field)}
+              variant="outline"
+              disabled={isPending || isClosedForAllGroups(field)}
+            >
               <FieldContent field={field} />
             </Button>
             <Text className="px-2 text-sm text-muted-foreground">{field.description}</Text>
@@ -152,7 +160,12 @@ export default function TipForm({
               ...group,
             },
           }))
-          const submitObject = { ...(formState ?? {}), groupId: group.group.id, raceId: race.id }
+          const closedFields = getClosedFields(race, group.group.cutoffInMinutes)
+          const submitObject = {
+            ...omitClosedFields(formState ?? {}, closedFields),
+            groupId: group.group.id,
+            raceId: race.id,
+          }
           try {
             const response = await submitTips(session, submitObject)
             setSubmissionState((prev) => ({
@@ -177,6 +190,10 @@ export default function TipForm({
         }),
       )
     }
+  }
+
+  function isClosedForAllGroups(field: Position) {
+    return closedFieldsPerGroup.every((closedFields) => closedFields.has(field.name))
   }
 
   function openModal(position: Position) {

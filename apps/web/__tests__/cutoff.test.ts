@@ -29,6 +29,17 @@ describe('sprint race', () => {
     const result = getClosedFields(givenRace, givenCutoff, givenDate)
     expect(result).toEqual(new Set(['sprintP1']))
   })
+  it('sets sprintP1 as closed for serialised race dates', () => {
+    const result = getClosedFields(
+      {
+        qualifyingDate: givenRace.qualifyingDate.toISOString(),
+        sprintQualifyingDate: givenRace.sprintQualifyingDate.toISOString(),
+      },
+      givenCutoff,
+      givenDate,
+    )
+    expect(result).toEqual(new Set(['sprintP1']))
+  })
   it('counts race as sprint race', () => {
     const result = getIsSprint(givenRace)
     expect(result).toBe(true)

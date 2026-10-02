@@ -55,6 +55,7 @@ export type ApiGroup = {
     championshipTipsRevalDate: DateOrString | null
     constructorsChampionshipPoints: number
     driversChampionshipPoints: number
+    cutoffInMinutes: number
   }
 }
 

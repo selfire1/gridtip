@@ -4,8 +4,15 @@ import {
 } from '@gridtip/shared/constants'
 import { CUTOFF_REFERENCE_KEY } from '@/constants'
 import { Database } from '@/db/types'
-import { isAfter, isBefore, subMinutes } from 'date-fns'
+import { isAfter, subMinutes } from 'date-fns'
 import { getIsSprint } from '@gridtip/shared/is-sprint'
+import { getClosedFields } from '@gridtip/shared/closed-fields'
+
+export {
+  getClosedFields,
+  getDueDatesForTips,
+  omitClosedFields,
+} from '@gridtip/shared/closed-fields'
 
 /**
  * Is this position part of the tips for a race
@@ -14,41 +21,6 @@ export function isPredictionForRace(
   position: string,
 ): position is RacePredictionField {
   return RACE_PREDICTION_FIELDS.includes(position as RacePredictionField)
-}
-
-export function getDueDatesForTips(race: Database.Race, cutoff: number) {
-  const isSprint = getIsSprint(race)
-  return {
-    sprint:
-      isSprint && race.sprintQualifyingDate
-        ? subMinutes(race.sprintQualifyingDate, cutoff)
-        : undefined,
-    grandPrix: subMinutes(race.qualifyingDate, cutoff),
-  }
-}
-
-export function getClosedFields(
-  race: Database.Race,
-  cutoff: number,
-  baseDate = new Date(),
-): Set<RacePredictionField> {
-  const isSprint = getIsSprint(race)
-  const tipsDue = getDueDatesForTips(race, cutoff)
-
-  const disabledFields = new Set<RacePredictionField>()
-  if (isSprint && tipsDue.sprint && isPastForBaseDate(tipsDue.sprint)) {
-    disabledFields.add('sprintP1')
-  }
-  if (tipsDue.grandPrix && isPastForBaseDate(tipsDue.grandPrix)) {
-    RACE_PREDICTION_FIELDS.forEach((field) => {
-      disabledFields.add(field)
-    })
-  }
-  return disabledFields
-
-  function isPastForBaseDate(date: Date) {
-    return isBefore(date, baseDate)
-  }
 }
 
 export function isRaceAbleToBeTipped(
@@ -75,15 +47,6 @@ export function isRaceAbleToBeTipped(
   function isPositionClosed(position: RacePredictionField) {
     return closedFields.has(position)
   }
-}
-
-export function omitClosedFields<T extends Record<string, unknown>>(
-  data: T,
-  closedFields: Set<string>,
-): Partial<T> {
-  return Object.fromEntries(
-    Object.entries(data).filter(([key]) => !closedFields.has(key)),
-  ) as Partial<T>
 }
 
 type Reference = typeof CUTOFF_REFERENCE_KEY
