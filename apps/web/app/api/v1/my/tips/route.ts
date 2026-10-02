@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
   })
 
   if (!membership?.id) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    return Response.json({ error: 'Not a member of group' }, { status: 403 })
   }
 
   const tips = await getTips({
