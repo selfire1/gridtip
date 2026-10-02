@@ -75,7 +75,7 @@ async function submitChangesThrows(input: Record<string, unknown>) {
   revalidateCache()
 
   async function createPrediction(body: Schema) {
-    const [{ id: predictionId }] = await db
+    await db
       .insert(predictionsTable)
       .values([
         {
@@ -84,15 +84,13 @@ async function submitChangesThrows(input: Record<string, unknown>) {
           raceId,
         },
       ])
-      .returning({ id: predictionsTable.id })
+      .onConflictDoNothing()
 
-    const values = formatBodyToPredictionEntries(body, predictionId)
-
-    const entries = await db
-      .insert(predictionEntriesTable)
-      .values(values)
-      .returning()
-    return entries
+    const prediction = await findPrediction()
+    if (!prediction) {
+      throw new Error('Failed to create prediction')
+    }
+    await updatePredictionEntries(prediction.id, body)
   }
 
   function revalidateCache() {
@@ -152,8 +150,8 @@ async function submitChangesThrows(input: Record<string, unknown>) {
     return values
   }
 
-  async function getExistingPredictions() {
-    const prediction = await db.query.predictionsTable.findFirst({
+  async function findPrediction() {
+    return await db.query.predictionsTable.findFirst({
       where: and(
         eq(predictionsTable.memberId, member.id),
         eq(predictionsTable.raceId, raceId),
@@ -163,6 +161,10 @@ async function submitChangesThrows(input: Record<string, unknown>) {
         id: true,
       },
     })
+  }
+
+  async function getExistingPredictions() {
+    const prediction = await findPrediction()
     if (!prediction?.id) {
       return { prediction, entries: [] }
     }

@@ -4,6 +4,7 @@ import {
   integer,
   index,
   unique,
+  uniqueIndex,
 } from 'drizzle-orm/sqlite-core'
 import { createId } from '@paralleldrive/cuid2'
 import { user } from './auth-schema'
@@ -156,6 +157,12 @@ export const predictionsTable = sqliteTable(
     index('predictions_group_id_idx').on(table.groupId),
     index('predictions_is_for_championship_idx').on(table.isForChampionship),
     index('predictions_race_id_idx').on(table.raceId),
+    uniqueIndex('predictions_member_group_race_uq')
+      .on(table.memberId, table.groupId, table.raceId)
+      .where(sql`race_id IS NOT NULL`),
+    uniqueIndex('predictions_member_group_championship_uq')
+      .on(table.memberId, table.groupId)
+      .where(sql`is_for_championship = 1`),
   ],
 )
 

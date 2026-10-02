@@ -12,6 +12,7 @@ import { and, eq } from 'drizzle-orm/sql'
 import * as Sentry from '@sentry/nextjs'
 import { getFirstRace } from '@/lib/utils/races'
 import { isAfterChampionshipDeadline } from '@/lib/utils/championship-deadline'
+import { onConflictUpdateKeys } from '@/lib/utils/drizzle'
 
 export async function submitChampionship(input: ChampionshipsTipData) {
   const { userId } = await verifySession()
@@ -58,30 +59,54 @@ export async function submitChampionship(input: ChampionshipsTipData) {
 
     if (!existingPrediction) {
       await db.transaction(async (tx) => {
-        const [created] = await tx
+        await tx
           .insert(predictionsTable)
           .values({
             memberId: member.id,
             groupId: group.id,
             isForChampionship: true,
           })
-          .returning()
+          .onConflictDoNothing()
+
+        const prediction = await tx.query.predictionsTable.findFirst({
+          where: (prediction, { eq, and }) =>
+            and(
+              eq(prediction.groupId, group.id),
+              eq(prediction.memberId, member.id),
+              eq(prediction.isForChampionship, true),
+            ),
+          columns: {
+            id: true,
+          },
+        })
+        if (!prediction) {
+          throw new Error('Failed to create prediction')
+        }
 
         await tx
           .insert(predictionEntriesTable)
           .values([
             {
-              predictionId: created.id,
+              predictionId: prediction.id,
               position: 'championshipConstructor',
               constructorId: data.constructorChampion.id,
             },
             {
-              predictionId: created.id,
+              predictionId: prediction.id,
               position: 'championshipDriver',
               driverId: data.driverChampion.id,
             },
           ])
-          .returning()
+          .onConflictDoUpdate({
+            target: [
+              predictionEntriesTable.predictionId,
+              predictionEntriesTable.position,
+            ],
+            set: onConflictUpdateKeys(predictionEntriesTable, [
+              'driverId',
+              'constructorId',
+            ]),
+          })
       })
 
       return { ok: true as const, message: '' }
