@@ -9,7 +9,7 @@ export const GET = async (_request: NextRequest) => {
     return validationResponse
   }
 
-  for (const tag in CacheTag) {
+  for (const tag of Object.values(CacheTag)) {
     revalidateTag(tag)
   }
 
