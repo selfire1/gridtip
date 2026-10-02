@@ -153,15 +153,26 @@ export default function TipForm({
             },
           }))
           const submitObject = { ...(formState ?? {}), groupId: group.group.id, raceId: race.id }
-          const response = await submitTips(session, submitObject)
-
-          setSubmissionState((prev) => ({
-            ...prev,
-            [group.group.id]: {
-              status: response.ok ? 'success' : 'error',
-              ...group,
-            },
-          }))
+          try {
+            const response = await submitTips(session, submitObject)
+            setSubmissionState((prev) => ({
+              ...prev,
+              [group.group.id]: {
+                status: response.ok ? 'success' : 'error',
+                message: response.ok ? undefined : response.message,
+                ...group,
+              },
+            }))
+          } catch (error) {
+            setSubmissionState((prev) => ({
+              ...prev,
+              [group.group.id]: {
+                status: 'error',
+                message: error instanceof Error ? error.message : 'Something went wrong',
+                ...group,
+              },
+            }))
+          }
           return null
         }),
       )
@@ -214,6 +225,7 @@ type SavingState = Record<
   Group['group']['id'],
   {
     status: 'pending' | 'success' | 'error'
+    message?: string
   } & Group
 >
 function SavingDialog({
@@ -240,14 +252,19 @@ function SavingDialog({
           <DialogTitle>Your tips</DialogTitle>
         </DialogHeader>
         <View className="flex flex-col gap-2">
-          {Object.values(savingState).map(({ group, status }) => {
+          {Object.values(savingState).map(({ group, status, message }) => {
             return (
-              <View key={group.id} className="flex flex-row items-center justify-between gap-3">
-                <View className="flex flex-row items-center gap-2">
-                  <StatusIcon />
-                  <Text className="font-medium">{group.name}</Text>
+              <View key={group.id} className="flex flex-col gap-1">
+                <View className="flex flex-row items-center justify-between gap-3">
+                  <View className="flex flex-row items-center gap-2">
+                    <StatusIcon />
+                    <Text className="font-medium">{group.name}</Text>
+                  </View>
+                  <StatusText />
                 </View>
-                <StatusText />
+                {status === 'error' && message ? (
+                  <Text className="text-sm text-muted-foreground">{message}</Text>
+                ) : null}
               </View>
             )
 

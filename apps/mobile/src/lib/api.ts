@@ -9,6 +9,7 @@ import {
   MeResponse,
   MyGroupsResponse,
   NotificationPreferencesResponse,
+  SubmitTipsResponse,
 } from '@gridtip/shared/api-types'
 import { type Position } from '@gridtip/shared/get-form-fields'
 
@@ -120,10 +121,19 @@ export async function submitTips(
     raceId: string
   },
 ) {
-  const response = await api<{ ok: boolean; message: string }>('my/tips', session, {
-    method: 'POST',
-    body: JSON.stringify(submitObject),
-  })
-
-  return response
+  try {
+    return await api<SubmitTipsResponse>('my/tips', session, {
+      method: 'POST',
+      body: JSON.stringify(submitObject),
+    })
+  } catch (error) {
+    if (error instanceof UnauthorizedError || !(error instanceof Error)) {
+      throw error
+    }
+    try {
+      return JSON.parse(error.message) as SubmitTipsResponse
+    } catch {
+      throw error
+    }
+  }
 }
