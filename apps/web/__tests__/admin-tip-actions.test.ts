@@ -2,10 +2,19 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const fixtures = vi.hoisted(() => {
   const writes: string[] = []
+  const state = {
+    isAdmin: false,
+    entry: undefined as
+      | { prediction: { groupId: string; memberId: string } }
+      | undefined,
+  }
   return {
     writes,
+    state,
     reset() {
       writes.length = 0
+      state.isAdmin = false
+      state.entry = undefined
     },
   }
 })
@@ -25,10 +34,11 @@ vi.mock('@/lib/dal', () => ({
     return Promise.resolve({ userId: 'user-member' })
   },
   verifyIsAdmin: () => {
-    return Promise.resolve({
-      isAdmin: false,
-      message: 'Not an admin of the group',
-    })
+    return Promise.resolve(
+      fixtures.state.isAdmin
+        ? { isAdmin: true }
+        : { isAdmin: false, message: 'Not an admin of the group' },
+    )
   },
 }))
 
@@ -45,6 +55,9 @@ vi.mock('@/db', () => {
   const findFirst = () => {
     return Promise.resolve({ id: 'member-1' })
   }
+  const findEntry = () => {
+    return Promise.resolve(fixtures.state.entry)
+  }
   const chain = (operation: string) => {
     fixtures.writes.push(operation)
     const builder: Record<string, unknown> = {}
@@ -60,7 +73,17 @@ vi.mock('@/db', () => {
   }
   return {
     db: {
-      query: new Proxy({}, { get: () => ({ findFirst }) }),
+      query: new Proxy(
+        {},
+        {
+          get: (_, table) => {
+            return {
+              findFirst:
+                table === 'predictionEntriesTable' ? findEntry : findFirst,
+            }
+          },
+        },
+      ),
       insert: () => {
         return chain('insert')
       },
@@ -102,5 +125,50 @@ describe('admin tip actions', () => {
 
     expect(result).toEqual({ ok: false, message: 'Not an admin of the group' })
     expect(fixtures.writes).toEqual([])
+  })
+
+  it('rejects updateTip for an entry from another group', async () => {
+    fixtures.state.isAdmin = true
+    fixtures.state.entry = {
+      prediction: { groupId: 'group-2', memberId: 'member-1' },
+    }
+
+    const result = await updateTip('entry-other-group' as never, tip)
+
+    expect(result.ok).toBe(false)
+    expect(fixtures.writes).toEqual([])
+  })
+
+  it('rejects updateTip for an entry of a different member', async () => {
+    fixtures.state.isAdmin = true
+    fixtures.state.entry = {
+      prediction: { groupId: 'group-1', memberId: 'member-2' },
+    }
+
+    const result = await updateTip('entry-other-member' as never, tip)
+
+    expect(result.ok).toBe(false)
+    expect(fixtures.writes).toEqual([])
+  })
+
+  it('rejects updateTip for an unknown entry', async () => {
+    fixtures.state.isAdmin = true
+
+    const result = await updateTip('entry-missing' as never, tip)
+
+    expect(result.ok).toBe(false)
+    expect(fixtures.writes).toEqual([])
+  })
+
+  it('updates an entry that belongs to the group and member', async () => {
+    fixtures.state.isAdmin = true
+    fixtures.state.entry = {
+      prediction: { groupId: 'group-1', memberId: 'member-1' },
+    }
+
+    const result = await updateTip('entry-1' as never, tip)
+
+    expect(result).toEqual({ ok: true, message: 'Updated prediction' })
+    expect(fixtures.writes).toEqual(['update'])
   })
 })

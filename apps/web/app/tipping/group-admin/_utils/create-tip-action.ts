@@ -206,6 +206,25 @@ export async function updateTip(
   if (!result.ok) {
     return result
   }
+  const entry = await db.query.predictionEntriesTable.findFirst({
+    columns: { id: true },
+    where(table, { eq }) {
+      return eq(table.id, predictionEntryId)
+    },
+    with: {
+      prediction: { columns: { groupId: true, memberId: true } },
+      constructor: undefined,
+    },
+  })
+  if (
+    entry?.prediction.groupId !== result.group.id ||
+    entry.prediction.memberId !== result.memberId
+  ) {
+    return {
+      ok: false,
+      message: 'Tip does not belong to the selected user in this group',
+    }
+  }
   try {
     await updatePrediction()
     revalidateTag(CacheTag.Predictions)
