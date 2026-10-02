@@ -10,6 +10,8 @@ import { db } from '@/db'
 import { predictionEntriesTable, predictionsTable } from '@/db/schema/schema'
 import { and, eq } from 'drizzle-orm/sql'
 import * as Sentry from '@sentry/nextjs'
+import { getFirstRace } from '@/lib/utils/races'
+import { isAfterChampionshipDeadline } from '@/lib/utils/championship-deadline'
 
 export async function submitChampionship(input: ChampionshipsTipData) {
   const { userId } = await verifySession()
@@ -25,6 +27,14 @@ export async function submitChampionship(input: ChampionshipsTipData) {
   const data = verification.data
 
   try {
+    const firstRace = await getFirstRace()
+    if (isAfterChampionshipDeadline(firstRace)) {
+      return {
+        ok: false as const,
+        message: 'Championship tips are closed',
+      }
+    }
+
     const currentGroup = await getCurrentGroup(userId)
     if (!currentGroup) {
       return {

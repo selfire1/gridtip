@@ -25,6 +25,7 @@ import { Database } from '@/db/types'
 import EmptyGroup from '@/components/empty-group'
 import { ChampionshipsTipData } from './actions/schema'
 import { getFirstRace } from '@/lib/utils/races'
+import { isAfterChampionshipDeadline } from '@/lib/utils/championship-deadline'
 import { getDriverOptions } from '@/lib/utils/drivers'
 import { getConstructorOptions } from '@/lib/utils/constructors'
 
@@ -58,9 +59,7 @@ export default async function ChampionshipPage() {
     return <EmptyGroup />
   }
 
-  const isAfterDeadline = !firstRace?.qualifyingDate
-    ? false
-    : isPast(firstRace.qualifyingDate)
+  const isAfterDeadline = isAfterChampionshipDeadline(firstRace)
 
   const showEveryonesTips =
     group.championshipTipsRevalDate && isPast(group.championshipTipsRevalDate)
