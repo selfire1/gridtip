@@ -77,6 +77,15 @@ export function isRaceAbleToBeTipped(
   }
 }
 
+export function omitClosedFields<T extends Record<string, unknown>>(
+  data: T,
+  closedFields: Set<string>,
+): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(data).filter(([key]) => !closedFields.has(key)),
+  ) as Partial<T>
+}
+
 type Reference = typeof CUTOFF_REFERENCE_KEY
 type Values = Reference[keyof Reference]
 export function isPositionAfterCutoff(info: {

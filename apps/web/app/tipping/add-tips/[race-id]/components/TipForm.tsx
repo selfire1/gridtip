@@ -30,11 +30,14 @@ import * as Sentry from '@sentry/nextjs'
 import { Spinner } from '@/components/ui/spinner'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
+import { omitClosedFields } from '@/lib/utils/prediction-fields'
 
 const formSchema = submitTipSchema.partial()
 export type Schema = z.infer<typeof formSchema>
 
-type UserGroup = Pick<Database.Group, 'id' | 'name'>
+type UserGroup = Pick<Database.Group, 'id' | 'name'> & {
+  closedFields: Set<keyof Schema>
+}
 export default function TipForm({
   drivers,
   constructors,
@@ -250,7 +253,7 @@ async function saveTipsToAllUserGroups(groups: UserGroup[], data: Schema) {
   await Promise.all(
     groups.map(async (group) => {
       const updatedData: Schema = {
-        ...data,
+        ...omitClosedFields(data, group.closedFields),
         groupId: group.id,
       }
       const result = await submitChanges(updatedData)

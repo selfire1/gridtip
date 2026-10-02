@@ -27,6 +27,7 @@ async function getGroupsForUser(userId: string) {
           id: true,
           name: true,
           iconName: true,
+          cutoffInMinutes: true,
           championshipTipsRevalDate: true,
           constructorsChampionshipPoints: true,
           driversChampionshipPoints: true,

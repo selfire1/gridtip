@@ -1,6 +1,7 @@
 import {
   getClosedFields,
   isRaceAbleToBeTipped,
+  omitClosedFields,
   throwIfAnyNewFieldIsAfterCutoff,
 } from '@/lib/utils/prediction-fields'
 import { describe, expect, it } from 'vitest'
@@ -139,5 +140,27 @@ describe('submitting tips after cutoff', () => {
         existing,
       )
     }).not.toThrow()
+  })
+})
+
+describe('omitClosedFields', () => {
+  it('removes closed positions and keeps the rest', () => {
+    const data = {
+      sprintP1: { id: 'max' },
+      pole: { id: 'lando' },
+      groupId: 'group',
+      raceId: 'race',
+    }
+    const result = omitClosedFields(data, new Set(['sprintP1']))
+    expect(result).toEqual({
+      pole: { id: 'lando' },
+      groupId: 'group',
+      raceId: 'race',
+    })
+  })
+
+  it('keeps all fields when nothing is closed', () => {
+    const data = { pole: { id: 'lando' }, groupId: 'group' }
+    expect(omitClosedFields(data, new Set())).toEqual(data)
   })
 })

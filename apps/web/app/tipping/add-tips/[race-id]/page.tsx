@@ -118,7 +118,11 @@ export default async function RaceFormPage({
         <TipForm
           drivers={drivers}
           constructors={constructors}
-          userGroups={allGroups.map(({ group }) => group)}
+          userGroups={allGroups.map(({ group }) => ({
+            id: group.id,
+            name: group.name,
+            closedFields: getClosedFields(race, group.cutoffInMinutes),
+          }))}
           isSprint={isSprint}
           disabledFields={closedFields}
           defaultValues={{
