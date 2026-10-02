@@ -127,7 +127,7 @@ function AuthentificatedHomeScreen({ session }: { session: Session }) {
       constructors={constructorsQuery.data.constructors}
       groups={groupsQuery.data.groups}
       apiTips={myTips.data || undefined}
-      isTipsPending={myTips.isFetching}
+      isTipsPending={myTips.isLoading}
     />
   )
 }
