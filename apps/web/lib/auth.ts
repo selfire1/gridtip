@@ -4,6 +4,7 @@ import { createAuthMiddleware } from 'better-auth/api'
 import { hoursToSeconds } from 'date-fns'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { db } from '@/db'
+import { handOverGroupsOfUser } from '@/lib/hand-over-groups'
 import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -48,6 +49,9 @@ Click this link below to verify your email: <a href="${url}">${url}</a>`.trim(),
   user: {
     deleteUser: {
       enabled: true,
+      async beforeDelete(user) {
+        await handOverGroupsOfUser(user.id)
+      },
     },
     additionalFields: {
       hasSeenOnboarding: {
