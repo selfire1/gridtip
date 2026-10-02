@@ -51,6 +51,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
         },
         signOut: () => {
           setToken(null)
+          queryClient.clear()
         },
         session: !token ? null : { token },
         isLoading,
