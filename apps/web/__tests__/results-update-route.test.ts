@@ -209,4 +209,65 @@ describe('GET /api/results/update', () => {
     ).toEqual(['insert drivers', 'delete results', 'insert results'])
     expect(fixtures.queriesRunOutsideBatch).toEqual([])
   })
+
+  it('keeps sprint positions from every page when a sprint straddles a page boundary', async () => {
+    function createSprintPage(driverId: string, position: string) {
+      return {
+        MRData: {
+          total: '101',
+          RaceTable: {
+            Races: [
+              {
+                Circuit: { circuitId: 'zandvoort' },
+                SprintResults: [{ position, Driver: { driverId } }],
+              },
+            ],
+          },
+        },
+      }
+    }
+    fixtures.setPages({
+      [SPRINT_PATH]: [
+        createSprintPage('tsunoda', '1'),
+        createSprintPage('lawson', '2'),
+      ],
+      [RESULTS_PATH]: [
+        {
+          MRData: {
+            total: '2',
+            RaceTable: {
+              Races: [
+                {
+                  round: '12',
+                  Circuit: { circuitId: 'zandvoort' },
+                  Results: [
+                    createResult({
+                      driverId: 'tsunoda',
+                      constructorId: 'rb',
+                      givenName: 'Yuki',
+                      familyName: 'Tsunoda',
+                    }),
+                    createResult({
+                      driverId: 'lawson',
+                      constructorId: 'rb',
+                      givenName: 'Liam',
+                      familyName: 'Lawson',
+                    }),
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      ],
+    })
+
+    await GET(createRequest())
+
+    const resultsInsert = fixtures.batches[0][2]
+    expect(resultsInsert.values).toMatchObject([
+      { driverId: 'tsunoda', sprint: '1' },
+      { driverId: 'lawson', sprint: '2' },
+    ])
+  })
 })

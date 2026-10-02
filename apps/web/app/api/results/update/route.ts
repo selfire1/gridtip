@@ -155,7 +155,7 @@ export const GET = async (_request: NextRequest) => {
         }
         for (const race of races) {
           const raceId = race.Circuit.circuitId
-          const resultsMap = new Map()
+          const resultsMap = sprintResultsMap.get(raceId) ?? new Map()
           for (const result of race.SprintResults) {
             const driverId = result.Driver.driverId
             const position = result.position
