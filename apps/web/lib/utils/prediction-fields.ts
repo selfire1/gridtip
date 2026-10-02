@@ -94,6 +94,70 @@ export function isPositionAfterCutoff(info: {
   return isAfter(testDate, cutoffDate)
 }
 
+export function throwIfAnyNewFieldIsAfterCutoff(
+  targetRace: Pick<Database.Race, Values>,
+  timeOfSubmission: Date,
+  body: Partial<Record<RacePredictionField, { id: string }>>,
+  group: Pick<Database.Group, 'cutoffInMinutes'>,
+  existingEntries?: Pick<
+    Database.PredictionEntry,
+    'position' | 'driverId' | 'constructorId'
+  >[],
+) {
+  function getIsPositionAfterCutoff(info: {
+    position: RacePredictionField
+    testDate: Date
+  }) {
+    return isPositionAfterCutoff({
+      race: targetRace,
+      cutoff: group.cutoffInMinutes,
+      ...info,
+    })
+  }
+
+  const positionsPredicted = Object.keys(body).filter((key) =>
+    RACE_PREDICTION_FIELDS.includes(key as RacePredictionField),
+  ) as RacePredictionField[]
+  const existingPredictionValuesMap = existingEntries?.reduce(
+    (acc, entry) => {
+      if (
+        !RACE_PREDICTION_FIELDS.includes(entry.position as RacePredictionField)
+      ) {
+        return acc
+      }
+      acc[entry.position as RacePredictionField] =
+        entry.driverId || entry.constructorId
+      return acc
+    },
+    {} as Partial<
+      Record<
+        RacePredictionField,
+        | Database.PredictionEntry['constructorId']
+        | Database.PredictionEntry['driverId']
+      >
+    >,
+  )
+
+  for (const position of positionsPredicted) {
+    const isAfterCutoff = getIsPositionAfterCutoff({
+      position,
+      testDate: timeOfSubmission,
+    })
+    const isUnchanged =
+      existingPredictionValuesMap?.[position] === body[position]?.id
+    if (isAfterCutoff && !isUnchanged) {
+      console.warn('Is new or changed and is after cutoff', {
+        existing: existingPredictionValuesMap,
+        body,
+      })
+      throwError(position)
+    }
+  }
+  function throwError(position: RacePredictionField) {
+    throw new Error(`Cannot predict ${position} after cutoff`)
+  }
+}
+
 function getCutoffDateForPosition(
   race: Pick<Database.Race, Values>,
   position: RacePredictionField,

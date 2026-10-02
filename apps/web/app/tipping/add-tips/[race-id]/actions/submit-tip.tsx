@@ -8,12 +8,10 @@ import { predictionEntriesTable, predictionsTable } from '@/db/schema/schema'
 import {
   CONSTRUCTOR_RACE_PREDICTION_FIELDS,
   DRIVER_RACE_PREDICTION_FIELDS,
-  RACE_PREDICTION_FIELDS,
-  type RacePredictionField,
 } from '@gridtip/shared/constants'
 import { CUTOFF_REFERENCE_KEY } from '@/constants'
 import { Database as Db } from '@/db/types'
-import { isPositionAfterCutoff as getIsAfterCutoff } from '@/lib/utils/prediction-fields'
+import { throwIfAnyNewFieldIsAfterCutoff } from '@/lib/utils/prediction-fields'
 import { onConflictUpdateKeys } from '@/lib/utils/drizzle'
 import { serverSubmitTipSchema } from './schema'
 import { revalidateTag } from 'next/cache'
@@ -202,77 +200,6 @@ async function submitChangesThrows(input: Record<string, unknown>) {
       throw new Error('Invalid race')
     }
     return targetRace
-  }
-
-  function throwIfAnyNewFieldIsAfterCutoff(
-    targetRace: Awaited<ReturnType<typeof getRaceFromId>>,
-    timeOfSubmission: Date,
-    body: Schema,
-    group: Pick<Db.Group, 'cutoffInMinutes'>,
-    existingEntries?: Pick<
-      Db.PredictionEntry,
-      'position' | 'driverId' | 'constructorId'
-    >[],
-  ) {
-    function getIsPositionAfterCutoff(info: {
-      position: RacePredictionField
-      testDate: Date
-    }) {
-      return getIsAfterCutoff({
-        race: targetRace,
-        cutoff: group.cutoffInMinutes,
-        ...info,
-      })
-    }
-
-    const positionsPredicted = Object.keys(body).filter((key) =>
-      RACE_PREDICTION_FIELDS.includes(key as RacePredictionField),
-    ) as RacePredictionField[]
-    const isNewPrediction = !existingEntries?.length
-    const existingPredictionValuesMap = existingEntries?.reduce(
-      (acc, entry) => {
-        if (
-          !RACE_PREDICTION_FIELDS.includes(
-            entry.position as RacePredictionField,
-          )
-        ) {
-          return acc
-        }
-        acc[entry.position as RacePredictionField] =
-          entry.driverId || entry.constructorId
-        return acc
-      },
-      {} as Record<
-        RacePredictionField,
-        Db.PredictionEntry['constructorId'] | Db.PredictionEntry['driverId']
-      >,
-    )
-
-    for (const position of positionsPredicted) {
-      const isPositionAfterCutoff = getIsPositionAfterCutoff({
-        position,
-        testDate: timeOfSubmission,
-      })
-      if (isNewPrediction && isPositionAfterCutoff) {
-        console.warn('Is a new prediction and is after cutoff')
-        throwError(position)
-      }
-
-      const wasPreviouslySaved = existingPredictionValuesMap?.[position]
-      const isChanged =
-        wasPreviouslySaved &&
-        existingPredictionValuesMap[position] !== body[position]?.id
-      if (isChanged && isPositionAfterCutoff) {
-        console.warn('Has changed and is after cutoff', {
-          existing: existingPredictionValuesMap,
-          body,
-        })
-        throwError(position)
-      }
-    }
-    function throwError(position: RacePredictionField) {
-      throw new Error(`Cannot predict ${position} after cutoff`)
-    }
   }
 
   function validateInput() {

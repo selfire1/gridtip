@@ -1,6 +1,7 @@
 import {
   getClosedFields,
   isRaceAbleToBeTipped,
+  throwIfAnyNewFieldIsAfterCutoff,
 } from '@/lib/utils/prediction-fields'
 import { describe, expect, it } from 'vitest'
 import { getIsSprint } from '@gridtip/shared/is-sprint'
@@ -34,5 +35,109 @@ describe('sprint race', () => {
   it('is not closed if sprint race', () => {
     const result = isRaceAbleToBeTipped(givenRace, givenCutoff, givenDate)
     expect(result).toBe(true)
+  })
+})
+
+describe('submitting tips after cutoff', () => {
+  type ExistingEntries = Parameters<typeof throwIfAnyNewFieldIsAfterCutoff>[4]
+  const givenRace = {
+    qualifyingDate: new Date('2025-10-18T21:00:00.000Z'),
+    sprintQualifyingDate: new Date('2025-10-17T21:30:00.000Z'),
+  }
+  const givenGroup = { cutoffInMinutes: 0 }
+  const givenDate = new Date('2025-10-19T21:00:00.000Z')
+
+  it('rejects adding a position to an existing prediction', () => {
+    const existing: ExistingEntries = [
+      {
+        position: 'constructorWithMostPoints',
+        driverId: null,
+        constructorId: 'mclaren',
+      },
+    ]
+    expect(() => {
+      throwIfAnyNewFieldIsAfterCutoff(
+        givenRace,
+        givenDate,
+        {
+          constructorWithMostPoints: { id: 'mclaren' },
+          pole: { id: 'norris' },
+        },
+        givenGroup,
+        existing,
+      )
+    }).toThrow('Cannot predict pole after cutoff')
+  })
+
+  it('rejects a new prediction', () => {
+    expect(() => {
+      throwIfAnyNewFieldIsAfterCutoff(
+        givenRace,
+        givenDate,
+        { pole: { id: 'norris' } },
+        givenGroup,
+        [],
+      )
+    }).toThrow('Cannot predict pole after cutoff')
+  })
+
+  it('rejects changing a saved position', () => {
+    const existing: ExistingEntries = [
+      { position: 'pole', driverId: 'norris', constructorId: null },
+    ]
+    expect(() => {
+      throwIfAnyNewFieldIsAfterCutoff(
+        givenRace,
+        givenDate,
+        { pole: { id: 'piastri' } },
+        givenGroup,
+        existing,
+      )
+    }).toThrow('Cannot predict pole after cutoff')
+  })
+
+  it('accepts resubmitting unchanged closed positions', () => {
+    const existing: ExistingEntries = [
+      { position: 'pole', driverId: 'norris', constructorId: null },
+      {
+        position: 'constructorWithMostPoints',
+        driverId: null,
+        constructorId: 'mclaren',
+      },
+    ]
+    expect(() => {
+      throwIfAnyNewFieldIsAfterCutoff(
+        givenRace,
+        givenDate,
+        {
+          pole: { id: 'norris' },
+          constructorWithMostPoints: { id: 'mclaren' },
+        },
+        givenGroup,
+        existing,
+      )
+    }).not.toThrow()
+  })
+
+  it('accepts new positions before cutoff', () => {
+    const existing: ExistingEntries = [
+      {
+        position: 'constructorWithMostPoints',
+        driverId: null,
+        constructorId: 'mclaren',
+      },
+    ]
+    expect(() => {
+      throwIfAnyNewFieldIsAfterCutoff(
+        givenRace,
+        new Date('2025-10-16T21:00:00.000Z'),
+        {
+          constructorWithMostPoints: { id: 'mclaren' },
+          pole: { id: 'norris' },
+        },
+        givenGroup,
+        existing,
+      )
+    }).not.toThrow()
   })
 })
