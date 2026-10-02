@@ -158,7 +158,7 @@ export default async function DashboardPage() {
   }
 
   function getPreviousRaceStatus(race: Pick<Database.Race, 'grandPrixDate'>) {
-    const daysAgo = differenceInDays(race.grandPrixDate, new Date())
+    const daysAgo = differenceInDays(new Date(), race.grandPrixDate)
     if (daysAgo <= 3) {
       return 'current'
     }
