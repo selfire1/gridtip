@@ -1,29 +1,17 @@
 import { unstable_cache } from 'next/cache'
 import { CacheTag } from '@/constants/cache'
 import { db } from '@/db'
-import { cache } from 'react'
 import { Database } from '@/db/types'
 import { getCountryFlag } from './country-flag'
 import { getMostRecent } from './get-most-recent'
 import { getIsSprint } from '@gridtip/shared/is-sprint'
+import { selectNextRace } from './next-race'
 
 export async function getNextRace() {
-  const undeduplicated = unstable_cache(
-    async () =>
-      await db.query.racesTable.findFirst({
-        orderBy: (race) => race.round,
-        columns: {
-          id: true,
-        },
-        where: (race, { gt }) => gt(race.grandPrixDate, new Date()),
-      }),
-    [],
-    {
-      tags: [CacheTag.Races],
-    },
-  )
+  const races = await getRaces()
+  const nextRace = selectNextRace(races)
 
-  return await cache(undeduplicated)()
+  return nextRace ? { id: nextRace.id } : undefined
 }
 
 export async function getRaceDetails(id: Database.RaceId) {
