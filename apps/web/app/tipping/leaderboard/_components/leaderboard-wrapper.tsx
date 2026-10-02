@@ -288,7 +288,7 @@ async function getTruncatedLeaderboard(
   )
   console.log({ myIndex })
 
-  if (myIndex !== -1 && myIndex > 10) {
+  if (myIndex !== -1 && myIndex >= topTen.length) {
     topTen.push(leaderboard[myIndex])
     return topTen
   }
