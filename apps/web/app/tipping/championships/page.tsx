@@ -28,6 +28,7 @@ import { getFirstRace } from '@/lib/utils/races'
 import { isAfterChampionshipDeadline } from '@/lib/utils/championship-deadline'
 import { getDriverOptions } from '@/lib/utils/drivers'
 import { getConstructorOptions } from '@/lib/utils/constructors'
+import { CURRENT_SEASON } from '@/constants'
 
 export default async function ChampionshipPage() {
   const { userId } = await verifySession()
@@ -123,6 +124,7 @@ export default async function ChampionshipPage() {
           eq(prediction.groupId, groupId),
           eq(prediction.memberId, memberId),
           eq(prediction.isForChampionship, true),
+          eq(prediction.season, CURRENT_SEASON),
         ),
     })
     if (!tip?.id) return []
@@ -155,6 +157,7 @@ export default async function ChampionshipPage() {
         and(
           eq(prediction.groupId, groupId),
           eq(prediction.isForChampionship, true),
+          eq(prediction.season, CURRENT_SEASON),
         ),
       with: {
         member: {

@@ -1,6 +1,8 @@
 import type { RacePredictionField } from '@gridtip/shared/constants'
 import type { Database } from '@/db/types'
 
+export const CURRENT_SEASON = 2026
+
 export const DEFAULT_CUTOFF_MINS = 180
 
 export const CUTOFF_REFERENCE_KEY = {

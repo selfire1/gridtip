@@ -1,4 +1,5 @@
 import { CacheTag } from '@/constants/cache'
+import { CURRENT_SEASON } from '@/constants'
 import { revalidateTag, unstable_cache } from 'next/cache'
 import { NextRequest } from 'next/server'
 import {
@@ -126,9 +127,33 @@ export const GET = async (_request: NextRequest) => {
   }
 
   async function getJolpicaResults() {
+    const raceIdByCircuitId = await getRaceIdByCircuitId()
     const sprintResultsMap = await getSprintResultsMap()
     await waitToAvoidRateLimit()
     return await getResults(sprintResultsMap)
+
+    async function getRaceIdByCircuitId() {
+      const races = await withRetry(
+        () =>
+          db.query.racesTable.findMany({
+            where: (race, { eq }) => eq(race.season, CURRENT_SEASON),
+            columns: {
+              id: true,
+              circuitId: true,
+            },
+          }),
+        { label: 'load races of season' },
+      )
+      return new Map(races.map((race) => [race.circuitId, race.id]))
+    }
+
+    function getRaceId(circuitId: string) {
+      const raceId = raceIdByCircuitId.get(circuitId)
+      if (!raceId) {
+        throw new Error(`No race found for circuit ${circuitId}`)
+      }
+      return raceId
+    }
 
     type SprintResultsMap = Map<
       Database.Race['id'],
@@ -143,7 +168,7 @@ export const GET = async (_request: NextRequest) => {
 
       while (total === null || offset < total) {
         const response = await fetchJolpica<SprintResultsResponse>(
-          `/ergast/f1/2026/sprint/`,
+          `/ergast/f1/${CURRENT_SEASON}/sprint/`,
           { params: { limit, offset } },
         )
         total = +response.MRData.total
@@ -154,7 +179,7 @@ export const GET = async (_request: NextRequest) => {
           continue
         }
         for (const race of races) {
-          const raceId = race.Circuit.circuitId
+          const raceId = getRaceId(race.Circuit.circuitId)
           const resultsMap = sprintResultsMap.get(raceId) ?? new Map()
           for (const result of race.SprintResults) {
             const driverId = result.Driver.driverId
@@ -180,7 +205,7 @@ export const GET = async (_request: NextRequest) => {
       const limit = 100
       while (total === null || offset < total) {
         const response = await fetchJolpica<ResultsResponse>(
-          `/ergast/f1/2026/results/`,
+          `/ergast/f1/${CURRENT_SEASON}/results/`,
           { params: { limit, offset } },
         )
         total = +response.MRData.total
@@ -200,7 +225,7 @@ export const GET = async (_request: NextRequest) => {
                 throw new Error('No Status found')
               }
 
-              const raceId = race.Circuit.circuitId
+              const raceId = getRaceId(race.Circuit.circuitId)
               const driverId = result.Driver.driverId
               const sprintPosition = sprintResultsMap.get(raceId)?.get(driverId)
 

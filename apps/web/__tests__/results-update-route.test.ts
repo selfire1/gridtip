@@ -11,6 +11,7 @@ type BatchedQuery = {
 const fixtures = vi.hoisted(() => {
   let pages: Record<string, JolpicaPage[]> = {}
   let storedResults: Record<string, unknown>[] = []
+  let storedRaces: Record<string, unknown>[] = []
   const batches: BatchedQuery[][] = []
   const queriesRunOutsideBatch: BatchedQuery[] = []
 
@@ -20,6 +21,7 @@ const fixtures = vi.hoisted(() => {
     reset() {
       pages = {}
       storedResults = []
+      storedRaces = [{ id: 'zandvoort', circuitId: 'zandvoort' }]
       batches.length = 0
       queriesRunOutsideBatch.length = 0
     },
@@ -31,6 +33,12 @@ const fixtures = vi.hoisted(() => {
     },
     getStoredResults() {
       return storedResults
+    },
+    setStoredRaces(next: Record<string, unknown>[]) {
+      storedRaces = next
+    },
+    getStoredRaces() {
+      return storedRaces
     },
     fetchJolpica(path: string, options?: { params?: { offset?: number } }) {
       const offset = options?.params?.offset ?? 0
@@ -101,6 +109,9 @@ vi.mock('@/db', () => {
         resultsTable: {
           findMany: () => Promise.resolve(fixtures.getStoredResults()),
         },
+        racesTable: {
+          findMany: () => Promise.resolve(fixtures.getStoredRaces()),
+        },
       },
       insert: (table: object) => createQuery('insert', getTableName(table)),
       delete: (table: object) => createQuery('delete', getTableName(table)),
@@ -149,9 +160,7 @@ describe('GET /api/results/update', () => {
   beforeEach(() => {
     fixtures.reset()
     fixtures.setPages({
-      [SPRINT_PATH]: [
-        { MRData: { total: '0', RaceTable: { Races: [] } } },
-      ],
+      [SPRINT_PATH]: [{ MRData: { total: '0', RaceTable: { Races: [] } } }],
       [RESULTS_PATH]: [
         {
           MRData: {
@@ -269,5 +278,25 @@ describe('GET /api/results/update', () => {
       { driverId: 'tsunoda', sprint: '1' },
       { driverId: 'lawson', sprint: '2' },
     ])
+  })
+
+  it('attaches results to the stored race of the season at that circuit', async () => {
+    fixtures.setStoredRaces([{ id: '2027-zandvoort', circuitId: 'zandvoort' }])
+
+    await GET(createRequest())
+
+    const resultsInsert = fixtures.batches[0][2]
+    expect(resultsInsert.values).toMatchObject([
+      { raceId: '2027-zandvoort', driverId: 'tsunoda' },
+    ])
+  })
+
+  it('fails without touching the results when a race is not stored yet', async () => {
+    fixtures.setStoredRaces([])
+
+    const response = await GET(createRequest())
+
+    expect(response.status).toBe(500)
+    expect(fixtures.batches).toEqual([])
   })
 })

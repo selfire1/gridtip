@@ -13,6 +13,7 @@ import * as Sentry from '@sentry/nextjs'
 import { getFirstRace } from '@/lib/utils/races'
 import { isAfterChampionshipDeadline } from '@/lib/utils/championship-deadline'
 import { onConflictUpdateKeys } from '@/lib/utils/drizzle'
+import { CURRENT_SEASON } from '@/constants'
 
 export async function submitChampionship(input: ChampionshipsTipData) {
   const { userId } = await verifySession()
@@ -54,6 +55,7 @@ export async function submitChampionship(input: ChampionshipsTipData) {
           eq(prediction.groupId, group.id),
           eq(prediction.memberId, member.id),
           eq(prediction.isForChampionship, true),
+          eq(prediction.season, CURRENT_SEASON),
         ),
     })
 
@@ -65,6 +67,7 @@ export async function submitChampionship(input: ChampionshipsTipData) {
             memberId: member.id,
             groupId: group.id,
             isForChampionship: true,
+            season: CURRENT_SEASON,
           })
           .onConflictDoNothing()
 
@@ -74,6 +77,7 @@ export async function submitChampionship(input: ChampionshipsTipData) {
               eq(prediction.groupId, group.id),
               eq(prediction.memberId, member.id),
               eq(prediction.isForChampionship, true),
+              eq(prediction.season, CURRENT_SEASON),
             ),
           columns: {
             id: true,

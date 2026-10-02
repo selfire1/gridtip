@@ -89,22 +89,30 @@ export const groupMembersRelations = relations(
   }),
 )
 
-export const racesTable = sqliteTable('races', {
-  id: text('id').primaryKey().notNull(),
-  country: text('country').notNull(),
-  round: integer('round').notNull(),
-  circuitName: text('circuit_name').notNull(),
-  raceName: text('race_name').notNull(),
-  grandPrixDate: integer({ mode: 'timestamp' }).notNull(),
-  qualifyingDate: integer({ mode: 'timestamp' }).notNull(),
-  sprintDate: integer({ mode: 'timestamp' }),
-  sprintQualifyingDate: integer({ mode: 'timestamp' }),
-  locality: text('locality').notNull(),
-  lastUpdated: integer({ mode: 'timestamp' }).notNull(),
-  created: integer({ mode: 'timestamp' })
-    .default(sql`(unixepoch())`)
-    .notNull(),
-})
+export const racesTable = sqliteTable(
+  'races',
+  {
+    id: text('id').primaryKey().notNull(),
+    season: integer('season').notNull(),
+    circuitId: text('circuit_id'),
+    country: text('country').notNull(),
+    round: integer('round').notNull(),
+    circuitName: text('circuit_name').notNull(),
+    raceName: text('race_name').notNull(),
+    grandPrixDate: integer({ mode: 'timestamp' }).notNull(),
+    qualifyingDate: integer({ mode: 'timestamp' }).notNull(),
+    sprintDate: integer({ mode: 'timestamp' }),
+    sprintQualifyingDate: integer({ mode: 'timestamp' }),
+    locality: text('locality').notNull(),
+    lastUpdated: integer({ mode: 'timestamp' }).notNull(),
+    created: integer({ mode: 'timestamp' })
+      .default(sql`(unixepoch())`)
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex('races_season_circuit_id_uq').on(table.season, table.circuitId),
+  ],
+)
 
 export const driversTable = sqliteTable('drivers', {
   id: text('id').primaryKey().notNull(),
@@ -148,6 +156,7 @@ export const predictionsTable = sqliteTable(
     raceId: text('race_id').references(() => racesTable.id, {
       onDelete: 'cascade',
     }),
+    season: integer('season'),
     createdAt: integer('created_at', { mode: 'timestamp' })
       .default(sql`(unixepoch())`)
       .notNull(),
@@ -161,7 +170,7 @@ export const predictionsTable = sqliteTable(
       .on(table.memberId, table.groupId, table.raceId)
       .where(sql`race_id IS NOT NULL`),
     uniqueIndex('predictions_member_group_championship_uq')
-      .on(table.memberId, table.groupId)
+      .on(table.memberId, table.groupId, table.season)
       .where(sql`is_for_championship = 1`),
   ],
 )

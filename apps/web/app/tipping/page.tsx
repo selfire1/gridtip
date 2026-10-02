@@ -31,6 +31,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import UserAvatar from '@/components/user-avatar'
+import { CURRENT_SEASON } from '@/constants'
 import { GLOBAL_GROUP_ID } from '@/constants/group'
 import { db } from '@/db'
 import { groupMembersTable } from '@/db/schema/schema'
@@ -356,10 +357,11 @@ export default async function DashboardPage() {
     }
     return await db.query.racesTable.findFirst({
       where: (race, { eq, and, gt }) => {
+        const isCurrentSeason = eq(race.season, CURRENT_SEASON)
         const isPreviousRound = eq(race.round, round - 1)
         const fiveDaysAgo = subDays(new Date(), 5)
         const gpIsNoMoreThanFiveAgo = gt(race.grandPrixDate, fiveDaysAgo)
-        return and(isPreviousRound, gpIsNoMoreThanFiveAgo)
+        return and(isCurrentSeason, isPreviousRound, gpIsNoMoreThanFiveAgo)
       },
     })
   }

@@ -1,5 +1,6 @@
 import { DriverOptionProps } from '@/components/driver-option'
 import { CacheTag } from '@/constants/cache'
+import { CURRENT_SEASON } from '@/constants'
 import { db } from '@/db'
 import {
   groupsTable,
@@ -189,7 +190,10 @@ async function getRacesThatAreAfterCutoff(groupId: string) {
   const currentDateWithCutoffAdjusted = subMinutes(currentDate, cutoffInMinutes)
   const raceIds = (
     await db.query.racesTable.findMany({
-      where: lt(racesTable.qualifyingDate, currentDateWithCutoffAdjusted),
+      where: and(
+        eq(racesTable.season, CURRENT_SEASON),
+        lt(racesTable.qualifyingDate, currentDateWithCutoffAdjusted),
+      ),
       columns: {
         id: true,
       },

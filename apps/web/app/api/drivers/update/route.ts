@@ -1,4 +1,5 @@
 import { CacheTag } from '@/constants/cache'
+import { CURRENT_SEASON } from '@/constants'
 import { revalidateTag, unstable_cache } from 'next/cache'
 import { NextRequest } from 'next/server'
 import { createResponse, fetchJolpica, validateToken, wait } from '../../utils'
@@ -180,7 +181,7 @@ export const GET = async (_request: NextRequest) => {
           DriverTable: { Drivers: apiDrivers },
         },
       } = await fetchJolpica<DriverResponse>(
-        `/ergast/f1/2026/constructors/${constructor.id}/drivers/`,
+        `/ergast/f1/${CURRENT_SEASON}/constructors/${constructor.id}/drivers/`,
       )
       if (!apiDrivers?.length) {
         continue

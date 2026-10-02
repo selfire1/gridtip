@@ -74,10 +74,13 @@ export default async function RaceFormPage({
   }
 
   const [next, previous] = await db.query.racesTable.findMany({
-    where: (selectRace, { or, eq }) =>
-      or(
-        eq(selectRace.round, race.round + 1),
-        eq(selectRace.round, race.round - 1),
+    where: (selectRace, { and, or, eq }) =>
+      and(
+        eq(selectRace.season, race.season),
+        or(
+          eq(selectRace.round, race.round + 1),
+          eq(selectRace.round, race.round - 1),
+        ),
       ),
     columns: {
       id: true,

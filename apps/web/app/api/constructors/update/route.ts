@@ -1,4 +1,5 @@
 import { CacheTag } from '@/constants/cache'
+import { CURRENT_SEASON } from '@/constants'
 import { revalidateTag, unstable_cache } from 'next/cache'
 import { NextRequest } from 'next/server'
 import {
@@ -106,7 +107,7 @@ export const GET = async (_request: NextRequest) => {
 
   async function getJolpicaConstructors() {
     const response = await fetchJolpica<ConstructorsResponse>(
-      '/ergast/f1/2026/constructors/',
+      `/ergast/f1/${CURRENT_SEASON}/constructors/`,
     )
     return response.MRData.ConstructorTable.Constructors
   }

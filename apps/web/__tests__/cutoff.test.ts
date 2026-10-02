@@ -10,6 +10,8 @@ import { getIsSprint } from '@gridtip/shared/is-sprint'
 describe('sprint race', () => {
   const givenRace = {
     id: 'americas',
+    season: 2025,
+    circuitId: 'americas',
     country: 'USA',
     round: 19,
     circuitName: 'Circuit of the Americas',
