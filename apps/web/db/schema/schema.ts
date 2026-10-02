@@ -159,20 +159,24 @@ export const predictionsTable = sqliteTable(
   ],
 )
 
-export const predictionRelations = relations(predictionsTable, ({ one }) => ({
-  member: one(groupMembersTable, {
-    fields: [predictionsTable.memberId],
-    references: [groupMembersTable.id],
+export const predictionRelations = relations(
+  predictionsTable,
+  ({ one, many }) => ({
+    member: one(groupMembersTable, {
+      fields: [predictionsTable.memberId],
+      references: [groupMembersTable.id],
+    }),
+    group: one(groupsTable, {
+      fields: [predictionsTable.groupId],
+      references: [groupsTable.id],
+    }),
+    race: one(racesTable, {
+      fields: [predictionsTable.raceId],
+      references: [racesTable.id],
+    }),
+    entries: many(predictionEntriesTable),
   }),
-  group: one(groupsTable, {
-    fields: [predictionsTable.groupId],
-    references: [groupsTable.id],
-  }),
-  race: one(racesTable, {
-    fields: [predictionsTable.raceId],
-    references: [racesTable.id],
-  }),
-}))
+)
 
 export const predictionEntriesTable = sqliteTable(
   'prediction_entries',

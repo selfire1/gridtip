@@ -1,7 +1,6 @@
 import { db } from '@/db'
 import { user } from '@/db/schema/auth-schema'
 import {
-  groupMembersTable,
   predictionsTable,
   raceNotificationsTable,
   racesTable,
@@ -59,17 +58,14 @@ async function main() {
             // grandPrixDate guard not needed; we filter on qualifying horizon
           ),
         }),
-        db
-          .select({
-            userId: groupMembersTable.userId,
-            raceId: predictionsTable.raceId,
-          })
-          .from(predictionsTable)
-          .innerJoin(
-            groupMembersTable,
-            eq(predictionsTable.memberId, groupMembersTable.id),
-          )
-          .where(eq(predictionsTable.isForChampionship, false)),
+        db.query.predictionsTable.findMany({
+          columns: { raceId: true, groupId: true },
+          where: eq(predictionsTable.isForChampionship, false),
+          with: {
+            member: { columns: { userId: true } },
+            entries: { columns: { id: true }, limit: 1 },
+          },
+        }),
         db.query.raceNotificationsTable.findMany({
           columns: {
             userId: true,
@@ -112,9 +108,17 @@ async function main() {
       groupIds: allGroupIds,
     }))
 
-  const predictions: SchedulerPrediction[] = rawPredictions
-    .filter((p): p is { userId: string; raceId: string } => p.raceId !== null)
-    .map((p) => ({ userId: p.userId, raceId: p.raceId }))
+  const predictions: SchedulerPrediction[] = rawPredictions.flatMap((p) => {
+    if (p.raceId === null) return []
+    return [
+      {
+        userId: p.member.userId,
+        raceId: p.raceId,
+        groupId: p.groupId,
+        hasEntries: p.entries.length > 0,
+      },
+    ]
+  })
 
   const notifications = computeNotificationsToSend({
     now,

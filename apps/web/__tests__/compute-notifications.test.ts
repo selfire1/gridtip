@@ -63,7 +63,13 @@ function race(opts: {
 function prediction(
   overrides: Partial<SchedulerPrediction> = {},
 ): SchedulerPrediction {
-  return { userId: 'user-1', raceId: 'race-1', ...overrides }
+  return {
+    userId: 'user-1',
+    raceId: 'race-1',
+    groupId: 'group-1',
+    hasEntries: true,
+    ...overrides,
+  }
 }
 
 function input(
@@ -267,7 +273,35 @@ describe('computeNotificationsToSend', () => {
     expect(result[0].reminderType).toBe('3h')
   })
 
-  it('tipped in any group counts as tipped (per-user)', () => {
+  it('tipped in only one of two groups -> standard 24h and 3h reminders', () => {
+    const memberships: SchedulerMembership[] = [
+      { userId: 'user-1', groupId: 'group-1', cutoffInMinutes: 180 },
+      { userId: 'user-1', groupId: 'group-2', cutoffInMinutes: 180 },
+    ]
+    const groupIds = ['group-1', 'group-2']
+
+    const at24h = computeNotificationsToSend(
+      input({
+        memberships,
+        races: [race({ hoursUntilGpCutoff: 23.5, groupIds })],
+        predictions: [prediction()],
+      }),
+    )
+    expect(at24h).toHaveLength(1)
+    expect(at24h[0].variant).toBe('standard')
+
+    const at3h = computeNotificationsToSend(
+      input({
+        memberships,
+        races: [race({ hoursUntilGpCutoff: 2.5, groupIds })],
+        predictions: [prediction()],
+      }),
+    )
+    expect(at3h).toHaveLength(1)
+    expect(at3h[0]).toMatchObject({ reminderType: '3h', variant: 'standard' })
+  })
+
+  it('tipped in every group -> last-chance', () => {
     const memberships: SchedulerMembership[] = [
       { userId: 'user-1', groupId: 'group-1', cutoffInMinutes: 180 },
       { userId: 'user-1', groupId: 'group-2', cutoffInMinutes: 180 },
@@ -280,11 +314,22 @@ describe('computeNotificationsToSend', () => {
       input({
         memberships,
         races: [r],
-        predictions: [prediction()],
+        predictions: [prediction(), prediction({ groupId: 'group-2' })],
       }),
     )
     expect(result).toHaveLength(1)
     expect(result[0].variant).toBe('last-chance')
+  })
+
+  it('prediction without entries -> not tipped', () => {
+    const result = computeNotificationsToSend(
+      input({
+        races: [race({ hoursUntilGpCutoff: 2.5 })],
+        predictions: [prediction({ hasEntries: false })],
+      }),
+    )
+    expect(result).toHaveLength(1)
+    expect(result[0]).toMatchObject({ reminderType: '3h', variant: 'standard' })
   })
 
   it('two users with different tip statuses -> independent verdicts', () => {
@@ -313,7 +358,9 @@ describe('computeNotificationsToSend', () => {
     const result = computeNotificationsToSend(
       input({
         users: [
-          user({ pushTokens: ['ExponentPushToken[a]', 'ExponentPushToken[b]'] }),
+          user({
+            pushTokens: ['ExponentPushToken[a]', 'ExponentPushToken[b]'],
+          }),
         ],
       }),
     )

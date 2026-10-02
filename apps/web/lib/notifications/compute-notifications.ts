@@ -31,6 +31,8 @@ export type SchedulerRace = {
 export type SchedulerPrediction = {
   userId: string
   raceId: string
+  groupId: string
+  hasEntries: boolean
 }
 
 export type SchedulerAlreadySent = {
@@ -71,7 +73,11 @@ export function computeNotificationsToSend(
     alreadySent.map((s) => key(s.userId, s.raceId, s.tipType, s.reminderType)),
   )
 
-  const tipped = new Set(predictions.map((p) => `${p.userId}|${p.raceId}`))
+  const tipped = new Set(
+    predictions
+      .filter((p) => p.hasEntries)
+      .map((p) => `${p.userId}|${p.raceId}|${p.groupId}`),
+  )
 
   const racesById = new Map(races.map((r) => [r.id, r]))
 
@@ -109,7 +115,9 @@ export function computeNotificationsToSend(
 
         if (sentKey.has(key(user.id, race.id, tipType, reminderType))) continue
 
-        const hasTipped = tipped.has(`${user.id}|${race.id}`)
+        const hasTipped = userMemberships
+          .filter((m) => race.groupIds.includes(m.groupId))
+          .every((m) => tipped.has(`${user.id}|${race.id}|${m.groupId}`))
 
         if (hasTipped && reminderType === '3h') continue
 
