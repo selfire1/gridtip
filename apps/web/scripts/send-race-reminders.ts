@@ -15,14 +15,13 @@ import {
 } from '@/lib/notifications/compute-notifications'
 import { sendNotifications } from '@/lib/notifications/send'
 import { withRetry } from '@/lib/utils/with-retry'
-import { addHours, subHours } from 'date-fns'
+import { subHours } from 'date-fns'
 import { and, eq, gte, inArray } from 'drizzle-orm'
 
 async function main() {
   const now = new Date()
 
   const horizonStart = subHours(now, 1)
-  const horizonEnd = addHours(now, 36)
 
   const [
     rawUsers,
@@ -99,14 +98,12 @@ async function main() {
   }))
 
   const allGroupIds = Array.from(new Set(memberships.map((m) => m.groupId)))
-  const races: SchedulerRace[] = rawRaces
-    .filter((r) => r.qualifyingDate <= horizonEnd)
-    .map((r) => ({
-      id: r.id,
-      qualifyingDate: r.qualifyingDate,
-      sprintQualifyingDate: r.sprintQualifyingDate,
-      groupIds: allGroupIds,
-    }))
+  const races: SchedulerRace[] = rawRaces.map((r) => ({
+    id: r.id,
+    qualifyingDate: r.qualifyingDate,
+    sprintQualifyingDate: r.sprintQualifyingDate,
+    groupIds: allGroupIds,
+  }))
 
   const predictions: SchedulerPrediction[] = rawPredictions.flatMap((p) => {
     if (p.raceId === null) return []

@@ -217,6 +217,21 @@ describe('computeNotificationsToSend', () => {
     }
   })
 
+  it('sprint weekend, sprint cutoff within 24h but GP cutoff ~2 days out -> only sprint 24h', () => {
+    const r = race({
+      hoursUntilGpCutoff: 50.5,
+      sprintHoursUntilCutoff: 23.5,
+    })
+    const result = computeNotificationsToSend(input({ races: [r] }))
+    expect(result).toEqual([
+      expect.objectContaining({
+        tipType: 'sprint',
+        reminderType: '24h',
+        variant: 'standard',
+      }),
+    ])
+  })
+
   it('alreadySent row exists -> skipped', () => {
     const result = computeNotificationsToSend(
       input({
