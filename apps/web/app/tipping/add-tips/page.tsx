@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
   title: 'Enter tips',
+  description: 'Tip the next Formula One Grand Prix weekend.',
 }
 
 export default async function AddTipping() {

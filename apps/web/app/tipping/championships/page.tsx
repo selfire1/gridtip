@@ -27,6 +27,13 @@ import { ChampionshipsTipData } from './actions/schema'
 import { getFirstRace } from '@/lib/utils/races'
 import { getDriverOptions } from '@/lib/utils/drivers'
 import { getConstructorOptions } from '@/lib/utils/constructors'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Championships',
+  description:
+    'Predict the Formula One Drivers’ and Constructors’ champions for the season.',
+}
 
 export default async function ChampionshipPage() {
   const { userId } = await verifySession()
