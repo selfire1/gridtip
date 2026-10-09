@@ -1,0 +1,1 @@
+ALTER TABLE `results` ADD `qualifying` integer;

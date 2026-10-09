@@ -8,7 +8,11 @@ import {
   validateToken,
   wait,
 } from '../../utils'
-import { ResultsResponse, SprintResultsResponse } from '@/types/ergast'
+import {
+  QualifyingResultsResponse,
+  ResultsResponse,
+  SprintResultsResponse,
+} from '@/types/ergast'
 import { db } from '@/db'
 import { driversTable, resultsTable } from '@/db/schema/schema'
 import { Database } from '@/db/types'
@@ -89,6 +93,7 @@ export const GET = async (_request: NextRequest) => {
       'raceId',
       'driverId',
       'sprint',
+      'qualifying',
       'constructorId',
       'grid',
       'position',
@@ -128,12 +133,16 @@ export const GET = async (_request: NextRequest) => {
   async function getJolpicaResults() {
     const sprintResultsMap = await getSprintResultsMap()
     await waitToAvoidRateLimit()
-    return await getResults(sprintResultsMap)
+    const qualifyingResultsMap = await getQualifyingResultsMap()
+    await waitToAvoidRateLimit()
+    return await getResults(sprintResultsMap, qualifyingResultsMap)
 
-    type SprintResultsMap = Map<
+    type PositionsMap = Map<
       Database.Race['id'],
       Map<Database.Driver['id'], number | null>
     >
+    type SprintResultsMap = PositionsMap
+    type QualifyingResultsMap = PositionsMap
     async function getSprintResultsMap(): Promise<SprintResultsMap> {
       let offset = 0
       let total: null | number = null
@@ -168,8 +177,41 @@ export const GET = async (_request: NextRequest) => {
       return sprintResultsMap
     }
 
+    async function getQualifyingResultsMap(): Promise<QualifyingResultsMap> {
+      let offset = 0
+      let total: null | number = null
+      const limit = 100
+
+      const qualifyingResultsMap = new Map() as QualifyingResultsMap
+
+      while (total === null || offset < total) {
+        const response = await fetchJolpica<QualifyingResultsResponse>(
+          `/ergast/f1/2026/qualifying/`,
+          { params: { limit, offset } },
+        )
+        total = +response.MRData.total
+        offset += limit
+
+        const races = response.MRData.RaceTable?.Races
+        if (!races?.length) {
+          continue
+        }
+        for (const race of races) {
+          const raceId = race.Circuit.circuitId
+          const resultsMap = qualifyingResultsMap.get(raceId) ?? new Map()
+          for (const result of race.QualifyingResults) {
+            resultsMap.set(result.Driver.driverId, +result.position)
+          }
+          qualifyingResultsMap.set(raceId, resultsMap)
+        }
+        await waitToAvoidRateLimit()
+      }
+      return qualifyingResultsMap
+    }
+
     async function getResults(
       sprintResultsMap: SprintResultsMap,
+      qualifyingResultsMap: QualifyingResultsMap,
     ): Promise<JolpicaResults> {
       const results: Database.InsertResult[] = []
       // keyed by driver id so a driver who changed teams mid-season keeps the
@@ -203,6 +245,8 @@ export const GET = async (_request: NextRequest) => {
               const raceId = race.Circuit.circuitId
               const driverId = result.Driver.driverId
               const sprintPosition = sprintResultsMap.get(raceId)?.get(driverId)
+              const qualifyingPosition =
+                qualifyingResultsMap.get(raceId)?.get(driverId) ?? null
 
               driversById.set(driverId, {
                 id: driverId,
@@ -220,6 +264,7 @@ export const GET = async (_request: NextRequest) => {
                 raceId,
                 driverId,
                 sprint: sprintPosition,
+                qualifying: qualifyingPosition,
                 constructorId: result.Constructor.constructorId,
                 grid: result.grid ? +result.grid : null,
                 position: isNaN(parseInt(result.positionText))
@@ -253,7 +298,7 @@ export const GET = async (_request: NextRequest) => {
           if (!overwrite) {
             return result
           }
-          return overwrite
+          return { ...result, ...overwrite }
         })
 
         return overwritten
@@ -262,7 +307,7 @@ export const GET = async (_request: NextRequest) => {
           return new Map([
             [
               'villeneuve',
-              new Map<string, Database.InsertResult>([
+              new Map<string, Partial<Database.InsertResult>>([
                 [
                   'norris',
                   {

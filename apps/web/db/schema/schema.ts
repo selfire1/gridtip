@@ -244,7 +244,12 @@ export const resultsTable = sqliteTable('results', {
    */
   sprint: integer(),
   /**
-   * The driver's grid (qualifying) position
+   * The driver's position in the official GP qualifying classification.
+   * Decides pole, even when a grid penalty moves the driver back.
+   */
+  qualifying: integer(),
+  /**
+   * The driver's starting position on the race grid, after penalties
    */
   grid: integer(),
   /**
