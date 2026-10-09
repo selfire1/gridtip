@@ -65,9 +65,11 @@ async function uncachedGetRaceIdToResultMap(): Promise<ResultsMap | undefined> {
 
     const raceMap = resultsMap.get(result.raceId)!
     if (result.driver) {
-      raceMap.qualifying.set(result.grid ?? 0, result.driver)
+      if (result.qualifying) {
+        raceMap.qualifying.set(result.qualifying, result.driver)
+      }
     } else {
-      console.warn('No driver for `grid`', result)
+      console.warn('No driver for `qualifying`', result)
     }
 
     if (result.driver) {

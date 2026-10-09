@@ -117,6 +117,7 @@ import { NextRequest } from 'next/server'
 
 const SPRINT_PATH = '/ergast/f1/2026/sprint/'
 const RESULTS_PATH = '/ergast/f1/2026/results/'
+const QUALIFYING_PATH = '/ergast/f1/2026/qualifying/'
 
 function createResult(overrides: {
   driverId: string
@@ -141,6 +142,38 @@ function createResult(overrides: {
   }
 }
 
+function createQualifyingPage(
+  total: number,
+  results: { driverId: string; position: string }[],
+) {
+  return {
+    MRData: {
+      total: total.toString(),
+      RaceTable: {
+        Races: [
+          {
+            round: '12',
+            Circuit: { circuitId: 'zandvoort' },
+            QualifyingResults: results.map((result) => {
+              return {
+                position: result.position,
+                Driver: { driverId: result.driverId },
+              }
+            }),
+          },
+        ],
+      },
+    },
+  }
+}
+
+function getInsertedResults() {
+  const insert = fixtures.batches[0]?.find((query) => {
+    return query.operation === 'insert' && query.table === 'results'
+  })
+  return insert?.values
+}
+
 function createRequest() {
   return new NextRequest('https://gridtipapp.com/api/results/update')
 }
@@ -148,34 +181,9 @@ function createRequest() {
 describe('GET /api/results/update', () => {
   beforeEach(() => {
     fixtures.reset()
-    fixtures.setPages({
-      [SPRINT_PATH]: [
-        { MRData: { total: '0', RaceTable: { Races: [] } } },
-      ],
-      [RESULTS_PATH]: [
-        {
-          MRData: {
-            total: '1',
-            RaceTable: {
-              Races: [
-                {
-                  round: '12',
-                  Circuit: { circuitId: 'zandvoort' },
-                  Results: [
-                    createResult({
-                      driverId: 'tsunoda',
-                      constructorId: 'rb',
-                      givenName: 'Yuki',
-                      familyName: 'Tsunoda',
-                    }),
-                  ],
-                },
-              ],
-            },
-          },
-        },
-      ],
-    })
+    fixtures.setPages(
+      pagesWithQualifying([{ driverId: 'tsunoda', position: '3' }]),
+    )
   })
 
   it('upserts the drivers named in the results before inserting them', async () => {
@@ -209,4 +217,149 @@ describe('GET /api/results/update', () => {
     ).toEqual(['insert drivers', 'delete results', 'insert results'])
     expect(fixtures.queriesRunOutsideBatch).toEqual([])
   })
+
+  it('stores the qualifying position next to the race grid', async () => {
+    await GET(createRequest())
+
+    expect(getInsertedResults()).toMatchObject([
+      { driverId: 'tsunoda', qualifying: 3, grid: 1 },
+    ])
+  })
+
+  it('stores no qualifying position for a driver missing from qualifying', async () => {
+    fixtures.setPages(pagesWithQualifying([]))
+
+    const response = await GET(createRequest())
+
+    expect(response.status).toBe(201)
+    expect(getInsertedResults()).toMatchObject([{ qualifying: null }])
+  })
+
+  it('applies qualifying positions from later pages', async () => {
+    fixtures.setPages({
+      ...pagesWithQualifying([]),
+      [QUALIFYING_PATH]: [
+        createQualifyingPage(101, []),
+        createQualifyingPage(101, [{ driverId: 'tsunoda', position: '3' }]),
+      ],
+    })
+
+    await GET(createRequest())
+
+    expect(getInsertedResults()).toMatchObject([{ qualifying: 3 }])
+  })
+
+  it('keeps the fetched qualifying position when a result is overwritten', async () => {
+    fixtures.setPages({
+      [SPRINT_PATH]: [{ MRData: { total: '0', RaceTable: { Races: [] } } }],
+      [QUALIFYING_PATH]: [
+        {
+          MRData: {
+            total: '1',
+            RaceTable: {
+              Races: [
+                {
+                  round: '10',
+                  Circuit: { circuitId: 'villeneuve' },
+                  QualifyingResults: [
+                    { position: '2', Driver: { driverId: 'norris' } },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      ],
+      [RESULTS_PATH]: [
+        {
+          MRData: {
+            total: '1',
+            RaceTable: {
+              Races: [
+                {
+                  round: '10',
+                  Circuit: { circuitId: 'villeneuve' },
+                  Results: [
+                    createResult({
+                      driverId: 'norris',
+                      constructorId: 'mclaren',
+                      givenName: 'Lando',
+                      familyName: 'Norris',
+                    }),
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      ],
+    })
+
+    await GET(createRequest())
+
+    expect(getInsertedResults()).toMatchObject([
+      {
+        raceId: 'villeneuve',
+        driverId: 'norris',
+        qualifying: 2,
+        grid: 7,
+        position: null,
+        points: 0,
+        status: 'Retired',
+      },
+    ])
+  })
+
+  it('rewrites the results when only the qualifying position changed', async () => {
+    fixtures.setStoredResults([
+      {
+        raceId: 'zandvoort',
+        driverId: 'tsunoda',
+        sprint: null,
+        constructorId: 'rb',
+        qualifying: 5,
+        grid: 1,
+        position: 1,
+        points: 25,
+        status: 'Finished',
+      },
+    ])
+
+    const response = await GET(createRequest())
+
+    expect(response.status).toBe(201)
+    expect(fixtures.batches).toHaveLength(1)
+  })
 })
+
+function pagesWithQualifying(
+  results: { driverId: string; position: string }[],
+) {
+  return {
+    [SPRINT_PATH]: [{ MRData: { total: '0', RaceTable: { Races: [] } } }],
+    [QUALIFYING_PATH]: [createQualifyingPage(1, results)],
+    [RESULTS_PATH]: [
+      {
+        MRData: {
+          total: '1',
+          RaceTable: {
+            Races: [
+              {
+                round: '12',
+                Circuit: { circuitId: 'zandvoort' },
+                Results: [
+                  createResult({
+                    driverId: 'tsunoda',
+                    constructorId: 'rb',
+                    givenName: 'Yuki',
+                    familyName: 'Tsunoda',
+                  }),
+                ],
+              },
+            ],
+          },
+        },
+      },
+    ],
+  }
+}

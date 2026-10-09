@@ -54,6 +54,7 @@ Driver positions are evaluated as per the final [official results](https://www.f
 Examples of what that could look like:
 - Russell finishes the race first but receives a time penalty that drops him to P2 in the official results. Result: Tips for Russell as P1 are incorrect.
 - Norris has a late crash. He doesn't cross the checkered flag. He is still classified in the final results as driver with the last position. Result: Tips for Norris as last are correct.
+- Verstappen sets the fastest time in qualifying but takes a grid penalty, so he starts the race from further back. Result: Tips for Verstappen as pole are correct.
 
 ### Championships
 
