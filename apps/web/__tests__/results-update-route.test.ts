@@ -232,7 +232,7 @@ describe('GET /api/results/update', () => {
     const response = await GET(createRequest())
 
     expect(response.status).toBe(201)
-    expect(getInsertedResults()?.[0].qualifying ?? null).toBeNull()
+    expect(getInsertedResults()).toMatchObject([{ qualifying: null }])
   })
 
   it('applies qualifying positions from later pages', async () => {
@@ -247,6 +247,67 @@ describe('GET /api/results/update', () => {
     await GET(createRequest())
 
     expect(getInsertedResults()).toMatchObject([{ qualifying: 3 }])
+  })
+
+  it('keeps the fetched qualifying position when a result is overwritten', async () => {
+    fixtures.setPages({
+      [SPRINT_PATH]: [{ MRData: { total: '0', RaceTable: { Races: [] } } }],
+      [QUALIFYING_PATH]: [
+        {
+          MRData: {
+            total: '1',
+            RaceTable: {
+              Races: [
+                {
+                  round: '10',
+                  Circuit: { circuitId: 'villeneuve' },
+                  QualifyingResults: [
+                    { position: '2', Driver: { driverId: 'norris' } },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      ],
+      [RESULTS_PATH]: [
+        {
+          MRData: {
+            total: '1',
+            RaceTable: {
+              Races: [
+                {
+                  round: '10',
+                  Circuit: { circuitId: 'villeneuve' },
+                  Results: [
+                    createResult({
+                      driverId: 'norris',
+                      constructorId: 'mclaren',
+                      givenName: 'Lando',
+                      familyName: 'Norris',
+                    }),
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      ],
+    })
+
+    await GET(createRequest())
+
+    expect(getInsertedResults()).toMatchObject([
+      {
+        raceId: 'villeneuve',
+        driverId: 'norris',
+        qualifying: 2,
+        grid: 7,
+        position: null,
+        points: 0,
+        status: 'Retired',
+      },
+    ])
   })
 
   it('rewrites the results when only the qualifying position changed', async () => {

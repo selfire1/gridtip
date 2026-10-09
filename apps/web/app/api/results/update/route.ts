@@ -8,7 +8,7 @@ import {
   validateToken,
   wait,
 } from '../../utils'
-import {
+import type {
   QualifyingResultsResponse,
   ResultsResponse,
   SprintResultsResponse,
